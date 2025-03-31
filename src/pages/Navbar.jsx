@@ -78,24 +78,24 @@ const Navbar = () => {
             </a>
             <div className="hidden md:flex space-x-6 ml-8">
               <a
-                href="https://mba.ptit.edu.vn/chat/"
+                href="http://localhost:5173/chat/"
                 className="text-white hover:text-pink-300 transition transform hover:scale-110 flex items-center bg-red-500 px-3 py-2 rounded-full"
               >
-                <FaHome className="mr-2" /> Home
+                <FaHome className="mr-2" /> Trang chủ
               </a>
               <a
                 href="/chat/chat"
                 onClick={handleChatClick}
                 className="text-white hover:text-pink-300 transition transform hover:scale-110 flex items-center bg-red-500 px-3 py-2 rounded-full cursor-pointer"
               >
-                <FaComments className="mr-2" /> Chat
+                <FaComments className="mr-2" /> Hỏi chatbot
               </a>
               {isLoggedIn && (
                 <a
                   href="/chat/quiz-history"
                   className="text-white hover:text-pink-300 transition transform hover:scale-110 flex items-center bg-red-500 px-3 py-2 rounded-full"
                 >
-                  <FaHistory className="mr-2" /> Test History
+                  <FaHistory className="mr-2" /> Lịch sử chat
                 </a>
               )}
             </div>
@@ -108,13 +108,13 @@ const Navbar = () => {
                   href="/chat/login"
                   className="text-white hover:text-pink-300 transition transform hover:scale-110 flex items-center bg-red-500 px-3 py-2 rounded-full"
                 >
-                  <FaSignInAlt className="mr-2" /> Login
+                  <FaSignInAlt className="mr-2" /> Đăng nhập
                 </a>
                 <a
                   href="/chat/signup"
                   className="text-white hover:text-pink-300 transition transform hover:scale-110 flex items-center bg-red-500 px-3 py-2 rounded-full"
                 >
-                  <FaUserPlus className="mr-2" /> Sign Up
+                  <FaUserPlus className="mr-2" /> Đăng ký
                 </a>
               </>
             ) : (
@@ -123,13 +123,13 @@ const Navbar = () => {
                   href="/chat/account"
                   className="text-white hover:text-pink-300 transition transform hover:scale-110 flex items-center bg-red-500 px-3 py-2 rounded-full"
                 >
-                  <FaUser className="mr-2" /> Account
+                  <FaUser className="mr-2" /> Tài khoản
                 </a>
                 <button
                   onClick={handleLogout}
                   className="text-white hover:text-pink-300 transition transform hover:scale-110 flex items-center bg-red-500 px-3 py-2 rounded-full"
                 >
-                  <FaSignOutAlt className="mr-2" /> Logout
+                  <FaSignOutAlt className="mr-2" /> Đăng xuất
                 </button>
               </>
             )}
@@ -148,17 +148,17 @@ const Navbar = () => {
         <div className="fixed inset-0 z-40 bg-red-700 bg-opacity-95 md:hidden">
           <div className="flex flex-col items-center justify-center h-full space-y-8">
             <a
-              href="https://mba.ptit.edu.vn/chat/"
+              href="http://localhost:5173/chat/"
               className="text-white text-2xl hover:text-pink-300 transition"
             >
-              Home
+              Trang chủ
             </a>
             <a
               href="/chat/chat"
               onClick={handleChatClick}
               className="text-white text-2xl hover:text-pink-300 transition cursor-pointer"
             >
-              Chat
+              Hỏi chatbot
             </a>
             {isLoggedIn && (
               <a
@@ -171,31 +171,31 @@ const Navbar = () => {
             {!isLoggedIn ? (
               <>
                 <a
-                  href="https://mba.ptit.edu.vn/chat/login"
+                  href="http://localhost:5173/chat/login"
                   className="text-white text-2xl hover:text-pink-300 transition"
                 >
-                  Login
+                  Đăng nhập
                 </a>
                 <a
-                  href="https://mba.ptit.edu.vn/chat/signup"
+                  href="http://localhost:5173/chat/signup"
                   className="text-white text-2xl hover:text-pink-300 transition"
                 >
-                  Sign Up
+                  Đăng ký
                 </a>
               </>
             ) : (
               <>
                 <a
-                  href="https://mba.ptit.edu.vn/chat/account"
+                  href="http://localhost:5173/chat/account"
                   className="text-white text-2xl hover:text-pink-300 transition"
                 >
-                  Account
+                  Tài khoản
                 </a>
                 <button
                   onClick={handleLogout}
                   className="text-white text-2xl hover:text-pink-300 transition"
                 >
-                  Logout
+                  Đăng xuất
                 </button>
               </>
             )}

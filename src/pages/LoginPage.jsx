@@ -77,7 +77,7 @@ const Login = () => {
                         <div className="col-md-6 p-4">
                             <div className="px-4 py-3">
                                 <h2 className="mb-4" style={{ fontSize: '24px', fontWeight: '500', color: colors.primary }}>
-                                    Log In
+                                    Đăng nhập
                                 </h2>
                                 {error && <div className="alert alert-danger">{error}</div>} {/* Display error if any */}
                                 {successMessage && <div className="alert alert-success" role="alert">
@@ -92,7 +92,7 @@ const Login = () => {
                                             <input
                                                 type="text"  // Changed from email to text
                                                 className="form-control"
-                                                placeholder="Username"  // Changed from Email to Username
+                                                placeholder="Tên đăng nhập"  // Changed from Email to Username
                                                 value={username}
                                                 onChange={(e) => setUsername(e.target.value)}
                                                 required
@@ -113,7 +113,7 @@ const Login = () => {
                                             <input
                                                 type="password"
                                                 className="form-control"
-                                                placeholder="Password"
+                                                placeholder="Mật khẩu"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 required
@@ -140,7 +140,7 @@ const Login = () => {
                                         onMouseOver={(e) => e.target.style.backgroundColor = colors.secondary}
                                         onMouseOut={(e) => e.target.style.backgroundColor = colors.primary}
                                     >
-                                        LOG IN
+                                        ĐĂNG NHẬP NGAY
                                     </button>
                                 </form>
                             </div>
@@ -152,9 +152,9 @@ const Login = () => {
                                 padding: '40px'
                             }}>
                             <div className="text-center px-4">
-                                <h1 className="mb-4"> <strong>Hello, Friend!</strong></h1>
+                                <h1 className="mb-4"> <strong>Xin chào các bạn!</strong></h1>
                                 <p className="mb-4">
-                                    Enter your personal details and start journey with us
+                                Cung cấp thông tin cá nhân của bạn và bắt đầu hành trình với chúng tớ
                                 </p>
                                 <a href="/chat/signup">
                                     <button
@@ -176,7 +176,7 @@ const Login = () => {
                                             e.target.style.color = 'white';
                                         }}
                                     >
-                                        SIGN UP
+                                        Đăng ký
                                     </button>
                                 </a>
                             </div>

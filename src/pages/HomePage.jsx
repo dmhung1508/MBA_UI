@@ -65,8 +65,8 @@ const HomePage = () => {
         >
           <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white p-4 shadow-lg mr-4 rounded-lg border-l-4 border-red-600 flex items-start" role="alert">
             <div className="flex-1">
-              <p className="font-bold text-lg mb-1">Warning!</p>
-              <p className="text-white/90">You need to login to use this feature.</p>
+              <p className="font-bold text-lg mb-1">Cảnh báo!</p>
+              <p className="text-white/90">Bạn cần đăng nhập để sử dụng tính năng này.</p>
             </div>
             <button 
               onClick={handleCloseWarning}
@@ -80,10 +80,10 @@ const HomePage = () => {
 
         <div className="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Hello! I am PTIT Chatbot.
+              Xin chào tôi là PTIT Chatbot
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Helps you answer questions and look up information quickly and most accurately.
+          Giúp bạn trả lời câu hỏi và tra cứu thông tin một cách nhanh chóng và chính xác nhất.
           </p>
           {isLoggedIn ? (
             <a
@@ -97,7 +97,7 @@ const HomePage = () => {
               href="https://mba.ptit.edu.vn/chat/login"
               className="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105"
             >
-              Login
+              Đăng nhập
             </a>
           )}
         </div>

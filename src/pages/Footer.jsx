@@ -27,7 +27,7 @@ const Footer = () => {
 
           {/* Column 2 - Contact */}
           <div className="text-white">
-            <h3 className="text-xl font-bold mb-4">Contact Us</h3>
+            <h3 className="text-xl font-bold mb-4">Thông tin liên hệ</h3>
             <div className="space-y-2">
               <div className="flex items-center">
                 <FaMapMarkerAlt className="mr-2" />
@@ -46,7 +46,7 @@ const Footer = () => {
 
           {/* Column 3 - Social Links */}
           <div className="text-white">
-            <h3 className="text-xl font-bold mb-4">Social Media</h3>
+            <h3 className="text-xl font-bold mb-4">Trang mạng xã hội</h3>
             <div className="flex space-x-4">
               <a
                 href="https://www.facebook.com/@HocvienPTIT"
@@ -71,9 +71,9 @@ const Footer = () => {
         {/* Bottom Copyright */}
         <div className="mt-8 pt-4 border-t border-red-500">
           <p className="text-center text-white text-sm">
-            © 2024 PTIT Chatbot. All rights reserved. 
+            © 2024 PTIT Chatbot. Bảo lưu mọi quyền.
             <br />
-            A product of IEC PTIT
+            Một sản phẩm của IEC PTIT.
           </p>
         </div>
       </div>

@@ -43,7 +43,7 @@ const Signup = () => {
       };
 
       // Replace with your actual backend URL
-      const response = await axios.post('https://mba.ptit.edu.vn/register', payload, {
+      const response = await axios.post('http://localhost:5173/register', payload, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -93,9 +93,9 @@ const Signup = () => {
                 padding: '40px'
               }}>
               <div className="text-center px-4">
-                <h1 className="mb-4"><strong>Welcome Back!</strong></h1>
+                <h1 className="mb-4"><strong>Chào mừng trở lại!</strong></h1>
                 <p className="mb-4">
-                  Already have an account? Sign in to connect with us
+                Bạn đã có tài khoản? Hãy đăng nhập để kết nối với chúng tớ
                 </p>
                 <a href="/chat/login" style={{ textDecoration: 'none' }}>
                   <button
@@ -117,7 +117,7 @@ const Signup = () => {
                       e.target.style.color = 'white';
                     }}
                   >
-                    LOG IN
+                    ĐĂNG NHẬP NGAY 
                   </button>
                 </a>
               </div>
@@ -126,7 +126,7 @@ const Signup = () => {
             <div className="col-md-6 p-4">
               <div className="px-4 py-3">
                 <h2 className="mb-4" style={{ fontSize: '24px', fontWeight: '500', color: colors.primary }}>
-                  Create Account
+                Tạo tài khoản
                 </h2>
                 <form onSubmit={handleSubmit}>
                   {errorMessage && <div className="alert alert-danger" role="alert">
@@ -143,7 +143,7 @@ const Signup = () => {
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Name"
+                        placeholder="Họ và tên"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
@@ -164,7 +164,7 @@ const Signup = () => {
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Username"
+                        placeholder="Tên người dùng"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
@@ -206,7 +206,7 @@ const Signup = () => {
                       <input
                         type="password"
                         className="form-control"
-                        placeholder="Password"
+                        placeholder="Mật khẩu"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
@@ -227,7 +227,7 @@ const Signup = () => {
                       <input
                         type="password"
                         className="form-control"
-                        placeholder="Confirm Password"
+                        placeholder="Xác nhận mật khẩu"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
@@ -255,7 +255,7 @@ const Signup = () => {
                     onMouseOut={(e) => e.target.style.backgroundColor = colors.primary}
                     disabled={isLoading} // Disable button while loading
                   >
-                    {isLoading ? 'Signing Up...' : 'SIGN UP'}
+                    {isLoading ? 'Signing Up...' : 'Đăng ký'}
                   </button>
                 </form>
               </div>
