@@ -73,7 +73,7 @@ const MessageManager = () => {
   // Fetch teacher's assigned topics
   const fetchTeacherTopics = async () => {
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/teacher/my-topics', {
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/teacher/my-topics', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json'
@@ -87,7 +87,7 @@ const MessageManager = () => {
         setAssignedTopics(topics);
         
         // Fetch all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+        const chatbotsResponse = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
         const chatbotsData = await chatbotsResponse.json();
         
         if (chatbotsData.chatbots) {
@@ -107,7 +107,7 @@ const MessageManager = () => {
   // Fetch all chatbots (for admin)
   const fetchChatbots = async () => {
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
       const data = await response.json();
       
       if (data.chatbots) {
@@ -129,7 +129,7 @@ const MessageManager = () => {
     try {
       const offset = (page - 1) * usersLimit;
       const response = await fetch(
-        `https://mba.ptit.edu.vn/mba_mini/source/${encodeURIComponent(topic)}/users?limit=${usersLimit}&skip=${offset}`,
+        `https://api.dinhmanhhung.net/mba_mini/source/${encodeURIComponent(topic)}/users?limit=${usersLimit}&skip=${offset}`,
         {
           headers: {
             'accept': 'application/json',
@@ -177,7 +177,7 @@ const MessageManager = () => {
       }
       
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/mba/chat_history/${encodeURIComponent(userId)}?limit=${chatLimit}&skip=${skip}&source=${encodeURIComponent(source)}`,
+        `https://api.dinhmanhhung.net/auth_mini/mba/chat_history/${encodeURIComponent(userId)}?limit=${chatLimit}&skip=${skip}&source=${encodeURIComponent(source)}`,
         {
           headers: headers
         }

@@ -45,7 +45,7 @@ const EditPage = () => {
   const fetchTeacherTopics = async () => {
     try {
       setChatbotsLoading(true);
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/teacher/my-topics', {
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/teacher/my-topics', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json'
@@ -59,7 +59,7 @@ const EditPage = () => {
         setAssignedTopics(topics);
         
         // Fetch all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+        const chatbotsResponse = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
         const chatbotsData = await chatbotsResponse.json();
         
         if (chatbotsData.chatbots) {
@@ -82,7 +82,7 @@ const EditPage = () => {
   const fetchChatbots = async () => {
     try {
       setChatbotsLoading(true);
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
       const data = await response.json();
       setChatbots(data.chatbots || []);
     } catch (err) {
@@ -160,7 +160,7 @@ const EditPage = () => {
           headers.append('Authorization', `Bearer ${token}`);
         }
         
-        const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/rag/?time=${timestamp}&q=${encodeURIComponent(inputMessage)}&source=${selectedChatbot.source}&save=false`, {
+        const response = await fetch(`https://api.dinhmanhhung.net/auth_mini/mba/rag/?time=${timestamp}&q=${encodeURIComponent(inputMessage)}&source=${selectedChatbot.source}&save=false`, {
           method: "GET",
           headers: headers,
         });

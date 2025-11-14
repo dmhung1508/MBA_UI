@@ -46,7 +46,7 @@ const SourceManager = () => {
 
   const fetchChatbots = async () => {
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
       if (response.ok) {
         const data = await response.json();
         const chatbots = data.chatbots || [];
@@ -79,7 +79,7 @@ const SourceManager = () => {
       };
       
       // First get teacher's assigned topics
-      const teacherResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/teacher/my-topics', {
+      const teacherResponse = await fetch('https://api.dinhmanhhung.net/auth_mini/teacher/my-topics', {
         headers
       });
       
@@ -89,7 +89,7 @@ const SourceManager = () => {
         setAssignedTopics(topics);
         
         // Then get all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+        const chatbotsResponse = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
         if (chatbotsResponse.ok) {
           const chatbotsData = await chatbotsResponse.json();
           const allChatbots = chatbotsData.chatbots || [];

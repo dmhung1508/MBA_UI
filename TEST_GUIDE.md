@@ -59,7 +59,7 @@ URL: http://localhost:5003/mini/test-file
 ## 🎯 Điều kiện để test:
 
 1. **Đăng nhập với quyền admin** - Các chức năng này chỉ dành cho admin
-2. **API server hoạt động** - `https://mba.ptit.edu.vn/mba_mini/`
+2. **API server hoạt động** - `https://api.dinhmanhhung.net/mba_mini/`
 3. **Có file trong database** - Nguồn 'hung' cần có ít nhất 1 file để test
 
 ## 🔍 Debug Tips:

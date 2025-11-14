@@ -12,6 +12,7 @@ import {
   faRobot
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
+import { fetchWithAuth } from '../utils/auth';
 
 const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploadSuccess }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -111,13 +112,6 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
     setUploadProgress('Đang tải lên...');
     
     try {
-      const token = localStorage.getItem('access_token');
-      const headers = {};
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
       const formData = new FormData();
       formData.append('file_id', selectedSource);
       
@@ -125,9 +119,8 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
         formData.append('files', file);
       });
 
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/mba/upload', {
+      const response = await fetchWithAuth('https://api.dinhmanhhung.net/auth_mini/mba/upload', {
         method: 'POST',
-        headers: headers,
         body: formData
       });
 

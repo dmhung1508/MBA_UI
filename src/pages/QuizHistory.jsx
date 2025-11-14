@@ -53,7 +53,7 @@ const QuizHistory = () => {
             const token = localStorage.getItem('access_token');
 
             // Chọn đúng endpoint API
-            const API_URL = `https://mba.ptit.edu.vn/auth_mini/quiz_history`;
+            const API_URL = `https://api.dinhmanhhung.net/auth_mini/quiz_history`;
 
             const response = await axios.get(API_URL, {
                 headers: { Authorization: `Bearer ${token}` },

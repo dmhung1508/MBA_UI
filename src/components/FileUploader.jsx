@@ -95,7 +95,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
       formData.append('file_id', source); // Sử dụng file_id thay vì source
       formData.append('files', selectedFile); // Sử dụng files thay vì file
 
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/mba/upload', {
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/mba/upload', {
         method: 'POST',
         headers: headers,
         body: formData

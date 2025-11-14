@@ -22,7 +22,7 @@ const Login = () => {
         formData.append('grant_type', 'password'); // Although not required in your backend, some OAuth2 implementations expect this
 
         try {
-            const response = await fetch('https://mba.ptit.edu.vn/auth_mini/token', { // Update with your backend URL
+            const response = await fetch('https://api.dinhmanhhung.net/auth_mini/token', { // Update with your backend URL
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -161,7 +161,7 @@ const Login = () => {
                                         </div>
                                         <div className="inline-flex items-center bg-white/20 text-white px-4 py-2 rounded-full mb-4 font-medium">
                                             <FaUniversity className="mr-2" />
-                                            PTIT - Học viện CNTT&TT
+                                            PTIT - Học viện CNBCVT
                                         </div>
                                     </div>
                                     

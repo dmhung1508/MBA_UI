@@ -19,7 +19,7 @@ import {
 import { toast } from 'react-toastify';
 import FileUploader from './FileUploader';
 import FileContentViewer from './FileContentViewer';
-import { getAuthHeaders } from '../utils/auth';
+import { fetchWithAuth } from '../utils/auth';
 
 const FileManager = ({ source = 'hung', chatbotName = '' }) => {
   const [metadata, setMetadata] = useState(null);
@@ -45,13 +45,11 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
       setLoading(true);
       setError('');
       
-      const headers = getAuthHeaders({
-        'accept': 'application/json'
-      });
-      
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/metadata`, {
+      const response = await fetchWithAuth(`https://api.dinhmanhhung.net/auth_mini/mba/files/${source}/metadata`, {
         method: 'GET',
-        headers: headers
+        headers: {
+          'accept': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -131,18 +129,11 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
         
       } else {
         // Đối với file text, docx, md... thử lấy nội dung
-        const token = localStorage.getItem('access_token');
-        const headers = {
-          'accept': 'text/plain'
-        };
-        
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
+        const response = await fetchWithAuth(`https://api.dinhmanhhung.net/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
           method: 'GET',
-          headers: headers,
+          headers: {
+            'accept': 'text/plain'
+          },
           signal: controller.signal
         });
 
@@ -279,19 +270,12 @@ Có thể do:
 
   const deleteFile = async (filename) => {
     try {
-      const token = localStorage.getItem('access_token');
-      const headers = {
-        'accept': 'application/json'
-      };
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
       const encodedFilename = encodeURIComponent(filename);
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/by-filename/${encodedFilename}?delete_original_file=true`, {
+      const response = await fetchWithAuth(`https://api.dinhmanhhung.net/auth_mini/mba/files/${source}/by-filename/${encodedFilename}?delete_original_file=true`, {
         method: 'DELETE',
-        headers: headers
+        headers: {
+          'accept': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -327,19 +311,12 @@ Có thể do:
     try {
       toast.info('Đang chuẩn bị tải xuống...');
       
-      const token = localStorage.getItem('access_token');
-      const headers = {
-        'accept': 'application/octet-stream'
-      };
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
       const encodedFilename = encodeURIComponent(filename);
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
+      const response = await fetchWithAuth(`https://api.dinhmanhhung.net/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
         method: 'GET',
-        headers: headers
+        headers: {
+          'accept': 'application/octet-stream'
+        }
       });
 
       if (!response.ok) {

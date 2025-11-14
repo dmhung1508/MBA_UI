@@ -94,7 +94,7 @@ const UserManager = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/users', {
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/users', {
         headers: getAuthHeaders()
       });
       
@@ -113,7 +113,7 @@ const UserManager = () => {
 
   const fetchChatbots = async () => {
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
       if (response.ok) {
         const data = await response.json();
         setAvailableChatbots(data.chatbots || []);
@@ -148,7 +148,7 @@ const UserManager = () => {
   const handleUpdateRole = async () => {
     try {
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/users/${selectedUser.username}/role`,
+        `https://api.dinhmanhhung.net/auth_mini/admin/users/${selectedUser.username}/role`,
         {
           method: 'PUT',
           headers: getAuthHeaders(),
@@ -172,7 +172,7 @@ const UserManager = () => {
   const handleAssignTopics = async () => {
     try {
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/users/${selectedUser.username}/assign-topics`,
+        `https://api.dinhmanhhung.net/auth_mini/admin/users/${selectedUser.username}/assign-topics`,
         {
           method: 'POST',
           headers: getAuthHeaders(),

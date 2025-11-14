@@ -55,7 +55,7 @@ const TeacherDashboard = () => {
       setLoading(true);
       
       // Fetch teacher's assigned topics
-      const teacherResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/teacher/my-topics', {
+      const teacherResponse = await fetch('https://api.dinhmanhhung.net/auth_mini/teacher/my-topics', {
         headers: getAuthHeaders()
       });
       
@@ -66,7 +66,7 @@ const TeacherDashboard = () => {
       const teacherData = await teacherResponse.json();
       
       // Fetch all chatbots to get subject names
-      const chatbotsResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const chatbotsResponse = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
       
       if (chatbotsResponse.ok) {
         const chatbotsData = await chatbotsResponse.json();

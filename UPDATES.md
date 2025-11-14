@@ -23,7 +23,7 @@ NEW: FormData với 'file_id' và 'files' (từ code cũ)
 **Cải tiến:**
 - ✅ Sử dụng parameter `file_id` thay vì `source`
 - ✅ Sử dụng parameter `files` thay vì `file`
-- ✅ Endpoint: `https://mba.ptit.edu.vn/mba_mini/upload`
+- ✅ Endpoint: `https://api.dinhmanhhung.net/mba_mini/upload`
 - ✅ Hỗ trợ upload multiple files
 
 ### 3. **API Xem File - Giải quyết lag**

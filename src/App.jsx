@@ -17,6 +17,13 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import MessageManager from "./pages/MessageManager";
 import TestPage from "./pages/TestPage";
 import AdminLogs from "./pages/AdminLogs";
+import TeacherStudents from "./pages/TeacherStudents";
+import StudentProgress from "./pages/StudentProgress";
+import TeacherAssignments from "./pages/TeacherAssignments";
+import AssignmentSubmissions from "./pages/AssignmentSubmissions";
+import StudentAssignments from "./pages/StudentAssignments";
+import StudentTakeAssignment from "./pages/StudentTakeAssignment";
+import StudentAssignmentResult from "./pages/StudentAssignmentResult";
 // import FAQPage from "./pages/FAQPage"
 // import IssuePage from "./pages/IssuePage";
 import { BrowserRouter, Routes, Route, Link, Navigate  } from "react-router-dom";
@@ -134,6 +141,62 @@ function App() {
             element={
               <PrivateRoute>
                 <AdminLogs />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/teacher/students" 
+            element={
+              <PrivateRoute>
+                <TeacherStudents />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/teacher/student-progress/:username" 
+            element={
+              <PrivateRoute>
+                <StudentProgress />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/teacher/assignments" 
+            element={
+              <PrivateRoute>
+                <TeacherAssignments />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/teacher/assignments/:assignmentId/submissions" 
+            element={
+              <PrivateRoute>
+                <AssignmentSubmissions />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/student/assignments" 
+            element={
+              <PrivateRoute>
+                <StudentAssignments />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/student/assignments/:assignmentId/take" 
+            element={
+              <PrivateRoute>
+                <StudentTakeAssignment />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/student/assignments/:assignmentId/result" 
+            element={
+              <PrivateRoute>
+                <StudentAssignmentResult />
               </PrivateRoute>
             } 
           />

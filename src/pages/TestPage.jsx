@@ -11,7 +11,7 @@ const TestPage = () => {
   const testMetadataAPI = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/mba_mini/files/hung/metadata', {
+      const response = await fetch('https://api.dinhmanhhung.net/mba_mini/files/hung/metadata', {
         method: 'GET',
         headers: {
           'accept': 'application/json'
@@ -45,7 +45,7 @@ const TestPage = () => {
     
     try {
       const encodedFilename = encodeURIComponent(firstFile.filename);
-      const response = await fetch(`https://mba.ptit.edu.vn/mba_mini/files/hung/view/${encodedFilename}`, {
+      const response = await fetch(`https://api.dinhmanhhung.net/mba_mini/files/hung/view/${encodedFilename}`, {
         method: 'GET',
         headers: {
           'accept': 'application/json'

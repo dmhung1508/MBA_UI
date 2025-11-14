@@ -18,16 +18,16 @@
 **API tích hợp:**
 ```javascript
 // Lấy danh sách chatbot
-GET https://mba.ptit.edu.vn/auth_mini/chatbots
+GET https://api.dinhmanhhung.net/auth_mini/chatbots
 
 // Tạo chatbot mới  
-POST https://mba.ptit.edu.vn/admin/chatbots
+POST https://api.dinhmanhhung.net/admin/chatbots
 
 // Cập nhật chatbot
-PUT https://mba.ptit.edu.vn/admin/chatbots/{id}
+PUT https://api.dinhmanhhung.net/admin/chatbots/{id}
 
 // Xóa chatbot
-DELETE https://mba.ptit.edu.vn/admin/chatbots/{id}
+DELETE https://api.dinhmanhhung.net/admin/chatbots/{id}
 ```
 
 ### 2. **📁 Source Manager - Quản lý Nguồn Tài Liệu**

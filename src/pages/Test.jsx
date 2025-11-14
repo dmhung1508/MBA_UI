@@ -74,7 +74,7 @@ function Test() {
 
   const fetchQuestions = async () => {
     try {
-      const response = await axios.get('https://mba.ptit.edu.vn/api/random-questions?topic=mcl');
+      const response = await axios.get('https://api.dinhmanhhung.net/api/random-questions?topic=mcl');
       setQuestions(response.data.questions);
       setLoading(false);
       setTimerActive(true);
@@ -152,7 +152,7 @@ function Test() {
       // Lấy token từ đâu đó, ví dụ localStorage
       const token = localStorage.getItem('access_token');
 
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/submit_quiz', {
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/submit_quiz', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

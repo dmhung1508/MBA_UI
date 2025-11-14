@@ -59,7 +59,7 @@ const AdminDashboard = () => {
   const fetchChatbots = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
       const data = await response.json();
       setChatbots(data.chatbots || []);
     } catch (err) {
@@ -118,7 +118,7 @@ const AdminDashboard = () => {
       formDataToSend.append('avatar_file', avatarFile);
 
       const token = localStorage.getItem('access_token');
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/admin/chatbots', {
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/admin/chatbots', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
         }
         formDataToSend.append('avatar_file', avatarFile);
 
-        const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/admin/chatbots/${selectedChatbot.id}`, {
+        const response = await fetch(`https://api.dinhmanhhung.net/auth_mini/admin/chatbots/${selectedChatbot.id}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -178,7 +178,7 @@ const AdminDashboard = () => {
           return;
         }
 
-        const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/admin/chatbots/${selectedChatbot.id}`, {
+        const response = await fetch(`https://api.dinhmanhhung.net/auth_mini/admin/chatbots/${selectedChatbot.id}`, {
           method: 'PUT',
           headers: getAuthHeaders(),
           body: JSON.stringify(updateData)
@@ -200,7 +200,7 @@ const AdminDashboard = () => {
 
   const handleDeleteChatbot = async () => {
     try {
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/admin/chatbots/${selectedChatbot.id}`, {
+      const response = await fetch(`https://api.dinhmanhhung.net/auth_mini/admin/chatbots/${selectedChatbot.id}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });

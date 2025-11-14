@@ -138,7 +138,7 @@ const QuestionManager = () => {
 
   const fetchChatbots = async () => {
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
       if (response.ok) {
         const data = await response.json();
         const chatbots = data.chatbots || [];
@@ -155,7 +155,7 @@ const QuestionManager = () => {
   const fetchTeacherTopics = async () => {
     try {
       // First get teacher's assigned topics
-      const teacherResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/teacher/my-topics', {
+      const teacherResponse = await fetch('https://api.dinhmanhhung.net/auth_mini/teacher/my-topics', {
         headers: getAuthHeaders()
       });
       
@@ -165,7 +165,7 @@ const QuestionManager = () => {
         setAssignedTopics(topics);
         
         // Then get all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+        const chatbotsResponse = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
         if (chatbotsResponse.ok) {
           const chatbotsData = await chatbotsResponse.json();
           const allChatbots = chatbotsData.chatbots || [];
@@ -194,7 +194,7 @@ const QuestionManager = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/questions/${selectedTopic}?offset=${pagination.offset}&size=${pagination.size}`,
+        `https://api.dinhmanhhung.net/auth_mini/admin/questions/${selectedTopic}?offset=${pagination.offset}&size=${pagination.size}`,
         { headers: getAuthHeaders() }
       );
       
@@ -224,7 +224,7 @@ const QuestionManager = () => {
       setLoading(true);
       
       // Build search URL with parameters
-      const searchUrl = new URL('https://mba.ptit.edu.vn/auth_mini/admin/search-questions');
+      const searchUrl = new URL('https://api.dinhmanhhung.net/auth_mini/admin/search-questions');
       searchUrl.searchParams.append('q', searchParams.keyword);
       searchUrl.searchParams.append('offset', searchPagination.offset.toString());
       searchUrl.searchParams.append('size', searchPagination.size.toString());
@@ -310,7 +310,7 @@ const QuestionManager = () => {
         return;
       }
       
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/admin/question', {
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/admin/question', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -345,7 +345,7 @@ const QuestionManager = () => {
         return;
       }
       
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/admin/questions', {
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/admin/questions', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -383,7 +383,7 @@ const QuestionManager = () => {
       }
       
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/questions/${topicToUse}/${selectedQuestion.index}`,
+        `https://api.dinhmanhhung.net/auth_mini/admin/questions/${topicToUse}/${selectedQuestion.index}`,
         {
           method: 'PUT',
           headers: getAuthHeaders(),
@@ -420,7 +420,7 @@ const QuestionManager = () => {
       }
       
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/questions/${topicToUse}/${selectedQuestion.index}`,
+        `https://api.dinhmanhhung.net/auth_mini/admin/questions/${topicToUse}/${selectedQuestion.index}`,
         {
           method: 'DELETE',
           headers: getAuthHeaders()
@@ -463,7 +463,7 @@ const QuestionManager = () => {
       formData.append('file', excelFile);
 
       const token = localStorage.getItem('access_token');
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/admin/questions/upload-excel', {
+      const response = await fetch('https://api.dinhmanhhung.net/auth_mini/admin/questions/upload-excel', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

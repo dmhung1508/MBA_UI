@@ -22,7 +22,7 @@ const EditSourceModal = ({
 
     setIsUpdating(true);
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/mba_mini/update-chroma', {
+      const response = await fetch('https://api.dinhmanhhung.net/mba_mini/update-chroma', {
         method: 'POST',
         headers: {
           'accept': 'application/json',

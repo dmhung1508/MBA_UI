@@ -14,7 +14,7 @@ const Profile = () => {
         const fetchUserData = async () => {
             try {
                 const token = localStorage.getItem('access_token');
-                const response = await axios.get('https://mba.ptit.edu.vn/auth_mini/users/me', {
+                const response = await axios.get('https://api.dinhmanhhung.net/auth_mini/users/me', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     },
@@ -32,7 +32,7 @@ const Profile = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('token_type');
         localStorage.removeItem('user_role');
-        navigate('/mini/login');
+        navigate('/login');
     };
 
     if (!userData) {

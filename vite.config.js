@@ -11,6 +11,7 @@ export default defineConfig({
       port: 24679,
       host: 'localhost'
     },
-    allowedHosts: ['mba.ptit.edu.vn'] // 👈 thêm dòng này
+    allowedHosts: ['mba.ptit.edu.vn', 'mba.dinhmanhhung.net', "mini.dinhmanhhung.net"] // 👈 thêm dòng này
   }
 });
+  

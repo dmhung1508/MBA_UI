@@ -21,7 +21,7 @@ const FileContentViewer = ({ isOpen, filename, source, onClose }) => {
       setLoading(true);
       
       // Thử API để lấy extracted content từ database
-      const response = await fetch(`https://mba.ptit.edu.vn/mba_mini/search`, {
+      const response = await fetch(`https://api.dinhmanhhung.net/mba_mini/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ Lỗi: ${err.message}
       }
       
       const encodedFilename = encodeURIComponent(filename);
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
+      const response = await fetch(`https://api.dinhmanhhung.net/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
         method: 'GET',
         headers: headers
       });
@@ -154,7 +154,7 @@ ${rawContent.substring(0, 100)}...
       }
       
       const encodedFilename = encodeURIComponent(filename);
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
+      const response = await fetch(`https://api.dinhmanhhung.net/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
         method: 'GET',
         headers: headers
       });

@@ -14,6 +14,7 @@ const ChatUI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedSources, setSelectedSources] = useState([]);
+  const [expandedSources, setExpandedSources] = useState({});
   const [currentView, setCurrentView] = useState("chat");
 
   const speechSynthesis = window.speechSynthesis;
@@ -22,7 +23,7 @@ const ChatUI = () => {
   useEffect(() => {
     const fetchChatbots = async () => {
       try {
-        const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+        const response = await fetch('https://api.dinhmanhhung.net/auth_mini/chatbots');
         const data = await response.json();
         
         setChatbots(data.chatbots);
@@ -122,7 +123,7 @@ const ChatUI = () => {
   };
 
   const renderIntroduction = () => {
-    window.location.href = "https://mba.ptit.edu.vn/mini/";
+    window.location.href = "https://api.dinhmanhhung.net/mini/";
   };
 
   const handleSendMessage = (chatbotId, newMessage) => {
@@ -236,26 +237,102 @@ const ChatUI = () => {
 
       {/* Source Popup */}
       {isSourcePopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full m-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Sources</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <div>
+                <h3 className="text-xl font-bold text-gray-800">Nguồn tham khảo</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {selectedSources.length} nguồn được tìm thấy
+                </p>
+              </div>
               <button
                 onClick={() => toggleSourcePopup([])}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-400 hover:text-gray-600 transition-colors text-2xl"
               >
                 ×
               </button>
             </div>
-            <div className="max-h-60 overflow-y-auto">
-              {selectedSources.length > 0 ? (
-                selectedSources.map((source, index) => (
-                  <div key={index} className="mb-2 p-2 bg-gray-100 rounded">
-                    <p className="text-sm">{source}</p>
-                  </div>
-                ))
+            
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {Array.isArray(selectedSources) && selectedSources.length > 0 ? (
+                <div className="space-y-4">
+                  {selectedSources.map((source, index) => {
+                    let displayText = '';
+                    let fileName = '';
+                    let fileInfo = '';
+                    
+                    if (typeof source === 'string') {
+                      displayText = source;
+                    } else if (source && typeof source === 'object') {
+                      displayText = source.text || '';
+                      fileName = source.file_name || `Nguồn ${index + 1}`;
+                      if (source.creation_date) {
+                        fileInfo = `Ngày tạo: ${source.creation_date}`;
+                      }
+                    }
+                    
+                    const isExpanded = expandedSources[index];
+                    const maxLength = 300;
+                    const shouldTruncate = displayText.length > maxLength;
+                    const textToShow = isExpanded || !shouldTruncate 
+                      ? displayText 
+                      : displayText.substring(0, maxLength) + '...';
+                    
+                    return (
+                      <div key={index} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                        {/* Source Header */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-200">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="flex items-center justify-center w-6 h-6 bg-blue-500 text-white text-xs font-bold rounded">
+                                  {index + 1}
+                                </span>
+                                <h4 className="font-semibold text-gray-800 text-sm">
+                                  {fileName}
+                                </h4>
+                              </div>
+                              {fileInfo && (
+                                <p className="text-xs text-gray-500 mt-1 ml-8">{fileInfo}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Source Content */}
+                        <div className="bg-white p-4">
+                          <div className="prose prose-sm max-w-none">
+                            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                              {textToShow}
+                            </p>
+                          </div>
+                          
+                          {shouldTruncate && (
+                            <button
+                              onClick={() => setExpandedSources(prev => ({
+                                ...prev,
+                                [index]: !prev[index]
+                              }))}
+                              className="mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                            >
+                              {isExpanded ? '← Thu gọn' : 'Xem thêm →'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               ) : (
-                <p className="text-gray-500">Không có nguồn tham khảo</p>
+                <div className="flex flex-col items-center justify-center py-12">
+                  <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <p className="text-gray-500 text-center">Không có nguồn tham khảo</p>
+                </div>
               )}
             </div>
           </div>

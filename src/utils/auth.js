@@ -75,3 +75,63 @@ export const renewToken = () => {
   }
   return false;
 };
+
+/**
+ * Xử lý logout khi token không hợp lệ
+ */
+export const handleInvalidToken = () => {
+  clearAuthData();
+  // Redirect về trang login
+  window.location.href = '/mini/login';
+};
+
+/**
+ * Wrapper cho fetch API với tự động xử lý token hết hạn
+ * @param {string} url - URL để gọi API
+ * @param {Object} options - Fetch options
+ * @returns {Promise<Response>}
+ */
+export const fetchWithAuth = async (url, options = {}) => {
+  // Kiểm tra token trước khi gọi API
+  if (!isTokenValid()) {
+    handleInvalidToken();
+    throw new Error('Token expired or invalid');
+  }
+  
+  // Thêm Authorization header
+  const headers = getAuthHeaders(options.headers || {});
+  const finalOptions = {
+    ...options,
+    headers
+  };
+  
+  try {
+    const response = await fetch(url, finalOptions);
+    
+    // Kiểm tra lỗi 401 Unauthorized hoặc 403 Forbidden
+    if (response.status === 401 || response.status === 403) {
+      // Kiểm tra xem có phải lỗi "Could not validate credentials" không
+      try {
+        const errorData = await response.clone().json();
+        if (errorData.detail && 
+            (errorData.detail.includes('Could not validate credentials') ||
+             errorData.detail.includes('Not authenticated'))) {
+          // Token không hợp lệ từ server, logout
+          handleInvalidToken();
+          throw new Error('Session expired. Please login again.');
+        }
+      } catch (e) {
+        // Nếu không parse được JSON, vẫn coi như token hết hạn
+        if (response.status === 401) {
+          handleInvalidToken();
+          throw new Error('Session expired. Please login again.');
+        }
+      }
+    }
+    
+    return response;
+  } catch (error) {
+    // Network error hoặc các lỗi khác
+    throw error;
+  }
+};

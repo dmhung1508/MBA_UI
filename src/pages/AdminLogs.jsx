@@ -103,7 +103,7 @@ const AdminLogs = () => {
       if (filters.to_date) params.append('to_date', filters.to_date);
 
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/logs?${params.toString()}`,
+        `https://api.dinhmanhhung.net/auth_mini/admin/logs?${params.toString()}`,
         { headers: getAuthHeaders() }
       );
 
@@ -127,7 +127,7 @@ const AdminLogs = () => {
       setError('');
 
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/logs/stats?days=${statsDays}`,
+        `https://api.dinhmanhhung.net/auth_mini/admin/logs/stats?days=${statsDays}`,
         { headers: getAuthHeaders() }
       );
 
@@ -150,7 +150,7 @@ const AdminLogs = () => {
       setError('');
 
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/logs/cleanup?days=${cleanupDays}`,
+        `https://api.dinhmanhhung.net/auth_mini/admin/logs/cleanup?days=${cleanupDays}`,
         {
           method: 'DELETE',
           headers: getAuthHeaders()

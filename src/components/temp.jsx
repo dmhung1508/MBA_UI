@@ -26,7 +26,7 @@ const Chatbot1 = ({
 
   const handleOpenQuiz = () => {
     setIsQuizOpen(true);
-    setApiUrl("https://mba.ptit.edu.vn/api/random-questions?topic=mcl");
+    setApiUrl("https://api.dinhmanhhung.net/api/random-questions?topic=mcl");
   };
 
   const handleExplanationRequest = async (explanationData) => {
@@ -36,7 +36,7 @@ const Chatbot1 = ({
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/mba_mini/explanation/', {
+      const response = await fetch('https://api.dinhmanhhung.net/mba_mini/explanation/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ const Chatbot1 = ({
       setInputMessage("");
 
       try {
-        const response = await fetch(`https://mba.ptit.edu.vn/mba_mini/tonghop/?time=${timestamp}&q=${encodeURIComponent(inputMessage)}&source=maketingchienluoc`, {
+        const response = await fetch(`https://api.dinhmanhhung.net/mba_mini/tonghop/?time=${timestamp}&q=${encodeURIComponent(inputMessage)}&source=maketingchienluoc`, {
           method: "GET",
           headers: new Headers({
             "ngrok-skip-browser-warning": "69420",

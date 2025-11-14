@@ -117,7 +117,7 @@ const UnifiedChatbot = ({
       }
       
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/mba/chat_history/${username}?limit=50&skip=0&source=${chatbotConfig.source}`,
+        `https://api.dinhmanhhung.net/auth_mini/mba/chat_history/${username}?limit=50&skip=0&source=${chatbotConfig.source}`,
         {
           method: "GET",
           headers: headers,
@@ -177,7 +177,7 @@ const UnifiedChatbot = ({
       }
       
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/mba/chat_history/${username}?source=${chatbotConfig.source}`,
+        `https://api.dinhmanhhung.net/auth_mini/mba/chat_history/${username}?source=${chatbotConfig.source}`,
         {
           method: "DELETE",
           headers: headers,
@@ -209,7 +209,7 @@ const UnifiedChatbot = ({
       clearTimeout(inactivityTimerRef.current);
       inactivityTimerRef.current = null;
     }
-    setApiUrl(`https://mba.ptit.edu.vn/auth_mini/random-questions?topic=${chatbotConfig.quizTopic}`);
+    setApiUrl(`https://api.dinhmanhhung.net/auth_mini/random-questions?topic=${chatbotConfig.quizTopic}`);
   };
 
   const handleExplanationRequest = async (explanationData) => {
@@ -217,7 +217,7 @@ const UnifiedChatbot = ({
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/mba_mini/explanation/', {
+      const response = await fetch('https://api.dinhmanhhung.net/mba_mini/explanation/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -289,9 +289,9 @@ const UnifiedChatbot = ({
       try {
         let apiEndpoint;
         if (chatbotConfig.id === 0) {
-          apiEndpoint = `https://mba.ptit.edu.vn/mba_mini/tonghop/?time=${timestamp}&q=${encodeURIComponent(inputMessage)}`;
+          apiEndpoint = `https://api.dinhmanhhung.net/mba_mini/tonghop/?time=${timestamp}&q=${encodeURIComponent(inputMessage)}`;
         } else {
-          apiEndpoint = `https://mba.ptit.edu.vn/auth_mini/mba/rag/?time=${username}&q=${encodeURIComponent(inputMessage)}&source=${chatbotConfig.source}&save=true`;
+          apiEndpoint = `https://api.dinhmanhhung.net/auth_mini/mba/rag/?time=${username}&q=${encodeURIComponent(inputMessage)}&source=${chatbotConfig.source}&save=true`;
         }
         
         const token = localStorage.getItem('access_token');
@@ -318,12 +318,18 @@ const UnifiedChatbot = ({
             sources: Object.entries(result.source || {}).map(([key, value]) => `${key}: ${value}`),
           };
         } else {
+          // Safely handle sources - ensure it's always an array
+          let sources = [];
+          if (Array.isArray(result.answer?.sources)) {
+            sources = result.answer.sources;
+          }
+          
           botResponse = {
             id: uuidv4(),
             text: result.answer.response,
             sender: "bot",
             timestamp: new Date().toLocaleTimeString(),
-            sources: result.answer.sources.map(source => `${source.file_name}: ${source.text}`),
+            sources: sources,
           };
         }
         setMessages(prev => [...prev, botResponse]);

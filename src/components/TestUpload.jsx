@@ -13,7 +13,7 @@ const TestUpload = () => {
   const testAPI = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/mba_mini/files/hung/metadata');
+      const response = await fetch('https://api.dinhmanhhung.net/mba_mini/files/hung/metadata');
       if (response.ok) {
         const data = await response.json();
         console.log('API Response:', data);
