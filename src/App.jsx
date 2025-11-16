@@ -22,6 +22,7 @@ import AdminLogs from "./pages/AdminLogs";
 import { BrowserRouter, Routes, Route, Link, Navigate  } from "react-router-dom";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { ToastContainer } from 'react-toastify';
+import AuthSuccess from './components/AuthSuccess.jsx'
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -137,6 +138,7 @@ function App() {
               </PrivateRoute>
             } 
           />
+          <Route path="/auth/success" element={<AuthSuccess />} />
         </Routes>
         
         <ToastContainer

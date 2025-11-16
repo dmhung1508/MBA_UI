@@ -1,5 +1,5 @@
 # Bước 1: Sử dụng node làm image cơ sở
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Bước 2: Thiết lập thư mục làm việc
 WORKDIR /app
