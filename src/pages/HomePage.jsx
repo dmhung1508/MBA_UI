@@ -36,19 +36,19 @@ const HomePage = () => {
       title: "Kỹ năng Lãnh đạo",
       description: "Phát triển tư duy lãnh đạo và kỹ năng quản lý hiệu quả",
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      highlights: ["Team Building", "Decision Making", "Change Management"]
+      highlights: ["Xây dựng đội nhóm", "Ra quyết định", "Quản lý thay đổi"]
     },
     {
-      title: "Business Analytics",
+      title: "Phân tích Kinh doanh",
       description: "Sử dụng dữ liệu để đưa ra quyết định kinh doanh thông minh",
       image: "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      highlights: ["Data Analysis", "Market Research", "Performance Metrics"]
+      highlights: ["Phân tích dữ liệu", "Nghiên cứu thị trường", "Đo lường hiệu suất"]
     },
     {
       title: "Khởi nghiệp & Đổi mới",
       description: "Tạo dựng và phát triển doanh nghiệp trong thời đại số",
-      image: "https://images.unsplash.com/photo-1590650153855-d9e808231d41?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      highlights: ["Innovation", "Startup Strategy", "Digital Transformation"]
+      image: "https://images.unsplash.com/photo-1587355760421-b9de3226a046?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      highlights: ["Đổi mới sáng tạo", "Chiến lược khởi nghiệp", "Chuyển đổi số"]
     }
   ];
 
@@ -76,7 +76,7 @@ const HomePage = () => {
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % mbaSlides.length);
-    }, 4000); // Change slide every 4 seconds
+    }, 4000); // Thay đổi slide mỗi 4 giây
 
     return () => clearInterval(slideInterval);
   }, [mbaSlides.length]);
@@ -101,8 +101,9 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
       <Navbar />
+      <div className="page-container bg-white">
 
       {/* Login Warning */}
         <div
@@ -132,26 +133,26 @@ const HomePage = () => {
             <div className="w-full lg:w-1/2 text-center lg:text-left">
               <div className="animate-fade-in-up">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-                  Xin chào, tôi là 
+                  Xin chào, tôi là <br/>
                   <span className="text-red-600 block lg:inline"> MBA Chatbot</span>
           </h1>
-                <div className="mb-3 flex flex-wrap justify-center lg:justify-start gap-2">
+                <div className="mb-3 flex flex-wrap justify-center gap-2">
                   <span className="inline-block bg-red-100 text-red-800 text-sm font-medium px-3 py-1 rounded-full">
                     🎓 PTIT
                   </span>
                   <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                    📊 MBA Program
+                    📊 Chương trình MBA 
                   </span>
                   <span className="inline-block bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
-                    🤖 AI Assistant
+                    🤖 Trợ lý AI
                   </span>
                 </div>
                 <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                  Trợ lý AI thông minh hỗ trợ học viên MBA. Giải đáp thắc mắc về chương trình học, 
-                  môn học và các thông tin học vụ một cách nhanh chóng và chính xác.
+                  Trợ lý AI thông minh hỗ trợ học viên MBA. <br/>Giải đáp thắc mắc về chương trình học, 
+                  môn học và <br/>các thông tin học vụ một cách nhanh chóng và chính xác.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start max-w-md mx-auto lg:mx-0">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md mx-auto">
           {isLoggedIn ? (
             <a
               href="/mini/mini"
@@ -206,7 +207,7 @@ const HomePage = () => {
                           <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                             <h3 className="text-xl sm:text-2xl font-bold mb-2">{slide.title}</h3>
                             <p className="text-sm sm:text-base mb-3 opacity-90">{slide.description}</p>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-2 mb-2.5">
                               {slide.highlights.map((highlight, idx) => (
                                 <span 
                                   key={idx}
@@ -266,13 +267,13 @@ const HomePage = () => {
           <div className="text-center mb-12 sm:mb-16">
             <div className="inline-flex items-center bg-red-100 text-red-800 px-4 py-2 rounded-full mb-4 font-medium">
               <FaRobot className="mr-2" />
-              MBA AI Assistant - PTIT
+              Trợ lý AI MBA - PTIT
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Chatbot thông minh cho học viên MBA
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              Trợ lý AI chuyên biệt hỗ trợ sinh viên Thạc sĩ Quản trị Kinh doanh tại Học viện PTIT
+              Trợ lý AI chuyên biệt hỗ trợ sinh viên Thạc sĩ Quản trị Kinh doanh tại <br/> Học viện Công nghệ Bưu chính Viễn thông
             </p>
           </div>
 
@@ -290,14 +291,14 @@ const HomePage = () => {
                 <FaShieldAlt size={20} className="sm:w-6 sm:h-6" />
               </div>
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 text-center">Dữ liệu PTIT chính thức</h3>
-              <p className="text-gray-600 text-center text-sm sm:text-base leading-relaxed">Thông tin được đồng bộ từ hệ thống chính thức của Học viện PTIT, đảm bảo độ chính xác tuyệt đối.</p>
+              <p className="text-gray-600 text-center text-sm sm:text-base leading-relaxed">Thông tin được đồng bộ từ hệ thống chính thức của Học viện Công nghệ Bưu chính Viễn thông, đảm bảo độ chính xác tuyệt đối.</p>
             </div>
 
             <div className="group p-6 sm:p-8 bg-white rounded-xl hover:shadow-lg transition-all duration-300 border border-gray-100">
               <div className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-red-600 text-white rounded-lg mb-4 sm:mb-6 group-hover:scale-110 transition-transform mx-auto">
                 <FaClock size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 text-center">AI MBA Advisor</h3>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 text-center">Cố vấn AI MBA</h3>
               <p className="text-gray-600 text-center text-sm sm:text-base leading-relaxed">Tư vấn thông minh về lộ trình học MBA, chọn môn học và định hướng nghề nghiệp sau tốt nghiệp.</p>
             </div>
 
@@ -321,8 +322,8 @@ const HomePage = () => {
               <div className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-red-600 text-white rounded-lg mb-4 sm:mb-6 group-hover:scale-110 transition-transform mx-auto">
                 <FaChartLine size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 text-center">MBA Business Analytics</h3>
-              <p className="text-gray-600 text-center text-sm sm:text-base leading-relaxed">Công cụ phân tích dữ liệu kinh doanh và đưa ra insights cho bài tập, dự án MBA theo chương trình PTIT.</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 text-center">Phân tích Dữ liệu MBA</h3>
+              <p className="text-gray-600 text-center text-sm sm:text-base leading-relaxed">Công cụ phân tích dữ liệu kinh doanh và đưa ra nhận định sâu sắc cho bài tập, dự án MBA theo chương trình PTIT.</p>
             </div>
           </div>
         </div>
@@ -372,7 +373,7 @@ const HomePage = () => {
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Chatbot hỗ trợ chương trình MBA PTIT
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto whitespace-nowrap">
               Tận dụng AI để tối ưu hóa quá trình học MBA tại Học viện Công nghệ Bưu chính Viễn thông
             </p>
           </div>
@@ -382,7 +383,7 @@ const HomePage = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <span className="text-2xl">🎯</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Chương trình Thực tiễn</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Chương trình thực tiễn</h3>
               <p className="text-gray-600 leading-relaxed">
                 Kết hợp lý thuyết với thực hành qua các case study thực tế từ doanh nghiệp Việt Nam và quốc tế.
               </p>
@@ -392,7 +393,7 @@ const HomePage = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <span className="text-2xl">👥</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Networking Mạnh mẽ</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Mạng lưới mạnh mẽ</h3>
               <p className="text-gray-600 leading-relaxed">
                 Kết nối với mạng lưới alumni mạnh mẽ gồm các lãnh đạo doanh nghiệp và chuyên gia hàng đầu.
               </p>
@@ -402,7 +403,7 @@ const HomePage = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <span className="text-2xl">🌟</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Đội ngũ Giảng viên</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Đội ngũ giảng viên</h3>
               <p className="text-gray-600 leading-relaxed">
                 Học tập cùng các giảng viên có trình độ cao, kinh nghiệm thực tiễn phong phú trong lĩnh vực kinh doanh.
               </p>
@@ -412,7 +413,7 @@ const HomePage = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-violet-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <span className="text-2xl">💼</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Cơ hội Nghề nghiệp</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Cơ hội nghề nghiệp</h3>
               <p className="text-gray-600 leading-relaxed">
                 Mở rộng cơ hội thăng tiến với bằng MBA được công nhận trong và ngoài nước.
               </p>
@@ -422,7 +423,7 @@ const HomePage = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <span className="text-2xl">🚀</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Đổi mới Sáng tạo</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Đổi mới sáng tạo</h3>
               <p className="text-gray-600 leading-relaxed">
                 Phát triển tư duy sáng tạo và kỹ năng lãnh đạo để dẫn dắt sự thay đổi trong tổ chức.
               </p>
@@ -432,7 +433,7 @@ const HomePage = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <span className="text-2xl">📈</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Phát triển Bền vững</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Phát triển bền vững</h3>
               <p className="text-gray-600 leading-relaxed">
                 Học cách xây dựng và quản lý doanh nghiệp theo hướng phát triển bền vững và có trách nhiệm xã hội.
               </p>
@@ -449,11 +450,11 @@ const HomePage = () => {
               <FaRobot className="mr-2 text-red-600" />
               MBA Chatbot - PTIT Official
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 whitespace-nowrap">
               Bắt đầu hành trình MBA cùng AI Assistant
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 px-4 leading-relaxed">
-              Gia nhập cộng đồng học viên MBA PTIT và trải nghiệm học tập thông minh với chatbot chuyên biệt về quản trị kinh doanh.
+              Gia nhập cộng đồng học viên MBA PTIT và trải nghiệm học tập thông minh <br/> với chatbot chuyên biệt về quản trị kinh doanh.
             </p>
             
             {!isLoggedIn && (
@@ -478,9 +479,9 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
+      </div>
       <Footer />
-    </div>
+    </>
   );
 };
 

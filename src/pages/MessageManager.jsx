@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { API_ENDPOINTS } from '../config/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faComments,
@@ -73,7 +74,7 @@ const MessageManager = () => {
   // Fetch teacher's assigned topics
   const fetchTeacherTopics = async () => {
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/teacher/my-topics', {
+      const response = await fetch(API_ENDPOINTS.TEACHER_MY_TOPICS, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json'
@@ -85,9 +86,9 @@ const MessageManager = () => {
         const topics = data.assigned_topics || [];
         console.log('Teacher assigned topics:', topics);
         setAssignedTopics(topics);
-        
+
         // Fetch all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
         const chatbotsData = await chatbotsResponse.json();
         
         if (chatbotsData.chatbots) {
@@ -107,7 +108,7 @@ const MessageManager = () => {
   // Fetch all chatbots (for admin)
   const fetchChatbots = async () => {
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch(API_ENDPOINTS.CHATBOTS);
       const data = await response.json();
       
       if (data.chatbots) {
@@ -129,7 +130,7 @@ const MessageManager = () => {
     try {
       const offset = (page - 1) * usersLimit;
       const response = await fetch(
-        `https://mba.ptit.edu.vn/mba_mini/source/${encodeURIComponent(topic)}/users?limit=${usersLimit}&skip=${offset}`,
+        API_ENDPOINTS.MBA_SOURCE_USERS(topic, usersLimit, offset),
         {
           headers: {
             'accept': 'application/json',
@@ -177,7 +178,7 @@ const MessageManager = () => {
       }
       
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/mba/chat_history/${encodeURIComponent(userId)}?limit=${chatLimit}&skip=${skip}&source=${encodeURIComponent(source)}`,
+        API_ENDPOINTS.CHAT_HISTORY(encodeURIComponent(userId), chatLimit, skip, encodeURIComponent(source)),
         {
           headers: headers
         }

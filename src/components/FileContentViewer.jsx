@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faTimes, 
+import {
+  faTimes,
   faSpinner,
   faFileAlt,
   faDownload,
@@ -9,6 +9,7 @@ import {
   faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
+import { API_ENDPOINTS } from '../config/api';
 
 const FileContentViewer = ({ isOpen, filename, source, onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,7 @@ const FileContentViewer = ({ isOpen, filename, source, onClose }) => {
       setLoading(true);
       
       // Thử API để lấy extracted content từ database
-      const response = await fetch(`https://mba.ptit.edu.vn/mba_mini/search`, {
+      const response = await fetch(API_ENDPOINTS.MBA_SEARCH, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,9 +87,9 @@ Lỗi: ${err.message}
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const encodedFilename = encodeURIComponent(filename);
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
+      const response = await fetch(API_ENDPOINTS.FILE_VIEW(source, encodedFilename), {
         method: 'GET',
         headers: headers
       });
@@ -154,7 +155,7 @@ ${rawContent.substring(0, 100)}...
       }
       
       const encodedFilename = encodeURIComponent(filename);
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
+      const response = await fetch(API_ENDPOINTS.FILE_VIEW(source, encodedFilename), {
         method: 'GET',
         headers: headers
       });

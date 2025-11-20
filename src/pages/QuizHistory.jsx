@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-  FaHistory, 
-  FaCheckCircle, 
-  FaQuestionCircle, 
+import {
+  FaHistory,
+  FaCheckCircle,
+  FaQuestionCircle,
   FaTasks,
   FaChevronLeft,
   FaChevronRight,
@@ -19,6 +19,7 @@ import {
   FaChartLine,
   FaClock
 } from 'react-icons/fa';
+import { API_ENDPOINTS } from '../config/api';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
@@ -52,10 +53,7 @@ const QuizHistory = () => {
             setLoading(true);
             const token = localStorage.getItem('access_token');
 
-            // Chọn đúng endpoint API
-            const API_URL = `https://mba.ptit.edu.vn/auth_mini/quiz_history`;
-
-            const response = await axios.get(API_URL, {
+            const response = await axios.get(API_ENDPOINTS.QUIZ_HISTORY, {
                 headers: { Authorization: `Bearer ${token}` },
                 mode: 'no-cors'
             });
@@ -259,7 +257,7 @@ const QuizHistory = () => {
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center bg-red-100 text-red-800 px-4 py-2 rounded-full mb-4 font-medium">
                         <FaRobot className="mr-2" />
-                        MBA Quiz History - PTIT
+                        Lịch sử MBA Quiz - PTIT
                     </div>
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">
                         Lịch sử luyện tập MBA

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { API_ENDPOINTS } from '../config/api';
 import { 
   faUpload, 
   faTimes, 
@@ -125,7 +126,7 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
         formData.append('files', file);
       });
 
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/mba/upload', {
+      const response = await fetch(API_ENDPOINTS.FILE_UPLOAD, {
         method: 'POST',
         headers: headers,
         body: formData

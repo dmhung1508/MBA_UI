@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { API_ENDPOINTS } from '../config/api';
 
 function Test() {
   const [questions, setQuestions] = useState([]);
@@ -74,7 +75,7 @@ function Test() {
 
   const fetchQuestions = async () => {
     try {
-      const response = await axios.get('https://mba.ptit.edu.vn/api/random-questions?topic=mcl');
+      const response = await axios.get(API_ENDPOINTS.RANDOM_QUESTIONS('mcl'));
       setQuestions(response.data.questions);
       setLoading(false);
       setTimerActive(true);
@@ -152,7 +153,7 @@ function Test() {
       // Lấy token từ đâu đó, ví dụ localStorage
       const token = localStorage.getItem('access_token');
 
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/submit_quiz', {
+      const response = await fetch(API_ENDPOINTS.SUBMIT_QUIZ, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

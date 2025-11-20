@@ -76,13 +76,10 @@ const Footer = () => {
 
         {/* Bottom Section */}
         <div className="pt-8 border-t border-gray-200">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-center md:text-left">
+          <div className="flex flex-col justify-center items-center space-y-4">
+            <div className="text-center">
               <p className="text-gray-600 text-sm">
                 © 2025 MBA Chatbot - PTIT. Bảo lưu mọi quyền.
-              </p>
-              <p className="text-gray-500 text-xs mt-1">
-                Một sản phẩm của IEC PTIT
               </p>
             </div>
             {/* <div className="flex items-center space-x-6 text-sm">

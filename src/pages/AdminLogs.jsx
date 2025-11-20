@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { API_ENDPOINTS } from '../config/api';
 import { 
   faClipboardList,
   faFilter,
@@ -103,7 +104,7 @@ const AdminLogs = () => {
       if (filters.to_date) params.append('to_date', filters.to_date);
 
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/logs?${params.toString()}`,
+        `${API_ENDPOINTS.ADMIN_LOGS}?${params.toString()}`,
         { headers: getAuthHeaders() }
       );
 
@@ -127,7 +128,7 @@ const AdminLogs = () => {
       setError('');
 
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/logs/stats?days=${statsDays}`,
+        `${API_ENDPOINTS.ADMIN_LOGS}/stats?days=${statsDays}`,
         { headers: getAuthHeaders() }
       );
 
@@ -150,7 +151,7 @@ const AdminLogs = () => {
       setError('');
 
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/logs/cleanup?days=${cleanupDays}`,
+        `${API_ENDPOINTS.ADMIN_LOGS}/cleanup?days=${cleanupDays}`,
         {
           method: 'DELETE',
           headers: getAuthHeaders()

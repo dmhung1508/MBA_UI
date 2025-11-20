@@ -5,10 +5,11 @@ import Footer from './Footer';
 import FileManager from '../components/FileManager';
 import AdvancedFileUploader from '../components/AdvancedFileUploader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
+import {
   faUpload,
   faFile
 } from '@fortawesome/free-solid-svg-icons';
+import { API_ENDPOINTS } from '../config/api';
 
 const SourceManager = () => {
   const [selectedChatbot, setSelectedChatbot] = useState('');
@@ -46,7 +47,7 @@ const SourceManager = () => {
 
   const fetchChatbots = async () => {
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch(API_ENDPOINTS.CHATBOTS);
       if (response.ok) {
         const data = await response.json();
         const chatbots = data.chatbots || [];
@@ -79,7 +80,7 @@ const SourceManager = () => {
       };
       
       // First get teacher's assigned topics
-      const teacherResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/teacher/my-topics', {
+      const teacherResponse = await fetch(API_ENDPOINTS.TEACHER_MY_TOPICS, {
         headers
       });
       
@@ -89,7 +90,7 @@ const SourceManager = () => {
         setAssignedTopics(topics);
         
         // Then get all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
         if (chatbotsResponse.ok) {
           const chatbotsData = await chatbotsResponse.json();
           const allChatbots = chatbotsData.chatbots || [];
@@ -116,8 +117,9 @@ const SourceManager = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
+    <>
       <Navbar />
+      <div className="page-container bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
       
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -180,9 +182,9 @@ const SourceManager = () => {
           setShowAdvancedUploader(false);
         }}
       />
-
+      </div>
       <Footer />
-    </div>
+    </>
   );
 };
 

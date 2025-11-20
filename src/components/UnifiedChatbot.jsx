@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { FaMicrophone, FaPaperPlane, FaQuestionCircle, FaVolumeMute, FaVolumeUp, FaHistory, FaTrash } from "react-icons/fa";
 import { v4 as uuidv4 } from 'uuid';
 import ReactMarkdown from 'react-markdown';
+import { API_ENDPOINTS } from '../config/api';
 import QuizPopup from './QuizPopup';
 import { jwtDecode } from 'jwt-decode';
 
@@ -117,7 +118,7 @@ const UnifiedChatbot = ({
       }
       
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/mba/chat_history/${username}?limit=50&skip=0&source=${chatbotConfig.source}`,
+        API_ENDPOINTS.CHAT_HISTORY(username, 50, 0, chatbotConfig.source),
         {
           method: "GET",
           headers: headers,
@@ -177,7 +178,7 @@ const UnifiedChatbot = ({
       }
       
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/mba/chat_history/${username}?source=${chatbotConfig.source}`,
+        API_ENDPOINTS.DELETE_CHAT_HISTORY(username, chatbotConfig.source),
         {
           method: "DELETE",
           headers: headers,
@@ -209,7 +210,7 @@ const UnifiedChatbot = ({
       clearTimeout(inactivityTimerRef.current);
       inactivityTimerRef.current = null;
     }
-    setApiUrl(`https://mba.ptit.edu.vn/auth_mini/random-questions?topic=${chatbotConfig.quizTopic}`);
+    setApiUrl(API_ENDPOINTS.RANDOM_QUESTIONS(chatbotConfig.quizTopic));
   };
 
   const handleExplanationRequest = async (explanationData) => {
@@ -217,7 +218,7 @@ const UnifiedChatbot = ({
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/mba_mini/explanation/', {
+      const response = await fetch(API_ENDPOINTS.MBA_EXPLANATION, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -289,9 +290,9 @@ const UnifiedChatbot = ({
       try {
         let apiEndpoint;
         if (chatbotConfig.id === 0) {
-          apiEndpoint = `https://mba.ptit.edu.vn/mba_mini/tonghop/?time=${timestamp}&q=${encodeURIComponent(inputMessage)}`;
+          apiEndpoint = API_ENDPOINTS.MBA_RAG_TONGHOP(timestamp, inputMessage);
         } else {
-          apiEndpoint = `https://mba.ptit.edu.vn/auth_mini/mba/rag/?time=${username}&q=${encodeURIComponent(inputMessage)}&source=${chatbotConfig.source}&save=true`;
+          apiEndpoint = API_ENDPOINTS.RAG(username, inputMessage, chatbotConfig.source, true);
         }
         
         const token = localStorage.getItem('access_token');

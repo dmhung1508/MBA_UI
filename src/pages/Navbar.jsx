@@ -116,7 +116,7 @@ const Navbar = () => {
             {isLoggedIn && (
               <div className="hidden lg:flex items-center space-x-1 ml-6">
                 <a
-                  href="https://mba.ptit.edu.vn/mini/"
+                  href="/mini/"
                   className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                 >
                   <FaHome className="mr-1 text-sm" /> Trang chủ
@@ -301,7 +301,7 @@ const Navbar = () => {
                 <div className="space-y-2">
                   {/* Always show basic navigation */}
                   <a
-                    href="https://mba.ptit.edu.vn/mini/"
+                    href="/mini/"
                     className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                     onClick={() => setIsMenuOpen(false)}
                   >

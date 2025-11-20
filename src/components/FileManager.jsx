@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faFile, 
-  faFileAlt, 
-  faFilePdf, 
+import {
+  faFile,
+  faFileAlt,
+  faFilePdf,
   faFileWord,
   faDownload,
   faEye,
@@ -49,7 +50,7 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
         'accept': 'application/json'
       });
       
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/metadata`, {
+      const response = await fetch(API_ENDPOINTS.FILE_METADATA(source), {
         method: 'GET',
         headers: headers
       });
@@ -140,7 +141,7 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
           headers['Authorization'] = `Bearer ${token}`;
         }
         
-        const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
+        const response = await fetch(API_ENDPOINTS.FILE_VIEW(source, encodedFilename), {
           method: 'GET',
           headers: headers,
           signal: controller.signal
@@ -289,7 +290,7 @@ Có thể do:
       }
       
       const encodedFilename = encodeURIComponent(filename);
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/by-filename/${encodedFilename}?delete_original_file=true`, {
+      const response = await fetch(API_ENDPOINTS.FILE_DELETE_BY_FILENAME(source, encodedFilename), {
         method: 'DELETE',
         headers: headers
       });
@@ -337,7 +338,7 @@ Có thể do:
       }
       
       const encodedFilename = encodeURIComponent(filename);
-      const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/files/${source}/view/${encodedFilename}`, {
+      const response = await fetch(API_ENDPOINTS.FILE_VIEW(source, encodedFilename), {
         method: 'GET',
         headers: headers
       });
