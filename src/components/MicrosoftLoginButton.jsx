@@ -1,18 +1,9 @@
 import React from "react";
 
 const MicrosoftLoginButton = () => {
-  const CLIENT_ID = "7bf686f1-841b-46be-8495-d05ea42d0348";
-  const TENANT_ID = "1cdffff7-92cd-412a-9956-d8f698af523d"; // tenant GUID
-  const REDIRECT_URI = "http://localhost:8000/auth/callback1/";
+  const redirect_uri = "https://mini.dinhmanhhung.net/mini/access-auth"
 
-  const AUTH_URL = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/authorize`;
-  const SCOPES = ["openid", "profile", "email", "offline_access", "User.Read"];
-
-  const loginUrl =
-    `${AUTH_URL}?client_id=${CLIENT_ID}` +
-    `&response_type=code` +
-    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-    `&scope=${encodeURIComponent(SCOPES.join(" "))}`;
+  const loginUrl = `https://gwdu.ptit.edu.vn/sso/realms/ptit/protocol/openid-connect/auth?client_id=ptit-connect&response_type=code&redirect_uri=${redirect_uri}&scope=openid%20profile%20email&state=abc123xyz`
 
   return (
     <div className="mt-6">

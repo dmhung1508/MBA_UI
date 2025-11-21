@@ -4,41 +4,120 @@ import { useEffect, useState } from "react";
 const AuthSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const params = new URLSearchParams(location.search);
+  const code = params.get("code");
+  const redirect_uri = "https://mini.dinhmanhhung.net/mini/access-auth"
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const token = params.get("access_token");
-    const type = params.get("token_type");
-    const role = params.get("user_role");
+    const handleAuth = async () => {
+      if (!code) {
+        setLoading(false);
+        console.error("No code found in callback URL");
+        return;
+      }
 
-    const expirationTime = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
+      try {
+        const tokenResponse = await fetch(
+          "https://gwdu.ptit.edu.vn/sso/realms/ptit/protocol/openid-connect/token",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              grant_type: "authorization_code",
+              code: code,
+              redirect_uri: redirect_uri, 
+              client_id: "ptit-connect",
+            }),
+          }
+        );
 
-    if (token) {
-      // Lưu token vào localStorage
-      localStorage.setItem("access_token", token);
-      localStorage.setItem("token_type", type);
-      localStorage.setItem("user_role", role);
-      localStorage.setItem('token_expiration', expirationTime.toString());
+        if (!tokenResponse.ok) {
+          const errText = await tokenResponse.text();
+          console.error("Error fetching SSO token:", errText);
+          setLoading(false);
+          return;
+        }
 
-      // Xóa query param khỏi URL
-      window.history.replaceState({}, document.title, "/auth/success");
+        const ssoData = await tokenResponse.json();
+        const ssoAccessToken = ssoData.access_token;
 
-      // Chuyển hướng sau khi lưu xong
-      setTimeout(() => {
-        navigate("/mini/"); // chuyển sang /mini
-      }, 1000); // 1s để hiển thị loading
-    }
-  }, [location, navigate]);
+        if (!ssoAccessToken) {
+          console.error("No access_token returned from SSO", ssoData);
+          setLoading(false);
+          return;
+        }
+
+        const appTokenResponse = await fetch(
+          "http://localhost:8080/generate/access-token",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${ssoAccessToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({}), 
+          }
+        );
+
+        if (!appTokenResponse.ok) {
+          const errText = await appTokenResponse.text();
+          console.error("Error fetching app access token:", errText);
+          setLoading(false);
+          return;
+        }
+
+        const appTokenData = await appTokenResponse.json();
+        const { access_token, token_type, user_role } = appTokenData;
+
+        if (!access_token) {
+          console.error("No app access_token returned:", appTokenData);
+          setLoading(false);
+          return;
+        }
+
+        const expirationTime =
+          Date.now() + 365 * 24 * 60 * 60 * 1000; 
+        localStorage.setItem("access_token", access_token);
+        localStorage.setItem("token_type", token_type || "bearer");
+        localStorage.setItem("user_role", user_role || "USER");
+        localStorage.setItem("token_expiration", expirationTime.toString());
+        window.history.replaceState({}, document.title, "/auth/success");
+        setSuccessMessage("Đăng nhập thành công!");
+        setLoading(false);
+
+        setTimeout(() => {
+          navigate("/");
+        }, 800);
+      } catch (error) {
+        console.error("Unexpected error in auth flow:", error);
+        setLoading(false);
+      }
+    };
+
+    handleAuth();
+  }, [code, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex flex-col items-center justify-center">
       {loading && (
         <div className="flex flex-col items-center">
           <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div>
           <p className="text-gray-700 font-medium">Đang đăng nhập...</p>
         </div>
       )}
+
+      {!loading && successMessage && (
+        <p className="text-green-600 font-semibold mt-4">
+          {successMessage}
+        </p>
+      )}
+
       <style>
         {`
           .loader {
@@ -46,8 +125,8 @@ const AuthSuccess = () => {
             animation: spin 1s linear infinite;
           }
           @keyframes spin {
-            0% { transform: rotate(0deg);}
-            100% { transform: rotate(360deg);}
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
           }
         `}
       </style>

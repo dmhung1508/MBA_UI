@@ -138,7 +138,7 @@ function App() {
               </PrivateRoute>
             } 
           />
-          <Route path="/auth/success" element={<AuthSuccess />} />
+          <Route path="/access-auth" element={<AuthSuccess />} />
         </Routes>
         
         <ToastContainer
