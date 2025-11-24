@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { API_ENDPOINTS } from '../config/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faQuestionCircle,
@@ -138,7 +139,7 @@ const QuestionManager = () => {
 
   const fetchChatbots = async () => {
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch(API_ENDPOINTS.CHATBOTS);
       if (response.ok) {
         const data = await response.json();
         const chatbots = data.chatbots || [];
@@ -155,17 +156,17 @@ const QuestionManager = () => {
   const fetchTeacherTopics = async () => {
     try {
       // First get teacher's assigned topics
-      const teacherResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/teacher/my-topics', {
+      const teacherResponse = await fetch(API_ENDPOINTS.TEACHER_MY_TOPICS, {
         headers: getAuthHeaders()
       });
-      
+
       if (teacherResponse.ok) {
         const teacherData = await teacherResponse.json();
         const topics = teacherData.assigned_topics || [];
         setAssignedTopics(topics);
-        
+
         // Then get all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
         if (chatbotsResponse.ok) {
           const chatbotsData = await chatbotsResponse.json();
           const allChatbots = chatbotsData.chatbots || [];
@@ -190,11 +191,11 @@ const QuestionManager = () => {
 
   const fetchQuestions = async () => {
     if (!selectedTopic) return;
-    
+
     try {
       setLoading(true);
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/questions/${selectedTopic}?offset=${pagination.offset}&size=${pagination.size}`,
+        `${API_ENDPOINTS.ADMIN_QUESTIONS(selectedTopic)}?offset=${pagination.offset}&size=${pagination.size}`,
         { headers: getAuthHeaders() }
       );
       
@@ -219,12 +220,12 @@ const QuestionManager = () => {
 
   const searchQuestions = async () => {
     if (!searchParams.keyword.trim()) return;
-    
+
     try {
       setLoading(true);
-      
+
       // Build search URL with parameters
-      const searchUrl = new URL('https://mba.ptit.edu.vn/auth_mini/admin/search-questions');
+      const searchUrl = new URL(API_ENDPOINTS.ADMIN_SEARCH_QUESTIONS);
       searchUrl.searchParams.append('q', searchParams.keyword);
       searchUrl.searchParams.append('offset', searchPagination.offset.toString());
       searchUrl.searchParams.append('size', searchPagination.size.toString());
@@ -309,8 +310,8 @@ const QuestionManager = () => {
       if (!validateTopicAccess(selectedTopic)) {
         return;
       }
-      
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/admin/question', {
+
+      const response = await fetch(API_ENDPOINTS.ADMIN_QUESTION_CREATE, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -344,8 +345,8 @@ const QuestionManager = () => {
       if (!validateTopicAccess(selectedTopic)) {
         return;
       }
-      
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/admin/questions', {
+
+      const response = await fetch(API_ENDPOINTS.ADMIN_QUESTIONS_BULK, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -376,14 +377,14 @@ const QuestionManager = () => {
   const handleUpdateQuestion = async () => {
     try {
       const topicToUse = selectedQuestion.topic || selectedTopic;
-      
+
       // Check permission for teacher
       if (!validateTopicAccess(topicToUse)) {
         return;
       }
-      
+
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/questions/${topicToUse}/${selectedQuestion.index}`,
+        API_ENDPOINTS.ADMIN_QUESTION_BY_ID(topicToUse, selectedQuestion.index),
         {
           method: 'PUT',
           headers: getAuthHeaders(),
@@ -413,14 +414,14 @@ const QuestionManager = () => {
   const handleDeleteQuestion = async () => {
     try {
       const topicToUse = selectedQuestion.topic || selectedTopic;
-      
+
       // Check permission for teacher
       if (!validateTopicAccess(topicToUse)) {
         return;
       }
-      
+
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/questions/${topicToUse}/${selectedQuestion.index}`,
+        API_ENDPOINTS.ADMIN_QUESTION_BY_ID(topicToUse, selectedQuestion.index),
         {
           method: 'DELETE',
           headers: getAuthHeaders()
@@ -463,7 +464,7 @@ const QuestionManager = () => {
       formData.append('file', excelFile);
 
       const token = localStorage.getItem('access_token');
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/admin/questions/upload-excel', {
+      const response = await fetch(API_ENDPOINTS.ADMIN_QUESTIONS_UPLOAD_EXCEL, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

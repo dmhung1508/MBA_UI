@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { API_ENDPOINTS } from '../config/api';
 import { 
   faChalkboardTeacher,
   faBookOpen,
@@ -55,7 +56,7 @@ const TeacherDashboard = () => {
       setLoading(true);
       
       // Fetch teacher's assigned topics
-      const teacherResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/teacher/my-topics', {
+      const teacherResponse = await fetch(API_ENDPOINTS.TEACHER_MY_TOPICS, {
         headers: getAuthHeaders()
       });
       
@@ -66,7 +67,7 @@ const TeacherDashboard = () => {
       const teacherData = await teacherResponse.json();
       
       // Fetch all chatbots to get subject names
-      const chatbotsResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
       
       if (chatbotsResponse.ok) {
         const chatbotsData = await chatbotsResponse.json();

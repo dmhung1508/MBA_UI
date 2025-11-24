@@ -3,6 +3,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import { FaUser, FaLock, FaRobot, FaGraduationCap, FaUniversity, FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 
 const Login = () => {
     const [username, setUsername] = useState('');  // Changed from email to username
@@ -22,7 +23,7 @@ const Login = () => {
         formData.append('grant_type', 'password'); // Although not required in your backend, some OAuth2 implementations expect this
 
         try {
-            const response = await fetch('https://mba.ptit.edu.vn/auth_mini/token', { // Update with your backend URL
+            const response = await fetch(API_ENDPOINTS.TOKEN, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -161,12 +162,12 @@ const Login = () => {
                                         </div>
                                         <div className="inline-flex items-center bg-white/20 text-white px-4 py-2 rounded-full mb-4 font-medium">
                                             <FaUniversity className="mr-2" />
-                                            PTIT - Học viện CNTT&TT
+                                            PTIT - Học viện CNBCVT
                                         </div>
                                     </div>
                                     
                                     <h3 className="text-3xl font-bold mb-4">
-                                        Chào mừng đến với MBA Chatbot!
+                                        Chào mừng đến với <br/> MBA Chatbot!
                                     </h3>
                                     <p className="text-red-100 mb-6 leading-relaxed">
                                         Trợ lý AI thông minh dành riêng cho học viên MBA tại Học viện 

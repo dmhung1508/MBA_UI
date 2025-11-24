@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { API_ENDPOINTS } from '../config/api';
 import { 
   faUsers,
   faPlus, 
@@ -94,7 +95,7 @@ const UserManager = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/users', {
+      const response = await fetch(API_ENDPOINTS.ADMIN_USERS, {
         headers: getAuthHeaders()
       });
       
@@ -113,7 +114,7 @@ const UserManager = () => {
 
   const fetchChatbots = async () => {
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch(API_ENDPOINTS.CHATBOTS);
       if (response.ok) {
         const data = await response.json();
         setAvailableChatbots(data.chatbots || []);
@@ -148,7 +149,7 @@ const UserManager = () => {
   const handleUpdateRole = async () => {
     try {
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/users/${selectedUser.username}/role`,
+        API_ENDPOINTS.ADMIN_USER_ROLE(selectedUser.username),
         {
           method: 'PUT',
           headers: getAuthHeaders(),
@@ -172,7 +173,7 @@ const UserManager = () => {
   const handleAssignTopics = async () => {
     try {
       const response = await fetch(
-        `https://mba.ptit.edu.vn/auth_mini/admin/users/${selectedUser.username}/assign-topics`,
+        API_ENDPOINTS.ADMIN_USER_ASSIGN_TOPICS(selectedUser.username),
         {
           method: 'POST',
           headers: getAuthHeaders(),

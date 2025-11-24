@@ -6,6 +6,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import EditSourceModal from '../components/EditSourceModal';
 import SourceList from '../components/SourceList';
+import { API_ENDPOINTS } from '../config/api';
 
 
 
@@ -45,7 +46,7 @@ const EditPage = () => {
   const fetchTeacherTopics = async () => {
     try {
       setChatbotsLoading(true);
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/teacher/my-topics', {
+      const response = await fetch(API_ENDPOINTS.TEACHER_MY_TOPICS, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json'
@@ -59,7 +60,7 @@ const EditPage = () => {
         setAssignedTopics(topics);
         
         // Fetch all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
         const chatbotsData = await chatbotsResponse.json();
         
         if (chatbotsData.chatbots) {
@@ -82,7 +83,7 @@ const EditPage = () => {
   const fetchChatbots = async () => {
     try {
       setChatbotsLoading(true);
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+      const response = await fetch(API_ENDPOINTS.CHATBOTS);
       const data = await response.json();
       setChatbots(data.chatbots || []);
     } catch (err) {
@@ -160,7 +161,7 @@ const EditPage = () => {
           headers.append('Authorization', `Bearer ${token}`);
         }
         
-        const response = await fetch(`https://mba.ptit.edu.vn/auth_mini/mba/rag/?time=${timestamp}&q=${encodeURIComponent(inputMessage)}&source=${selectedChatbot.source}&save=false`, {
+        const response = await fetch(API_ENDPOINTS.RAG(timestamp, inputMessage, selectedChatbot.source, false), {
           method: "GET",
           headers: headers,
         });

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaSave, FaSpinner } from 'react-icons/fa';
+import { API_ENDPOINTS } from '../config/api';
 
 const EditSourceModal = ({
   isOpen,
@@ -22,7 +23,7 @@ const EditSourceModal = ({
 
     setIsUpdating(true);
     try {
-      const response = await fetch('https://mba.ptit.edu.vn/mba_mini/update-chroma', {
+      const response = await fetch(API_ENDPOINTS.MBA_UPDATE_CHROMA, {
         method: 'POST',
         headers: {
           'accept': 'application/json',

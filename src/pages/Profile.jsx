@@ -4,6 +4,7 @@ import axios from 'axios';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { FaUser, FaEnvelope, FaIdCard, FaRobot, FaGraduationCap, FaUniversity, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { API_ENDPOINTS } from '../config/api';
 
 const Profile = () => {
     const [userData, setUserData] = useState(null);
@@ -14,7 +15,7 @@ const Profile = () => {
         const fetchUserData = async () => {
             try {
                 const token = localStorage.getItem('access_token');
-                const response = await axios.get('https://mba.ptit.edu.vn/auth_mini/users/me', {
+                const response = await axios.get(API_ENDPOINTS.USERS_ME, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     },
@@ -196,7 +197,7 @@ const Profile = () => {
                                                     <FaRobot className="text-white text-sm" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium text-gray-900">AI Assistant</p>
+                                                    <p className="font-medium text-gray-900">Trợ lý     AI</p>
                                                     <p className="text-xs text-gray-600">Trợ lý thông minh 24/7</p>
                                                 </div>
                                             </div>

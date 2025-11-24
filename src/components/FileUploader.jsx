@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faUpload, 
-  faTimes, 
+import {
+  faUpload,
+  faTimes,
   faCloudUploadAlt,
   faFileAlt,
   faSpinner,
@@ -95,7 +96,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
       formData.append('file_id', source); // Sử dụng file_id thay vì source
       formData.append('files', selectedFile); // Sử dụng files thay vì file
 
-      const response = await fetch('https://mba.ptit.edu.vn/auth_mini/mba/upload', {
+      const response = await fetch(API_ENDPOINTS.FILE_UPLOAD, {
         method: 'POST',
         headers: headers,
         body: formData

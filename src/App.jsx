@@ -15,7 +15,6 @@ import QuestionManager from "./pages/QuestionManager";
 import UserManager from "./pages/UserManager";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import MessageManager from "./pages/MessageManager";
-import TestPage from "./pages/TestPage";
 import AdminLogs from "./pages/AdminLogs";
 // import FAQPage from "./pages/FAQPage"
 // import IssuePage from "./pages/IssuePage";
@@ -118,14 +117,6 @@ function App() {
             element={
               <PrivateRoute>
                 <MessageManager />
-              </PrivateRoute>
-            } 
-          />
-          <Route 
-            path="/test-file" 
-            element={
-              <PrivateRoute>
-                <TestPage />
               </PrivateRoute>
             } 
           />

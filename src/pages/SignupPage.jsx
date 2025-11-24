@@ -4,6 +4,7 @@ import Footer from './Footer';
 import { FaUser, FaLock, FaEnvelope, FaRobot, FaGraduationCap, FaUniversity, FaArrowRight } from 'react-icons/fa';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -40,15 +41,14 @@ const Signup = () => {
         password
       };
 
-      // Replace with your actual backend URL
-      const response = await axios.post('https://mba.ptit.edu.vn/auth_mini/register', payload, {
+      const response = await axios.post(API_ENDPOINTS.REGISTER, payload, {
         headers: {
           'Content-Type': 'application/json'
         },
       });
 
       setIsLoading(false);
-      setSuccessMessage('Banh đã đăng ký thành công! Vui lòng đăng nhập.');
+      setSuccessMessage('Bạn đã đăng ký thành công! Vui lòng đăng nhập.');
       // Optionally, redirect to login page after a delay
       setTimeout(() => {
         navigate('/login'); // Ensure you have a route for login
@@ -83,7 +83,7 @@ const Signup = () => {
                     </div>
                     <div className="inline-flex items-center bg-white/20 text-white px-4 py-2 rounded-full mb-4 font-medium">
                       <FaUniversity className="mr-2" />
-                      PTIT - Học viện CNTT&TT
+                      PTIT - Học viện CNBCVT
                     </div>
                   </div>
                   

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FaBars, FaChevronLeft, FaHome, FaComment } from "react-icons/fa";
+import { FaBars, FaChevronLeft, FaHome, FaComment, FaSearch } from "react-icons/fa";
 import { BsCircleFill } from "react-icons/bs";
 import UnifiedChatbot from "./UnifiedChatbot";
 import { ResizableBox } from 'react-resizable';
 import 'react-resizable/css/styles.css';
+import { API_ENDPOINTS } from '../config/api';
 
 const ChatUI = () => {
   const [chatbots, setChatbots] = useState([]);
@@ -15,6 +16,7 @@ const ChatUI = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedSources, setSelectedSources] = useState([]);
   const [currentView, setCurrentView] = useState("chat");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const speechSynthesis = window.speechSynthesis;
 
@@ -22,7 +24,7 @@ const ChatUI = () => {
   useEffect(() => {
     const fetchChatbots = async () => {
       try {
-        const response = await fetch('https://mba.ptit.edu.vn/auth_mini/chatbots');
+        const response = await fetch(API_ENDPOINTS.CHATBOTS);
         const data = await response.json();
         
         setChatbots(data.chatbots);
@@ -122,7 +124,7 @@ const ChatUI = () => {
   };
 
   const renderIntroduction = () => {
-    window.location.href = "https://mba.ptit.edu.vn/mini/";
+    window.location.href = "/mini/";
   };
 
   const handleSendMessage = (chatbotId, newMessage) => {
@@ -141,6 +143,11 @@ const ChatUI = () => {
     );
   }
 
+  // Filter chatbots based on search query
+  const filteredChatbots = chatbots.filter(chatbot =>
+    chatbot.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -151,7 +158,22 @@ const ChatUI = () => {
             <FaChevronLeft className="w-5 h-5" />
           </button>
         </div>
-        {chatbots.map((chatbot) => (
+
+        {/* Search Box */}
+        <div className="p-3 border-b border-gray-200">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Tìm kiếm chatbot..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          </div>
+        </div>
+
+        {filteredChatbots.map((chatbot) => (
           <div
             key={chatbot.id}
             className={`flex items-center p-4 hover:bg-gray-100 cursor-pointer ${currentChat.id === chatbot.id ? "bg-blue-50" : ""}`}
