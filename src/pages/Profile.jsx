@@ -33,7 +33,7 @@ const Profile = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('token_type');
         localStorage.removeItem('user_role');
-        navigate('/mini/login');
+        window.location.href = '/mini/login';
     };
 
     if (!userData) {
@@ -50,7 +50,7 @@ const Profile = () => {
     return (
         <div className="min-h-screen bg-white">
             <Navbar />
-            
+
             <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ paddingTop: '120px' }}>
                 <div className="max-w-4xl w-full">
                     <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">

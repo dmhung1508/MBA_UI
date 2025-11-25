@@ -4,7 +4,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { API_ENDPOINTS } from '../config/api';
-import { 
+import {
   faChalkboardTeacher,
   faBookOpen,
   faQuestionCircle,
@@ -14,7 +14,8 @@ import {
   faCheck,
   faExclamationTriangle,
   faEdit,
-  faComments
+  faComments,
+  faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 
 const TeacherDashboard = () => {
@@ -22,7 +23,7 @@ const TeacherDashboard = () => {
   const [chatbots, setChatbots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const navigate = useNavigate();
 
   const colors = {
@@ -54,26 +55,26 @@ const TeacherDashboard = () => {
   const fetchTeacherInfo = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch teacher's assigned topics
       const teacherResponse = await fetch(API_ENDPOINTS.TEACHER_MY_TOPICS, {
         headers: getAuthHeaders()
       });
-      
+
       if (!teacherResponse.ok) {
         throw new Error('Không thể tải thông tin teacher');
       }
-      
+
       const teacherData = await teacherResponse.json();
-      
+
       // Fetch all chatbots to get subject names
       const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
-      
+
       if (chatbotsResponse.ok) {
         const chatbotsData = await chatbotsResponse.json();
         const allChatbots = chatbotsData.chatbots || [];
         setChatbots(allChatbots);
-        
+
         // Map assigned topics to include subject names
         const assignedTopics = teacherData.assigned_topics || [];
         const enrichedTopics = assignedTopics.map(topicCode => {
@@ -83,7 +84,7 @@ const TeacherDashboard = () => {
             name: chatbot ? chatbot.name : topicCode
           };
         });
-        
+
         setTeacherInfo({
           ...teacherData,
           enriched_topics: enrichedTopics
@@ -92,7 +93,7 @@ const TeacherDashboard = () => {
         // Fallback nếu không lấy được chatbots
         setTeacherInfo(teacherData);
       }
-      
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -115,7 +116,7 @@ const TeacherDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -126,20 +127,19 @@ const TeacherDashboard = () => {
                 Bảng Điều Khiển Giảng Viên
               </h1>
               <p className="text-gray-600">
-                Chào mừng {teacherInfo?.user}! 
-                {teacherInfo?.role === 'admin' ? ' (Admin có full access)' : ' Quản lý môn học được assign cho bạn'}
+                Chào mừng {teacherInfo?.name || teacherInfo?.user}!
+                {teacherInfo?.role === 'admin' ? ' (Admin có full access)' : ' Quản lý môn học được giao cho bạn'}
               </p>
             </div>
-            <div className="text-right">
+            {/* <div className="text-right">
               <div className="text-sm text-gray-500">Access Level</div>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                teacherInfo?.access_level === 'full_access' 
-                  ? 'bg-red-100 text-red-800' 
-                  : 'bg-yellow-100 text-yellow-800'
-              }`}>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${teacherInfo?.access_level === 'full_access'
+                ? 'bg-red-100 text-red-800'
+                : 'bg-yellow-100 text-yellow-800'
+                }`}>
                 {teacherInfo?.access_level === 'full_access' ? 'Full Access' : 'Restricted'}
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -184,6 +184,97 @@ const TeacherDashboard = () => {
           </div>
         </div>
 
+        {/* Quick Actions */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <FontAwesomeIcon icon={faStar} className="mr-2" />
+            Hành Động Nhanh
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a
+              href="/mini/questions"
+              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-blue-300"
+            >
+              <div className="text-center">
+                <FontAwesomeIcon icon={faQuestionCircle} className="text-2xl text-blue-600 mb-2" />
+                <h4 className="font-medium text-gray-900">Quản lý Câu hỏi</h4>
+                <p className="text-sm text-gray-600">Tạo, sửa, xóa câu hỏi</p>
+              </div>
+            </a>
+
+            <a
+              href="/mini/sources"
+              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-green-300"
+            >
+              <div className="text-center">
+                <FontAwesomeIcon icon={faFileAlt} className="text-2xl text-green-600 mb-2" />
+                <h4 className="font-medium text-gray-900">Quản lý File</h4>
+                <p className="text-sm text-gray-600">Upload, tải file dữ liệu</p>
+              </div>
+            </a>
+
+            {/* <a
+              href="/mini/edit"
+              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-orange-300"
+            >
+              <div className="text-center">
+                <FontAwesomeIcon icon={faEdit} className="text-2xl text-orange-600 mb-2" />
+                <h4 className="font-medium text-gray-900">Chỉnh sửa nguồn</h4>
+                <p className="text-sm text-gray-600">Thử nghiệm, chỉnh sửa AI</p>
+              </div>
+            </a> */}
+
+            <a
+              href="/mini/messages"
+              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-purple-300"
+            >
+              <div className="text-center">
+                <FontAwesomeIcon icon={faComments} className="text-2xl text-purple-600 mb-2" />
+                <h4 className="font-medium text-gray-900">Quản lý Tin nhắn</h4>
+                <p className="text-sm text-gray-600">Xem tin nhắn người dùng</p>
+              </div>
+            </a>
+
+            <a
+              href="/mini/teacher/quiz-history"
+              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-indigo-300"
+            >
+              <div className="text-center">
+                <FontAwesomeIcon icon={faClipboardList} className="text-2xl text-indigo-600 mb-2" />
+                <h4 className="font-medium text-gray-900">Lịch Sử Làm Bài</h4>
+                <p className="text-sm text-gray-600">Xem lịch sử quiz học sinh</p>
+              </div>
+            </a>
+
+            {teacherInfo?.role === 'admin' && (
+              <>
+                <a
+                  href="/mini/admin"
+                  className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-purple-300"
+                >
+                  <div className="text-center">
+                    <FontAwesomeIcon icon={faChalkboardTeacher} className="text-2xl text-purple-600 mb-2" />
+                    <h4 className="font-medium text-gray-900">Quản lý Chatbot</h4>
+                    <p className="text-sm text-gray-600">Tạo, sửa chatbot</p>
+                  </div>
+                </a>
+
+                <a
+                  href="/mini/users"
+                  className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-red-300"
+                >
+                  <div className="text-center">
+                    <FontAwesomeIcon icon={faUserGraduate} className="text-2xl text-red-600 mb-2" />
+                    <h4 className="font-medium text-gray-900">Quản lý Người dùng</h4>
+                    <p className="text-sm text-gray-600">Phân quyền, giao môn học</p>
+                  </div>
+                </a>
+              </>
+            )}
+          </div>
+        </div>
+
         {/* Assigned Topics */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
           <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
@@ -194,14 +285,14 @@ const TeacherDashboard = () => {
           </div>
 
           <div className="p-6">
-            {(teacherInfo?.enriched_topics || teacherInfo?.assigned_topics) && 
-             (teacherInfo?.enriched_topics?.length > 0 || teacherInfo?.assigned_topics?.length > 0) ? (
+            {(teacherInfo?.enriched_topics || teacherInfo?.assigned_topics) &&
+              (teacherInfo?.enriched_topics?.length > 0 || teacherInfo?.assigned_topics?.length > 0) ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {(teacherInfo.enriched_topics || teacherInfo.assigned_topics || []).map((topic, index) => {
                   // Handle both enriched topics (with name/code) and simple topics (just string)
                   const topicName = typeof topic === 'object' ? topic.name : topic;
                   const topicCode = typeof topic === 'object' ? topic.code : topic;
-                  
+
                   return (
                     <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
                       <div className="flex items-center justify-between mb-3">
@@ -223,7 +314,7 @@ const TeacherDashboard = () => {
                           </a>
                         </div>
                       </div>
-                      
+
                       <div className="text-sm text-gray-600">
                         <div className="bg-gray-100 rounded px-2 py-1 font-mono text-xs">
                           {topicCode}
@@ -237,97 +328,19 @@ const TeacherDashboard = () => {
               <div className="text-center py-12 text-gray-500">
                 <FontAwesomeIcon icon={faExclamationTriangle} className="text-6xl mb-4 text-gray-300" />
                 <h3 className="text-xl font-medium mb-2">
-                  {teacherInfo?.role === 'admin' ? 'Không có môn học nào' : 'Chưa được assign môn học nào'}
+                  {teacherInfo?.role === 'admin' ? 'Không có môn học nào' : 'Chưa được giao môn học nào'}
                 </h3>
                 <p className="text-gray-400">
-                  {teacherInfo?.role === 'admin' 
-                    ? 'Hệ thống chưa có môn học nào được tạo' 
-                    : 'Liên hệ admin để được assign môn học để quản lý'}
+                  {teacherInfo?.role === 'admin'
+                    ? 'Hệ thống chưa có môn học nào được tạo'
+                    : 'Liên hệ admin để được giao môn học để quản lý'}
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <FontAwesomeIcon icon={faStar} className="mr-2" />
-            Quick Actions
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a
-              href="/mini/questions"
-              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-blue-300"
-            >
-              <div className="text-center">
-                <FontAwesomeIcon icon={faQuestionCircle} className="text-2xl text-blue-600 mb-2" />
-                <h4 className="font-medium text-gray-900">Quản lý Câu hỏi</h4>
-                <p className="text-sm text-gray-600">Tạo, sửa, xóa câu hỏi</p>
-              </div>
-            </a>
-            
-            <a
-              href="/mini/sources"
-              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-green-300"
-            >
-              <div className="text-center">
-                <FontAwesomeIcon icon={faFileAlt} className="text-2xl text-green-600 mb-2" />
-                <h4 className="font-medium text-gray-900">Quản lý File</h4>
-                <p className="text-sm text-gray-600">Upload, tải file dữ liệu</p>
-              </div>
-            </a>
 
-            <a
-              href="/mini/edit"
-              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-orange-300"
-            >
-              <div className="text-center">
-                <FontAwesomeIcon icon={faEdit} className="text-2xl text-orange-600 mb-2" />
-                <h4 className="font-medium text-gray-900">Chỉnh sửa nguồn</h4>
-                <p className="text-sm text-gray-600">Thử nghiệm, chỉnh sửa AI</p>
-              </div>
-            </a>
-            
-            <a
-              href="/mini/messages"
-              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-purple-300"
-            >
-              <div className="text-center">
-                <FontAwesomeIcon icon={faComments} className="text-2xl text-purple-600 mb-2" />
-                <h4 className="font-medium text-gray-900">Quản lý Tin nhắn</h4>
-                <p className="text-sm text-gray-600">Xem tin nhắn người dùng</p>
-              </div>
-            </a>
-
-            {teacherInfo?.role === 'admin' && (
-              <>
-                <a
-                  href="/mini/admin"
-                  className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-purple-300"
-                >
-                  <div className="text-center">
-                    <FontAwesomeIcon icon={faChalkboardTeacher} className="text-2xl text-purple-600 mb-2" />
-                    <h4 className="font-medium text-gray-900">Quản lý Chatbot</h4>
-                    <p className="text-sm text-gray-600">Tạo, sửa chatbot</p>
-                  </div>
-                </a>
-                
-                <a
-                  href="/mini/users"
-                  className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-red-300"
-                >
-                  <div className="text-center">
-                    <FontAwesomeIcon icon={faUserGraduate} className="text-2xl text-red-600 mb-2" />
-                    <h4 className="font-medium text-gray-900">Quản lý Người dùng</h4>
-                    <p className="text-sm text-gray-600">Phân quyền, assign môn học</p>
-                  </div>
-                </a>
-              </>
-            )}
-          </div>
-        </div>
       </div>
 
       <Footer />

@@ -58,13 +58,13 @@ const EditPage = () => {
         const topics = data.assigned_topics || [];
         console.log('Teacher assigned topics:', topics);
         setAssignedTopics(topics);
-        
+
         // Fetch all chatbots and filter by assigned topics
         const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
         const chatbotsData = await chatbotsResponse.json();
-        
+
         if (chatbotsData.chatbots) {
-          const filteredChatbots = chatbotsData.chatbots.filter(cb => 
+          const filteredChatbots = chatbotsData.chatbots.filter(cb =>
             topics.includes(cb.source)
           );
           console.log('Filtered chatbots for teacher:', filteredChatbots);
@@ -156,11 +156,11 @@ const EditPage = () => {
         const headers = new Headers({
           "ngrok-skip-browser-warning": "69420",
         });
-        
+
         if (token) {
           headers.append('Authorization', `Bearer ${token}`);
         }
-        
+
         const response = await fetch(API_ENDPOINTS.RAG(timestamp, inputMessage, selectedChatbot.source, false), {
           method: "GET",
           headers: headers,
@@ -238,7 +238,7 @@ const EditPage = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
-      
+
       <div className="flex h-screen pt-20" style={{ height: 'calc(100vh - 80px)' }}>
         {/* Sidebar - Chatbot Selection */}
         <div className={`${isSidebarOpen ? 'w-full md:w-1/4 lg:w-1/5' : 'w-0'} bg-white border-r border-gray-200 overflow-y-auto transition-all duration-300 ease-in-out absolute md:relative z-10 h-full`}>
@@ -255,7 +255,7 @@ const EditPage = () => {
               <FaTimes className="w-5 h-5" />
             </button>
           </div>
-          
+
           <div className="p-4">
             {chatbotsLoading ? (
               <div className="flex justify-center items-center py-8">
@@ -277,11 +277,10 @@ const EditPage = () => {
               chatbots.map((chatbot) => (
                 <div
                   key={chatbot.id}
-                  className={`flex items-center p-3 mb-2 rounded-lg cursor-pointer transition-colors ${
-                    selectedChatbot?.id === chatbot.id 
-                      ? "bg-red-50 border-2 border-red-200" 
+                  className={`flex items-center p-3 mb-2 rounded-lg cursor-pointer transition-colors ${selectedChatbot?.id === chatbot.id
+                      ? "bg-red-50 border-2 border-red-200"
                       : "hover:bg-gray-100"
-                  }`}
+                    }`}
                   onClick={() => handleChatbotSelect(chatbot)}
                 >
                   <img
@@ -347,11 +346,11 @@ const EditPage = () => {
                       <div className="flex justify-between items-center text-xs">
                         <p className={`${message.sender === "user" ? "text-red-200" : "text-gray-500"}`}>{message.timestamp}</p>
                       </div>
-                      
+
                       {/* Sources */}
                       {message.sources && message.sources.length > 0 && (
-                        <SourceList 
-                          sources={message.sources} 
+                        <SourceList
+                          sources={message.sources}
                           onEditSource={handleEditSource}
                         />
                       )}

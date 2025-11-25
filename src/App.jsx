@@ -14,122 +14,133 @@ import SourceManager from "./pages/SourceManager";
 import QuestionManager from "./pages/QuestionManager";
 import UserManager from "./pages/UserManager";
 import TeacherDashboard from "./pages/TeacherDashboard";
+import TeacherQuizHistory from "./pages/TeacherQuizHistory";
 import MessageManager from "./pages/MessageManager";
 import AdminLogs from "./pages/AdminLogs";
 // import FAQPage from "./pages/FAQPage"
 // import IssuePage from "./pages/IssuePage";
-import { BrowserRouter, Routes, Route, Link, Navigate  } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { ToastContainer } from 'react-toastify';
+import AuthSuccess from './components/AuthSuccess.jsx'
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
   const [currentPage, SetCurrentPage] = useState("Home");
   return (
     <BrowserRouter basename="/mini"> {/* Thêm basename vào đây */}
       <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/mini" 
+          <Route path="/mini"
             element={
               <PrivateRoute>
                 <ChatBot />
               </PrivateRoute>
-            } 
+            }
           />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route 
-            path="/account" 
+          <Route
+            path="/account"
             element={
               <PrivateRoute>
                 <Profile />
               </PrivateRoute>
-            } 
+            }
           />
-          <Route 
-            path="/quiz-history" 
+          <Route
+            path="/quiz-history"
             element={
               <PrivateRoute>
                 <QuizHistory />
               </PrivateRoute>
-            } 
+            }
           />
-          <Route 
-            path="/test" 
+          <Route
+            path="/test"
             element={
               <PrivateRoute>
                 <Test />
               </PrivateRoute>
-            } 
+            }
           />
-          <Route 
-            path="/edit" 
+          <Route
+            path="/edit"
             element={
               <PrivateRoute>
                 <EditPage />
               </PrivateRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin" 
+          <Route
+            path="/admin"
             element={
               <PrivateRoute>
                 <AdminDashboard />
               </PrivateRoute>
-            } 
+            }
           />
-          <Route 
-            path="/sources" 
+          <Route
+            path="/sources"
             element={
               <PrivateRoute>
                 <SourceManager />
               </PrivateRoute>
-            } 
+            }
           />
-          <Route 
-            path="/questions" 
+          <Route
+            path="/questions"
             element={
               <PrivateRoute>
                 <QuestionManager />
               </PrivateRoute>
-            } 
+            }
           />
-          <Route 
-            path="/users" 
+          <Route
+            path="/users"
             element={
               <PrivateRoute>
                 <UserManager />
               </PrivateRoute>
-            } 
+            }
           />
-          <Route 
-            path="/teacher" 
+          <Route
+            path="/teacher"
             element={
               <PrivateRoute>
                 <TeacherDashboard />
               </PrivateRoute>
-            } 
+            }
           />
-          <Route 
-            path="/messages" 
+          <Route
+            path="/teacher/quiz-history"
+            element={
+              <PrivateRoute>
+                <TeacherQuizHistory />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/messages"
             element={
               <PrivateRoute>
                 <MessageManager />
               </PrivateRoute>
-            } 
+            }
           />
-          <Route 
-            path="/logs" 
+          <Route
+            path="/logs"
             element={
               <PrivateRoute>
                 <AdminLogs />
               </PrivateRoute>
-            } 
+            }
           />
+          <Route path="/access-auth" element={<AuthSuccess />} />
         </Routes>
-        
+
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -142,7 +153,7 @@ function App() {
           pauseOnHover
           theme="light"
         />
-      </div> 
+      </div>
     </BrowserRouter>
   );
 }

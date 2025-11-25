@@ -38,7 +38,7 @@ export const API_ENDPOINTS = {
   // Quiz
   RANDOM_QUESTIONS: (topic) => `${AUTH_MINI_BASE}/random-questions?topic=${topic}`,
   SUBMIT_QUIZ: `${AUTH_MINI_BASE}/submit_quiz`,
-  QUIZ_HISTORY: `${AUTH_MINI_BASE}/quiz-history`,
+  QUIZ_HISTORY: `${AUTH_MINI_BASE}/quiz_history`,
 
   // Profile
   PROFILE: `${AUTH_MINI_BASE}/profile`,
@@ -67,6 +67,7 @@ export const API_ENDPOINTS = {
 
   // Teacher
   TEACHER_MY_TOPICS: `${AUTH_MINI_BASE}/teacher/my-topics`,
+  TEACHER_QUIZ_HISTORY: `${AUTH_MINI_BASE}/teacher/quiz-history`,
 
   // ============================================
   // MBA_MINI SERVICE - RAG, Search, AI Features

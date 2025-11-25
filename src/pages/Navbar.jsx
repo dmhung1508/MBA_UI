@@ -36,7 +36,7 @@ const Navbar = () => {
     // Kiểm tra token có hợp lệ không
     const tokenValid = isTokenValid();
     const userRole = localStorage.getItem("user_role");
-    
+
     setIsLoggedIn(tokenValid);
     setIsAdmin(tokenValid && userRole === "admin");
     setIsTeacher(tokenValid && userRole === "teacher");
@@ -83,7 +83,7 @@ const Navbar = () => {
     setIsLoggedIn(false);
     setIsAdmin(false);
     setIsTeacher(false);
-    window.location.href = "/mini/"; 
+    window.location.href = "/mini/";
   };
 
   // Hàm xử lý khi người dùng nhấn vào Chat
@@ -99,19 +99,18 @@ const Navbar = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? "bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200" : "bg-white/90 backdrop-blur-sm"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200" : "bg-white/90 backdrop-blur-sm"
+          }`}
       >
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <a href="/mini/" className="text-2xl font-bold text-gray-900 flex items-center">
-              <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-3">
+          <div className="flex items-center flex-shrink-0">
+            <a href="/mini/" className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
+              <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
                 <FaRobot className="text-white text-lg" />
               </div>
-              MBA Chatbot
+              <span className="truncate">MBA Chatbot</span>
             </a>
-            
+
             {/* Desktop Menu - Only show if logged in */}
             {isLoggedIn && (
               <div className="hidden lg:flex items-center space-x-1 ml-6">
@@ -126,7 +125,7 @@ const Navbar = () => {
                   onClick={handleChatClick}
                   className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg cursor-pointer font-medium"
                 >
-                  <FaComments className="mr-1 text-sm" /> Chat
+                  <FaComments className="mr-1 text-sm" /> Nhắn tin
                 </a>
                 <a
                   href="/mini/quiz-history"
@@ -140,20 +139,20 @@ const Navbar = () => {
                       href="/mini/teacher"
                       className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                     >
-                      <FaChalkboardTeacher className="mr-1 text-sm" /> Teacher
+                      <FaChalkboardTeacher className="mr-1 text-sm" /> Bảng điều khiển giảng viên
                     </a>
-                    <a
+                    {/* <a
                       href="/mini/edit"
                       className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                     >
                       <FaEdit className="mr-1 text-sm" /> Chỉnh sửa
-                    </a>
-                    <a
+                    </a> */}
+                    {/* <a
                       href="/mini/messages"
                       className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                     >
                       <FaComments className="mr-1 text-sm" /> Tin nhắn
-                    </a>
+                    </a> */}
                   </>
                 )}
                 {isAdmin && (
@@ -263,10 +262,11 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-gray-700 hover:text-red-600 focus:outline-none p-2"
+            className="md:hidden text-gray-900 hover:text-red-600 focus:outline-none p-2 rounded-lg hover:bg-gray-100 transition-all"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
           >
-            {isMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+            {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
           </button>
         </nav>
       </header>
@@ -276,7 +276,7 @@ const Navbar = () => {
         <div className="fixed inset-0 z-40 md:hidden">
           {/* Backdrop */}
           <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)}></div>
-          
+
           {/* Menu Panel */}
           <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300">
             <div className="flex flex-col h-full">
@@ -308,7 +308,7 @@ const Navbar = () => {
                     <FaHome className="mr-3 text-sm" />
                     Trang chủ
                   </a>
-                  
+
                   {isLoggedIn ? (
                     <>
                       <a
@@ -320,9 +320,9 @@ const Navbar = () => {
                         className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200 cursor-pointer"
                       >
                         <FaComments className="mr-3 text-sm" />
-                        Chat
+                        Nhắn tin
                       </a>
-                      
+
                       <a
                         href="/mini/quiz-history"
                         className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
@@ -340,9 +340,9 @@ const Navbar = () => {
                             onClick={() => setIsMenuOpen(false)}
                           >
                             <FaChalkboardTeacher className="mr-3 text-sm" />
-                            Teacher Dashboard
+                            Bảng điều khiển giảng viên
                           </a>
-                          <a
+                          {/* <a
                             href="/mini/edit"
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
@@ -357,7 +357,7 @@ const Navbar = () => {
                           >
                             <FaComments className="mr-3 text-sm" />
                             Quản lý Tin nhắn
-                          </a>
+                          </a> */}
                         </>
                       )}
 

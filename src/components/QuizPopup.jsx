@@ -7,6 +7,7 @@ import Plyr from 'plyr';
 import 'plyr/dist/plyr.css';
 import { FaVolumeUp } from 'react-icons/fa';
 import explainData from '../assets/explain.json';
+import { API_ENDPOINTS } from '../config/api';
 const ExplanationPanel = ({ visible, onClose, currentIndex, wrongIndexes, questions, setCurrentIndex }) => {
   if (!visible || wrongIndexes.length === 0) return null;
   const realIndex = wrongIndexes[currentIndex];
@@ -72,7 +73,7 @@ const ExplanationPanel = ({ visible, onClose, currentIndex, wrongIndexes, questi
               <p className="text-gray-700">Đang kết nối với gia sư ...</p>
               <div className="text-center mb-2">{progress}%</div>
               <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="bg-blue-500 h-full transition-all duration-100 ease-linear"
                   style={{ width: `${progress}%` }}
                 ></div>
@@ -93,7 +94,7 @@ const ExplanationPanel = ({ visible, onClose, currentIndex, wrongIndexes, questi
               <p className="text-sm text-gray-700 mt-2">Đang kết nối với gia sư ...</p>
               <div className="text-center mb-2">{progress}%</div>
               <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="bg-blue-500 h-full transition-all duration-100 ease-linear"
                   style={{ width: `${progress}%` }}
                 ></div>
@@ -103,7 +104,7 @@ const ExplanationPanel = ({ visible, onClose, currentIndex, wrongIndexes, questi
             <div className="relative w-full h-[380px] overflow-hidden
                     flex items-center justify-center
                     shadow-md"
-                style={{ borderRadius: '50% / 60%' }}>       {/* khung oval */}
+              style={{ borderRadius: '50% / 60%' }}>       {/* khung oval */}
               <video
                 ref={videoRef}
                 key={realIndex}
@@ -178,7 +179,23 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
     fetch(apiUrl)
       .then(res => res.json())
       .then(data => {
-        if (data?.questions) setQuestions(data.questions);
+        if (data?.questions) {
+          // Transform API format to component format
+          const transformedQuestions = data.questions.map(q => {
+            // Convert choices array to answers array with A, B, C, D labels
+            const answers = q.choices.map((choice, index) => ({
+              answer: `${String.fromCharCode(65 + index)}. ${choice}`,
+              isCorrectAnswer: choice === q.correct_answer ? "true" : "false"
+            }));
+
+            return {
+              question: q.question,
+              answers: answers
+            };
+          });
+
+          setQuestions(transformedQuestions);
+        }
       })
       .catch(err => console.error('Lỗi tải câu hỏi:', err))
       .finally(() => setIsLoading(false));
@@ -215,7 +232,7 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
   const getScore = () => {
     return questions.reduce((score, q, index) => {
       const correct = q.answers.find(a => a.isCorrectAnswer === "true");
-      return answers[index] === correct.answer.charAt(0) ? score + 1 : score;
+      return (correct && answers[index] === correct.answer.charAt(0)) ? score + 1 : score;
     }, 0);
   };
 
@@ -237,6 +254,49 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
     }, []);
 
     setWrongIndexes(wrongs);
+
+    // Save quiz history to backend
+    const score = getScore();
+    const scorePercentage = (score / questions.length * 100).toFixed(2);
+    const historyData = {
+      timestamp: new Date().toISOString(),
+      total_questions: questions.length,
+      correct_answers: score,
+      score: parseFloat(scorePercentage),
+      questions: questions.map((q, index) => {
+        const correct = q.answers.find(a => a.isCorrectAnswer === "true");
+        const userAnswer = answers[index];
+        const userAnswerText = userAnswer ? q.answers.find(a => a.answer.charAt(0) === userAnswer)?.answer : null;
+
+        return {
+          question: q.question,
+          user_answer: userAnswerText || "",
+          correct_answer: correct?.answer || "",
+          is_correct: userAnswer === correct?.answer.charAt(0)
+        };
+      }),
+      is_intake_test: false
+    };
+
+    // Get token for authentication
+    const token = localStorage.getItem('access_token');
+
+    fetch(API_ENDPOINTS.SUBMIT_QUIZ, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(historyData)
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log('Quiz history saved:', data);
+      })
+      .catch(err => {
+        console.error('Error saving quiz history:', err);
+      });
+
     setTimeout(() => {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 300);
@@ -307,6 +367,11 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
           <p>Đang tải câu hỏi...</p>
         ) : (
           questions.map((q, idx) => {
+            // Safety check: ensure answers exists and is an array
+            if (!q.answers || !Array.isArray(q.answers)) {
+              return null;
+            }
+
             const correct = q.answers.find(a => a.isCorrectAnswer === "true");
             const userChoice = answers[idx];
             const correctLetter = correct?.answer.charAt(0);
@@ -382,7 +447,7 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
               >
                 Làm Lại
               </button>
-              {hasWrongAnswers() && (
+              {/* {hasWrongAnswers() && (
                 <button
                   onClick={() => {
                     setShowVideoPanel(true);
@@ -392,7 +457,7 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
                 >
                   📺 Xem Video Chữa Bài
                 </button>
-              )}
+              )} */}
             </>
           )}
         </div>

@@ -26,14 +26,14 @@ const ChatUI = () => {
       try {
         const response = await fetch(API_ENDPOINTS.CHATBOTS);
         const data = await response.json();
-        
+
         setChatbots(data.chatbots);
-        
+
         // Set current chat to first chatbot
         if (data.chatbots.length > 0) {
           setCurrentChat(data.chatbots[0]);
         }
-        
+
         // Initialize chat histories for all chatbots
         const initialHistories = {};
         data.chatbots.forEach(chatbot => {
@@ -48,7 +48,7 @@ const ChatUI = () => {
           ];
         });
         setChatHistories(initialHistories);
-        
+
       } catch (error) {
         console.error('Error fetching chatbots:', error);
         // Fallback to default chatbots if API fails
@@ -149,7 +149,7 @@ const ChatUI = () => {
   );
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-[100dvh] bg-gray-100">
       {/* Sidebar */}
       <div className={`${isSidebarOpen ? 'w-full md:w-1/4 lg:w-1/5' : 'w-0'} bg-white border-r border-gray-200 overflow-y-auto transition-all duration-300 ease-in-out absolute md:relative z-10 h-full`}>
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
@@ -228,13 +228,13 @@ const ChatUI = () => {
             >
               <FaHome className="w-6 h-6" />
             </button>
-            <button
+            {/* <button
               onClick={() => setCurrentView("chat")}
               className={`p-3 rounded-full text-lg ${currentView === "chat" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-600"} hover:bg-opacity-80 focus:outline-none transition-colors duration-200`}
               title="Chat"
             >
               <FaComment className="w-6 h-6" />
-            </button>
+            </button> */}
           </div>
         </div>
 

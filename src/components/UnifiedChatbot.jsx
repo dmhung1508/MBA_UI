@@ -35,7 +35,7 @@ const UnifiedChatbot = ({
 
   // Các tin nhắn loading thú vị
   const loadingMessages = [
-    { text: "LISA đang suy nghĩ...", emoji: "💭", subtitle: "Đang xử lý câu hỏi của bạn" },
+    { text: "Trợ lý AI MBA đang suy nghĩ...", emoji: "💭", subtitle: "Đang xử lý câu hỏi của bạn" },
     { text: "Đang tìm kiếm thông tin...", emoji: "🔍", subtitle: "Chờ chút nhé, sắp có kết quả rồi" },
     { text: "Đang phân tích dữ liệu...", emoji: "📊", subtitle: "Hệ thống đang làm việc chăm chỉ" },
     { text: "Chuẩn bị câu trả lời...", emoji: "✨", subtitle: "Sắp xong rồi, kiên nhẫn tí nha" },
@@ -58,7 +58,7 @@ const UnifiedChatbot = ({
   // Function để format lịch sử chat từ API thành format message
   const formatChatHistoryToMessages = (chatHistoryData) => {
     const formattedMessages = [];
-    
+
     chatHistoryData.forEach(chatItem => {
       // Thêm tin nhắn của user
       formattedMessages.push({
@@ -72,7 +72,7 @@ const UnifiedChatbot = ({
       // Xử lý response của bot
       let botText = "";
       let sources = [];
-      
+
       if (typeof chatItem.response === 'string') {
         botText = chatItem.response;
       } else if (chatItem.response && typeof chatItem.response === 'object') {
@@ -81,7 +81,7 @@ const UnifiedChatbot = ({
         } else {
           botText = JSON.stringify(chatItem.response);
         }
-        
+
         if (chatItem.response.sources && Array.isArray(chatItem.response.sources)) {
           sources = chatItem.response.sources;
         }
@@ -112,11 +112,11 @@ const UnifiedChatbot = ({
         "accept": "application/json",
         "ngrok-skip-browser-warning": "69420",
       };
-      
+
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await fetch(
         API_ENDPOINTS.CHAT_HISTORY(username, 50, 0, chatbotConfig.source),
         {
@@ -165,18 +165,18 @@ const UnifiedChatbot = ({
   const confirmClearHistory = async () => {
     setShowDeleteConfirm(false);
     setIsLoadingHistory(true);
-    
+
     try {
       const token = localStorage.getItem('access_token');
       const headers = {
         "accept": "application/json",
         "ngrok-skip-browser-warning": "69420",
       };
-      
+
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await fetch(
         API_ENDPOINTS.DELETE_CHAT_HISTORY(username, chatbotConfig.source),
         {
@@ -278,7 +278,7 @@ const UnifiedChatbot = ({
     if (inputMessage.trim() !== "" && !isLoading) {
       setIsLoading(true);
       setLoadingMessageIndex(0); // Reset loading message index
-      
+
       const newMessage = {
         id: uuidv4(),
         text: inputMessage,
@@ -294,16 +294,16 @@ const UnifiedChatbot = ({
         } else {
           apiEndpoint = API_ENDPOINTS.RAG(username, inputMessage, chatbotConfig.source, true);
         }
-        
+
         const token = localStorage.getItem('access_token');
         const headers = new Headers({
           "ngrok-skip-browser-warning": "69420",
         });
-        
+
         if (token && chatbotConfig.id !== 0) {
           headers.append('Authorization', `Bearer ${token}`);
         }
-        
+
         const response = await fetch(apiEndpoint, {
           method: "GET",
           headers: headers,
@@ -449,29 +449,29 @@ const UnifiedChatbot = ({
           </div>
         )}
         {!isLoadingHistory && messages.length === 0 && (
-  <div className="flex justify-center items-center min-h-screen py-12 bg-gray-50">
-    <div className="relative bg-white text-gray-700 rounded-xl shadow-sm p-6 text-center max-w-md transform transition-all hover:scale-102 duration-200">
-      {/* Icon nhẹ nhàng */}
-      <div className="text-4xl mb-3">🌟</div>
-      
-      {/* Tiêu đề thanh lịch */}
-      <h1 className="font-semibold text-2xl mb-2 text-gray-800">
-        Xin chào!
-      </h1>
-      
-      {/* Mô tả tối giản */}
-      <p className="text-sm text-gray-500 leading-relaxed">
-        Tôi là <span className="font-medium text-blue-600">LISA</span> - trợ lý AI MBA. 
-        Hỏi tôi bất cứ điều gì hoặc bắt đầu trò chuyện nhé!
-      </p>
-      
-      {/* Nút đơn giản */}
-      <button className="mt-5 px-5 py-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors duration-200">
+          <div className="flex justify-center items-center py-12 bg-gray-50">
+            <div className="relative bg-white text-gray-700 rounded-xl shadow-sm p-6 text-center max-w-md transform transition-all hover:scale-102 duration-200">
+              {/* Icon nhẹ nhàng */}
+              <div className="text-4xl mb-3">🌟</div>
+
+              {/* Tiêu đề thanh lịch */}
+              <h1 className="font-semibold text-2xl mb-2 text-gray-800">
+                Xin chào!
+              </h1>
+
+              {/* Mô tả tối giản */}
+              <p className="text-sm text-gray-500 leading-relaxed">
+                Tôi là trợ lý AI MBA.
+                Hỏi tôi bất cứ điều gì hoặc bắt đầu trò chuyện nhé!
+              </p>
+
+              {/* Nút đơn giản */}
+              {/* <button className="mt-5 px-5 py-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors duration-200">
         Khám phá ngay
-      </button>
-    </div>
-  </div>
-)}
+      </button> */}
+            </div>
+          </div>
+        )}
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-xs lg:max-w-md xl:max-w-lg ${message.sender === "user" ? "bg-blue-600 text-white" : "bg-white text-gray-800"} rounded-lg p-3 ${message.sender === "user" ? "rounded-br-none" : "rounded-bl-none"} shadow-md break-words ${message.historyId ? "opacity-90 border-l-4 border-gray-300" : ""}`}>
@@ -481,7 +481,7 @@ const UnifiedChatbot = ({
                   {message.historyId && <span className="text-xs opacity-70">📜 </span>}
                   {message.timestamp}
                 </p>
-                {message.sender === "bot" && (
+                {/* {message.sender === "bot" && (
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => handleToggleSpeaker(message.text)}
@@ -502,7 +502,7 @@ const UnifiedChatbot = ({
                       </button>
                     )}
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           </div>
@@ -513,8 +513,8 @@ const UnifiedChatbot = ({
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-1">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
@@ -528,7 +528,7 @@ const UnifiedChatbot = ({
                   </div>
                 </div>
               </div>
-              
+
               {/* Progress bar animation */}
               <div className="mt-3 w-full bg-gray-200 rounded-full h-1">
                 <div className="bg-blue-500 h-1 rounded-full animate-pulse" style={{
@@ -547,7 +547,7 @@ const UnifiedChatbot = ({
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
+            placeholder="Nhập tin nhắn của bạn…"
             className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             rows="1"
           />
@@ -565,12 +565,12 @@ const UnifiedChatbot = ({
           >
             <FaTrash className="w-4 h-4" />
           </button>
-          <button
+          {/* <button
             onClick={toggleVoiceInput}
             className={`p-2 rounded-full ${isVoiceInputActive ? "bg-red-500 text-white" : "bg-gray-200 text-gray-600"} hover:bg-opacity-80 focus:outline-none`}
           >
             <FaMicrophone className="w-4 h-4" />
-          </button>
+          </button> */}
           <button
             onClick={handleSendMessage}
             className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 focus:outline-none"
@@ -623,14 +623,12 @@ const UnifiedChatbot = ({
       {/* Toast notification */}
       {showToast && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out">
-          <div className={`px-6 py-3 bg-white shadow-xl rounded-full border ${
-            toastType === "success" 
-              ? "border-green-200 bg-gradient-to-r from-green-50 to-white" 
-              : "border-red-200 bg-gradient-to-r from-red-50 to-white"
-          } flex items-center space-x-3 min-w-fit`}>
-            <div className={`flex items-center justify-center w-6 h-6 rounded-full ${
-              toastType === "success" ? "bg-green-500" : "bg-red-500"
-            }`}>
+          <div className={`px-6 py-3 bg-white shadow-xl rounded-full border ${toastType === "success"
+            ? "border-green-200 bg-gradient-to-r from-green-50 to-white"
+            : "border-red-200 bg-gradient-to-r from-red-50 to-white"
+            } flex items-center space-x-3 min-w-fit`}>
+            <div className={`flex items-center justify-center w-6 h-6 rounded-full ${toastType === "success" ? "bg-green-500" : "bg-red-500"
+              }`}>
               {toastType === "success" ? (
                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -641,11 +639,11 @@ const UnifiedChatbot = ({
                 </svg>
               )}
             </div>
-            
+
             <span className="text-sm font-medium text-gray-800 whitespace-nowrap">
               {toastMessage}
             </span>
-            
+
             <button
               onClick={() => setShowToast(false)}
               className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors duration-200 ml-2"

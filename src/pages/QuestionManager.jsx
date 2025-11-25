@@ -4,12 +4,14 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import { API_ENDPOINTS } from '../config/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {
   faQuestionCircle,
-  faPlus, 
-  faEdit, 
-  faTrash, 
-  faSave, 
+  faPlus,
+  faEdit,
+  faTrash,
+  faSave,
   faTimes,
   faExclamationTriangle,
   faUpload,
@@ -28,11 +30,11 @@ const QuestionManager = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   // Teacher permission states
   const [userRole, setUserRole] = useState('');
   const [assignedTopics, setAssignedTopics] = useState([]);
-  
+
   // Search states
   const [searchMode, setSearchMode] = useState(false);
   const [searchParams, setSearchParams] = useState({
@@ -48,12 +50,12 @@ const QuestionManager = () => {
     total: 0,
     has_more: false
   });
-  
+
   // Modal states
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create'); // 'create', 'edit', 'delete', 'bulk-create', 'excel-upload'
   const [selectedQuestion, setSelectedQuestion] = useState(null);
-  
+
   // Pagination
   const [pagination, setPagination] = useState({
     offset: 0,
@@ -61,7 +63,7 @@ const QuestionManager = () => {
     total: 0,
     has_more: false
   });
-  
+
   // Form data for single question
   const [questionForm, setQuestionForm] = useState({
     question_text: '',
@@ -72,7 +74,7 @@ const QuestionManager = () => {
       { text: '', is_correct: false }
     ]
   });
-  
+
   // Form data for bulk questions
   const [bulkQuestions, setBulkQuestions] = useState([
     {
@@ -85,10 +87,10 @@ const QuestionManager = () => {
       ]
     }
   ]);
-  
+
   // Excel upload
   const [excelFile, setExcelFile] = useState(null);
-  
+
   const navigate = useNavigate();
 
   const colors = {
@@ -107,7 +109,7 @@ const QuestionManager = () => {
       return;
     }
     setUserRole(role);
-    
+
     if (role === 'teacher') {
       fetchTeacherTopics();
     } else {
@@ -170,12 +172,12 @@ const QuestionManager = () => {
         if (chatbotsResponse.ok) {
           const chatbotsData = await chatbotsResponse.json();
           const allChatbots = chatbotsData.chatbots || [];
-          
+
           // Filter chatbots to only show assigned topics
-          const filteredChatbots = allChatbots.filter(chatbot => 
+          const filteredChatbots = allChatbots.filter(chatbot =>
             topics.includes(chatbot.source)
           );
-          
+
           setAvailableChatbots(filteredChatbots);
           if (filteredChatbots.length > 0) {
             setSelectedTopic(filteredChatbots[0].source);
@@ -198,7 +200,7 @@ const QuestionManager = () => {
         `${API_ENDPOINTS.ADMIN_QUESTIONS(selectedTopic)}?offset=${pagination.offset}&size=${pagination.size}`,
         { headers: getAuthHeaders() }
       );
-      
+
       if (response.ok) {
         const data = await response.json();
         setQuestions(data.questions || []);
@@ -229,16 +231,16 @@ const QuestionManager = () => {
       searchUrl.searchParams.append('q', searchParams.keyword);
       searchUrl.searchParams.append('offset', searchPagination.offset.toString());
       searchUrl.searchParams.append('size', searchPagination.size.toString());
-      
+
       if (searchParams.topic) {
         searchUrl.searchParams.append('topic', searchParams.topic);
       }
       if (searchParams.hasChoices) {
         searchUrl.searchParams.append('has_choices', searchParams.hasChoices);
       }
-      
+
       const response = await fetch(searchUrl.toString(), { headers: getAuthHeaders() });
-      
+
       if (response.ok) {
         const data = await response.json();
         setSearchResults(data.questions || []);
@@ -266,7 +268,7 @@ const QuestionManager = () => {
       setError('Vui lòng nhập từ khóa tìm kiếm');
       return;
     }
-    
+
     setSearchMode(true);
     setSearchPagination(prev => ({ ...prev, offset: 0 }));
     await searchQuestions();
@@ -278,7 +280,7 @@ const QuestionManager = () => {
     setSearchResults([]);
     setSearchStats(null);
     setSearchPagination({ offset: 0, size: 10, total: 0, has_more: false });
-    
+
     // Reload regular questions if topic is selected
     if (selectedTopic) {
       fetchQuestions();
@@ -325,8 +327,8 @@ const QuestionManager = () => {
         throw new Error(errorData.detail || 'Không thể tạo câu hỏi');
       }
 
-      setSuccess('Câu hỏi đã được tạo thành công!');
-      
+      toast.success('✅ Câu hỏi đã được tạo thành công!', { position: 'top-right' });
+
       // Refresh appropriate data based on current mode
       if (searchMode && searchParams.keyword) {
         await searchQuestions();
@@ -360,8 +362,8 @@ const QuestionManager = () => {
         throw new Error(errorData.detail || 'Không thể tạo câu hỏi');
       }
 
-      setSuccess(`Đã tạo thành công ${bulkQuestions.length} câu hỏi!`);
-      
+      toast.success(`✅ Đã tạo thành công ${bulkQuestions.length} câu hỏi!`, { position: 'top-right' });
+
       // Refresh appropriate data based on current mode
       if (searchMode && searchParams.keyword) {
         await searchQuestions();
@@ -397,8 +399,8 @@ const QuestionManager = () => {
         throw new Error(errorData.detail || 'Không thể cập nhật câu hỏi');
       }
 
-      setSuccess('Câu hỏi đã được cập nhật thành công!');
-      
+      toast.success('✅ Câu hỏi đã được cập nhật thành công!', { position: 'top-right' });
+
       // Refresh appropriate data based on current mode
       if (searchMode && searchParams.keyword) {
         await searchQuestions();
@@ -433,13 +435,32 @@ const QuestionManager = () => {
         throw new Error(errorData.detail || 'Không thể xóa câu hỏi');
       }
 
-      setSuccess('Câu hỏi đã được xóa thành công!');
-      
-      // Refresh appropriate data based on current mode
+      toast.success('✅ Câu hỏi đã được xóa thành công!', { position: 'top-right' });
+
+      // Check if we need to go back to previous page
+      // If we're deleting the last item on current page and not on first page
       if (searchMode && searchParams.keyword) {
-        await searchQuestions();
+        // For search mode
+        if (searchResults.length === 1 && searchPagination.offset > 0) {
+          setSearchPagination(prev => ({
+            ...prev,
+            offset: Math.max(0, prev.offset - prev.size)
+          }));
+        } else {
+          await searchQuestions();
+        }
       } else if (selectedTopic) {
-        fetchQuestions();
+        // For browse mode
+        if (questions.length === 1 && pagination.offset > 0) {
+          // Go back to previous page
+          setPagination(prev => ({
+            ...prev,
+            offset: Math.max(0, prev.offset - prev.size)
+          }));
+        } else {
+          // Just refresh current page
+          fetchQuestions();
+        }
       }
       closeModal();
     } catch (err) {
@@ -478,8 +499,8 @@ const QuestionManager = () => {
       }
 
       const result = await response.json();
-      setSuccess(`Đã upload thành công ${result.created_count || 'nhiều'} câu hỏi từ Excel!`);
-      
+      toast.success(`✅ Đã upload thành công ${result.created_count || 'nhiều'} câu hỏi từ Excel!`, { position: 'top-right' });
+
       // Refresh appropriate data based on current mode
       if (searchMode && searchParams.keyword) {
         await searchQuestions();
@@ -528,25 +549,25 @@ const QuestionManager = () => {
 
   const openEditModal = (question, index) => {
     setModalMode('edit');
-    
+
     // For search mode, use the topic from the question itself
     // For browse mode, use the current selected topic
     const questionTopic = searchMode ? question.topic : selectedTopic;
     const questionIndex = searchMode ? (question.topic_index !== undefined ? question.topic_index : index) : index;
-    
+
     setSelectedQuestion({ ...question, index: questionIndex, topic: questionTopic });
-    
+
     // Convert question format for editing
     // Tìm index của đáp án đúng trong array choices
     const correctIndex = question.choices.findIndex(choice => choice === question.correct_answer);
     // Nếu không tìm thấy đáp án đúng, mặc định chọn đáp án đầu tiên
     const safeCorrectIndex = correctIndex >= 0 ? correctIndex : 0;
-    
+
     const choices = question.choices.map((choice, idx) => ({
       text: choice,
       is_correct: idx === safeCorrectIndex
     }));
-    
+
     setQuestionForm({
       question_text: question.question,
       choices: choices
@@ -556,12 +577,12 @@ const QuestionManager = () => {
 
   const openDeleteModal = (question, index) => {
     setModalMode('delete');
-    
+
     // For search mode, use the topic from the question itself
     // For browse mode, use the current selected topic
     const questionTopic = searchMode ? question.topic : selectedTopic;
     const questionIndex = searchMode ? (question.topic_index !== undefined ? question.topic_index : index) : index;
-    
+
     setSelectedQuestion({ ...question, index: questionIndex, topic: questionTopic });
     setShowModal(true);
   };
@@ -674,7 +695,8 @@ const QuestionManager = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
       <Navbar />
-      
+      <ToastContainer />
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -689,18 +711,11 @@ const QuestionManager = () => {
             {!searchMode && (
               <div className="flex space-x-3">
                 <button
-                  onClick={openCreateModal}
+                  onClick={openBulkCreateModal}
                   className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105"
                 >
                   <FontAwesomeIcon icon={faPlus} className="mr-2" />
                   Thêm câu hỏi
-                </button>
-                <button
-                  onClick={openBulkCreateModal}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105"
-                >
-                  <FontAwesomeIcon icon={faPlus} className="mr-2" />
-                  Thêm nhiều câu
                 </button>
                 <button
                   onClick={openExcelUploadModal}
@@ -718,22 +733,20 @@ const QuestionManager = () => {
             <div className="flex bg-gray-100 rounded-lg p-1">
               <button
                 onClick={clearSearch}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                  !searchMode
-                    ? 'bg-white text-red-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${!searchMode
+                  ? 'bg-white text-red-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+                  }`}
               >
                 <FontAwesomeIcon icon={faList} className="mr-2" />
                 Duyệt câu hỏi
               </button>
               <button
                 onClick={() => setSearchMode(true)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                  searchMode
-                    ? 'bg-white text-red-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${searchMode
+                  ? 'bg-white text-red-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+                  }`}
               >
                 <FontAwesomeIcon icon={faSearch} className="mr-2" />
                 Tìm kiếm
@@ -827,15 +840,15 @@ const QuestionManager = () => {
                   Xóa tìm kiếm
                 </button>
               </div>
-              
+
               {/* Search Stats */}
               {searchStats && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <div className="flex items-center text-sm text-blue-800">
                     <FontAwesomeIcon icon={faSearch} className="mr-2" />
                     <span>
-                      Tìm thấy <strong>{searchStats.matched_questions}</strong> câu hỏi 
-                      từ <strong>{searchStats.total_questions_found}</strong> câu hỏi 
+                      Tìm thấy <strong>{searchStats.matched_questions}</strong> câu hỏi
+                      từ <strong>{searchStats.total_questions_found}</strong> câu hỏi
                       trong <strong>{searchStats.topics_searched}</strong> topic
                     </span>
                   </div>
@@ -938,7 +951,7 @@ const QuestionManager = () => {
                 </tbody>
               </table>
             </div>
-            
+
             {/* Empty States */}
             {!searchMode && questions.length === 0 && !loading && (
               <div className="text-center py-12 text-gray-500">
@@ -956,46 +969,46 @@ const QuestionManager = () => {
             )}
 
             {/* Pagination */}
-            {((searchMode && searchPagination.total > searchPagination.size) || 
+            {((searchMode && searchPagination.total > searchPagination.size) ||
               (!searchMode && pagination.total > pagination.size)) && (
-              <div className="bg-gray-50 px-6 py-3 flex items-center justify-between">
-                <div className="text-sm text-gray-700">
-                  {searchMode ? (
-                    <>
-                      Hiển thị {searchPagination.offset + 1} - {Math.min(searchPagination.offset + searchPagination.size, searchPagination.total)} của {searchPagination.total} kết quả
-                    </>
-                  ) : (
-                    <>
-                      Hiển thị {pagination.offset + 1} - {Math.min(pagination.offset + pagination.size, pagination.total)} của {pagination.total} câu hỏi
-                    </>
-                  )}
+                <div className="bg-gray-50 px-6 py-3 flex items-center justify-between">
+                  <div className="text-sm text-gray-700">
+                    {searchMode ? (
+                      <>
+                        Hiển thị {searchPagination.offset + 1} - {Math.min(searchPagination.offset + searchPagination.size, searchPagination.total)} của {searchPagination.total} kết quả
+                      </>
+                    ) : (
+                      <>
+                        Hiển thị {pagination.offset + 1} - {Math.min(pagination.offset + pagination.size, pagination.total)} của {pagination.total} câu hỏi
+                      </>
+                    )}
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => searchMode ?
+                        handleSearchPageChange(Math.max(0, searchPagination.offset - searchPagination.size)) :
+                        handlePageChange(Math.max(0, pagination.offset - pagination.size))
+                      }
+                      disabled={searchMode ? searchPagination.offset === 0 : pagination.offset === 0}
+                      className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                    >
+                      <FontAwesomeIcon icon={faChevronLeft} className="mr-1" />
+                      Trước
+                    </button>
+                    <button
+                      onClick={() => searchMode ?
+                        handleSearchPageChange(searchPagination.offset + searchPagination.size) :
+                        handlePageChange(pagination.offset + pagination.size)
+                      }
+                      disabled={searchMode ? !searchPagination.has_more : !pagination.has_more}
+                      className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                    >
+                      Sau
+                      <FontAwesomeIcon icon={faChevronRight} className="ml-1" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => searchMode ? 
-                      handleSearchPageChange(Math.max(0, searchPagination.offset - searchPagination.size)) :
-                      handlePageChange(Math.max(0, pagination.offset - pagination.size))
-                    }
-                    disabled={searchMode ? searchPagination.offset === 0 : pagination.offset === 0}
-                    className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                  >
-                    <FontAwesomeIcon icon={faChevronLeft} className="mr-1" />
-                    Trước
-                  </button>
-                  <button
-                    onClick={() => searchMode ?
-                      handleSearchPageChange(searchPagination.offset + searchPagination.size) :
-                      handlePageChange(pagination.offset + pagination.size)
-                    }
-                    disabled={searchMode ? !searchPagination.has_more : !pagination.has_more}
-                    className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                  >
-                    Sau
-                    <FontAwesomeIcon icon={faChevronRight} className="ml-1" />
-                  </button>
-                </div>
-              </div>
-            )}
+              )}
           </div>
         ) : (
           /* Show topic selector instruction when not in search mode */
@@ -1035,9 +1048,9 @@ const QuestionManager = () => {
               {modalMode === 'delete' ? (
                 <div>
                   <div className="text-center mb-6">
-                    <FontAwesomeIcon 
-                      icon={faExclamationTriangle} 
-                      className="text-6xl text-red-500 mb-4" 
+                    <FontAwesomeIcon
+                      icon={faExclamationTriangle}
+                      className="text-6xl text-red-500 mb-4"
                     />
                     <p className="text-gray-700">
                       Bạn có chắc chắn muốn xóa câu hỏi này?
@@ -1088,7 +1101,7 @@ const QuestionManager = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex space-x-3 mt-6">
                     <button
                       type="button"
@@ -1125,7 +1138,7 @@ const QuestionManager = () => {
                                 </button>
                               )}
                             </div>
-                            
+
                             <div className="space-y-4">
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1144,7 +1157,7 @@ const QuestionManager = () => {
                                   required
                                 />
                               </div>
-                              
+
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {question.choices.map((choice, choiceIndex) => (
                                   <div key={choiceIndex}>
@@ -1177,7 +1190,7 @@ const QuestionManager = () => {
                             </div>
                           </div>
                         ))}
-                        
+
                         <button
                           type="button"
                           onClick={addBulkQuestion}
@@ -1202,7 +1215,7 @@ const QuestionManager = () => {
                             required
                           />
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {questionForm.choices.map((choice, index) => (
                             <div key={index}>
@@ -1235,7 +1248,7 @@ const QuestionManager = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex space-x-3 mt-6">
                     <button
                       type="button"
