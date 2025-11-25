@@ -4,6 +4,7 @@ import Footer from './Footer';
 import { FaUser, FaLock, FaRobot, FaGraduationCap, FaUniversity, FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { API_ENDPOINTS } from '../config/api';
+import MicrosoftLoginButton from '../components/MicrosoftLoginButton'
 
 const Login = () => {
     const [username, setUsername] = useState('');  // Changed from email to username
@@ -142,6 +143,8 @@ const Login = () => {
                                         <FaArrowRight className="ml-2" />
                                     </button>
                                 </form>
+
+                                <MicrosoftLoginButton />
 
                                 <div className="mt-6 text-center">
                                     <p className="text-gray-600">
