@@ -210,7 +210,7 @@ const TeacherDashboard = () => {
               <div className="text-center">
                 <FontAwesomeIcon icon={faFileAlt} className="text-2xl text-green-600 mb-2" />
                 <h4 className="font-medium text-gray-900">Quản lý File</h4>
-                <p className="text-sm text-gray-600">Upload, tải file dữ liệu</p>
+                <p className="text-sm text-gray-600">Upload dữ liệu lên chatbot</p>
               </div>
             </a>
 

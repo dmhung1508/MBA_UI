@@ -16,6 +16,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [uploadStep, setUploadStep] = useState('');
 
   const acceptedFileTypes = [
     'application/pdf',
@@ -83,15 +84,18 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
     }
 
     setUploading(true);
-    
+    setUploadStep('Đang chuẩn bị upload file...');
+
     try {
       const token = localStorage.getItem('access_token');
       const headers = {};
-      
+
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
+      setUploadStep('Đang upload file lên server...');
+
       const formData = new FormData();
       formData.append('file_id', source); // Sử dụng file_id thay vì source
       formData.append('files', selectedFile); // Sử dụng files thay vì file
@@ -107,19 +111,29 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
         throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
       }
 
+      setUploadStep('Đang xử lý file và trích xuất nội dung...');
+
       const result = await response.json();
       console.log('Upload successful:', result);
-      
+
+      setUploadStep('Đang embedding vào cơ sở dữ liệu...');
+
+      // Giả lập delay để user thấy step
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      setUploadStep('Hoàn thành! ✓');
+
       toast.success(`Upload thành công! ${result.message || 'File đã được tải lên'}`);
-      
+
       // Reset form
       setSelectedFile(null);
-      
+      setUploadStep('');
+
       // Callback để refresh danh sách file
       if (onUploadSuccess) {
         onUploadSuccess();
       }
-      
+
       // Đóng modal sau 1 giây
       setTimeout(() => {
         onClose();
@@ -127,6 +141,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
 
     } catch (error) {
       console.error('Upload error:', error);
+      setUploadStep('');
       toast.error(`Upload thất bại: ${error.message}`);
     } finally {
       setUploading(false);
@@ -149,7 +164,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={handleClose}></div>
-      
+
       <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -173,18 +188,17 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
           {/* File Drop Zone */}
           {!selectedFile && (
             <div
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                dragOver
-                  ? 'border-red-400 bg-red-50'
-                  : 'border-gray-300 hover:border-red-400 hover:bg-red-50'
-              }`}
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragOver
+                ? 'border-red-400 bg-red-50'
+                : 'border-gray-300 hover:border-red-400 hover:bg-red-50'
+                }`}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
             >
-              <FontAwesomeIcon 
-                icon={faCloudUploadAlt} 
-                className={`text-4xl mb-4 ${dragOver ? 'text-red-500' : 'text-gray-400'}`} 
+              <FontAwesomeIcon
+                icon={faCloudUploadAlt}
+                className={`text-4xl mb-4 ${dragOver ? 'text-red-500' : 'text-gray-400'}`}
               />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 Kéo thả file vào đây hoặc click để chọn
@@ -235,12 +249,19 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
 
               {uploading && (
                 <div className="mt-4">
-                  <div className="flex items-center justify-center text-blue-600">
+                  <div className="flex items-center justify-center text-blue-600 mb-2">
                     <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
-                    <span>Đang upload...</span>
+                    <span className="font-medium">{uploadStep}</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full animate-pulse transition-all" style={{ width: '60%' }}></div>
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500 text-center">
+                    {uploadStep.includes('chuẩn bị') && 'Bước 1/4'}
+                    {uploadStep.includes('upload file') && 'Bước 2/4'}
+                    {uploadStep.includes('xử lý') && 'Bước 3/4'}
+                    {uploadStep.includes('embedding') && 'Bước 4/4'}
+                    {uploadStep.includes('Hoàn thành') && 'Hoàn tất'}
                   </div>
                 </div>
               )}

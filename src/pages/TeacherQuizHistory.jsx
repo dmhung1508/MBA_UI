@@ -166,6 +166,14 @@ const TeacherQuizHistory = () => {
         }
     }, [currentPage, assignedTopics]);
 
+    // Auto-fetch when topic filter changes
+    useEffect(() => {
+        if (assignedTopics.length > 0) {
+            setCurrentPage(1); // Reset to page 1
+            fetchQuizHistory();
+        }
+    }, [selectedTopic]);
+
     const handleFilter = () => {
         setCurrentPage(1);
         fetchQuizHistory();
@@ -515,13 +523,13 @@ const TeacherQuizHistory = () => {
                                         </p>
                                     </div>
                                     <div className={`rounded-lg p-4 text-center ${selectedSubmission.score >= 80 ? 'bg-green-50' :
-                                            selectedSubmission.score >= 60 ? 'bg-yellow-50' : 'bg-red-50'
+                                        selectedSubmission.score >= 60 ? 'bg-yellow-50' : 'bg-red-50'
                                         }`}>
                                         <p className={`text-sm font-medium ${selectedSubmission.score >= 80 ? 'text-green-600' :
-                                                selectedSubmission.score >= 60 ? 'text-yellow-600' : 'text-red-600'
+                                            selectedSubmission.score >= 60 ? 'text-yellow-600' : 'text-red-600'
                                             }`}>Điểm Số</p>
                                         <p className={`text-2xl font-bold ${selectedSubmission.score >= 80 ? 'text-green-900' :
-                                                selectedSubmission.score >= 60 ? 'text-yellow-900' : 'text-red-900'
+                                            selectedSubmission.score >= 60 ? 'text-yellow-900' : 'text-red-900'
                                             }`}>
                                             {selectedSubmission.score.toFixed(1)}%
                                         </p>
@@ -534,8 +542,8 @@ const TeacherQuizHistory = () => {
                                         <div
                                             key={idx}
                                             className={`border-2 rounded-lg p-4 ${q.is_correct
-                                                    ? 'border-green-200 bg-green-50'
-                                                    : 'border-red-200 bg-red-50'
+                                                ? 'border-green-200 bg-green-50'
+                                                : 'border-red-200 bg-red-50'
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between mb-3">
@@ -543,8 +551,8 @@ const TeacherQuizHistory = () => {
                                                     Câu {idx + 1}: {q.question}
                                                 </h3>
                                                 <span className={`px-3 py-1 rounded-full text-sm font-semibold ${q.is_correct
-                                                        ? 'bg-green-200 text-green-800'
-                                                        : 'bg-red-200 text-red-800'
+                                                    ? 'bg-green-200 text-green-800'
+                                                    : 'bg-red-200 text-red-800'
                                                     }`}>
                                                     {q.is_correct ? '✓ Đúng' : '✗ Sai'}
                                                 </span>

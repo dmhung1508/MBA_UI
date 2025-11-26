@@ -2,22 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-  FaHistory,
-  FaCheckCircle,
-  FaQuestionCircle,
-  FaTasks,
-  FaChevronLeft,
-  FaChevronRight,
-  FaPlus,
-  FaMinus,
-  FaInbox,
-  FaSmile,
-  FaRobot,
-  FaGraduationCap,
-  FaUniversity,
-  FaTrophy,
-  FaChartLine,
-  FaClock
+    FaHistory,
+    FaCheckCircle,
+    FaQuestionCircle,
+    FaTasks,
+    FaChevronLeft,
+    FaChevronRight,
+    FaPlus,
+    FaMinus,
+    FaInbox,
+    FaSmile,
+    FaRobot,
+    FaGraduationCap,
+    FaUniversity,
+    FaTrophy,
+    FaChartLine,
+    FaClock
 } from 'react-icons/fa';
 import { API_ENDPOINTS } from '../config/api';
 import Navbar from './Navbar';
@@ -32,7 +32,7 @@ const QuizHistory = () => {
         totalCorrect: 0,
         totalQuestions: 0,
     });
-    
+
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -154,14 +154,14 @@ const QuizHistory = () => {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = quizHistory.slice(indexOfFirstItem, indexOfLastItem);
 
-        // Pagination component
+    // Pagination component
     const PaginationComponent = () => {
         const pageNumbers = [];
         const maxVisiblePages = 5;
-        
+
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-        
+
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
@@ -174,14 +174,13 @@ const QuizHistory = () => {
             <nav aria-label="Quiz history pagination" className="mt-6">
                 <div className="flex justify-center space-x-2">
                     {/* Nút Trước */}
-                    <button 
+                    <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className={`px-3 py-2 rounded-lg border transition-colors duration-200 ${
-                            currentPage === 1 
+                        className={`px-3 py-2 rounded-lg border transition-colors duration-200 ${currentPage === 1
                                 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
                                 : 'bg-white text-red-600 border-red-300 hover:bg-red-50'
-                        }`}
+                            }`}
                     >
                         <FaChevronLeft />
                     </button>
@@ -189,7 +188,7 @@ const QuizHistory = () => {
                     {/* Trang đầu và dấu chấm lửng */}
                     {startPage > 1 && (
                         <>
-                            <button 
+                            <button
                                 onClick={() => handlePageChange(1)}
                                 className="px-3 py-2 rounded-lg border bg-white text-red-600 border-red-300 hover:bg-red-50 transition-colors duration-200"
                             >
@@ -206,11 +205,10 @@ const QuizHistory = () => {
                         <button
                             key={number}
                             onClick={() => handlePageChange(number)}
-                            className={`px-3 py-2 rounded-lg border transition-colors duration-200 ${
-                                currentPage === number
+                            className={`px-3 py-2 rounded-lg border transition-colors duration-200 ${currentPage === number
                                     ? 'bg-red-600 text-white border-red-600'
                                     : 'bg-white text-red-600 border-red-300 hover:bg-red-50'
-                            }`}
+                                }`}
                         >
                             {number}
                         </button>
@@ -222,7 +220,7 @@ const QuizHistory = () => {
                             {endPage < totalPages - 1 && (
                                 <span className="px-3 py-2 text-gray-500">...</span>
                             )}
-                            <button 
+                            <button
                                 onClick={() => handlePageChange(totalPages)}
                                 className="px-3 py-2 rounded-lg border bg-white text-red-600 border-red-300 hover:bg-red-50 transition-colors duration-200"
                             >
@@ -232,14 +230,13 @@ const QuizHistory = () => {
                     )}
 
                     {/* Nút Tiếp */}
-                    <button 
+                    <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className={`px-3 py-2 rounded-lg border transition-colors duration-200 ${
-                            currentPage === totalPages 
+                        className={`px-3 py-2 rounded-lg border transition-colors duration-200 ${currentPage === totalPages
                                 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
                                 : 'bg-white text-red-600 border-red-300 hover:bg-red-50'
-                        }`}
+                            }`}
                     >
                         <FaChevronRight />
                     </button>
@@ -257,13 +254,13 @@ const QuizHistory = () => {
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center bg-red-100 text-red-800 px-4 py-2 rounded-full mb-4 font-medium">
                         <FaRobot className="mr-2" />
-                        Lịch sử MBA Quiz - PTIT
+                        Lịch sử Quiz - PTIT
                     </div>
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                        Lịch sử luyện tập MBA
+                        Lịch sử luyện tập
                     </h1>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Theo dõi tiến trình luyện tập và kết quả của bạn trong các bài test MBA
+                        Theo dõi tiến trình luyện tập và kết quả của bạn trong các bài test
                     </p>
                 </div>
 
@@ -326,7 +323,7 @@ const QuizHistory = () => {
                 {loading ? (
                     <div className="text-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Đang tải lịch sử MBA quiz...</p>
+                        <p className="text-gray-600">Đang tải lịch sử quiz...</p>
                     </div>
                 ) : (
                     <>
@@ -336,7 +333,7 @@ const QuizHistory = () => {
                                     const globalIndex = indexOfFirstItem + index;
                                     return (
                                         <div key={globalIndex} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                                            <div 
+                                            <div
                                                 className="p-6 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
                                                 onClick={() => toggleQuizDetails(globalIndex)}
                                             >
@@ -348,7 +345,7 @@ const QuizHistory = () => {
                                                             </div>
                                                             <div>
                                                                 <h3 className="text-lg font-semibold text-gray-900">
-                                                                    Bài test MBA #{globalIndex + 1}
+                                                                    Bài test #{globalIndex + 1}
                                                                 </h3>
                                                                 <div className="flex items-center text-sm text-gray-500">
                                                                     <FaClock className="mr-1" />
@@ -357,7 +354,7 @@ const QuizHistory = () => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    
+
                                                     <div className="flex items-center space-x-3">
                                                         <div className="text-right">
                                                             <div className="flex items-center space-x-2 mb-1">
@@ -380,7 +377,7 @@ const QuizHistory = () => {
                                                 <div className="border-t border-gray-200 bg-gray-50 p-6">
                                                     <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                                                         <FaChartLine className="mr-2 text-red-600" />
-                                                        Chi tiết câu hỏi MBA
+                                                        Chi tiết câu hỏi
                                                     </h4>
                                                     {Array.isArray(quiz.questions) && quiz.questions.length > 0 ? (
                                                         <div className="space-y-3">
@@ -393,13 +390,12 @@ const QuizHistory = () => {
                                                                         <span className="text-gray-600">
                                                                             <strong>Câu trả lời của bạn:</strong> {question.user_answer}
                                                                         </span>
-                                                                        <span className={`font-semibold ${
-                                                                            question.is_correct 
-                                                                                ? 'text-green-600' 
+                                                                        <span className={`font-semibold ${question.is_correct
+                                                                                ? 'text-green-600'
                                                                                 : 'text-red-600'
-                                                                        }`}>
-                                                                            {question.is_correct 
-                                                                                ? "✓ Đúng" 
+                                                                            }`}>
+                                                                            {question.is_correct
+                                                                                ? "✓ Đúng"
                                                                                 : `✗ Sai (Đáp án: ${question.correct_answer})`
                                                                             }
                                                                         </span>
@@ -423,27 +419,27 @@ const QuizHistory = () => {
                                         </div>
                                         <div className="inline-flex items-center bg-red-100 text-red-800 px-4 py-2 rounded-full mb-4 font-medium">
                                             <FaGraduationCap className="mr-2" />
-                                            MBA Quiz Center
+                                            Quiz Center
                                         </div>
                                     </div>
-                                    
+
                                     <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                                        Chưa có lịch sử luyện tập MBA
+                                        Chưa có lịch sử luyện tập
                                     </h3>
                                     <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                                        Bạn chưa có lịch sử làm bài kiểm tra MBA. Hãy bắt đầu luyện tập để cải thiện kiến thức quản trị kinh doanh của mình!
+                                        Bạn chưa có lịch sử làm bài kiểm tra. Hãy bắt đầu luyện tập để cải thiện kiến thức của mình!
                                     </p>
-                                    <button 
+                                    <button
                                         onClick={() => window.location.href = '/mini/'}
                                         className="inline-flex items-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
                                     >
                                         <FaPlus className="mr-2" />
-                                        Bắt đầu luyện tập MBA
+                                        Bắt đầu luyện tập
                                     </button>
                                 </div>
                             )}
                         </div>
-                        
+
                         {/* Pagination */}
                         {totalPages > 1 && <PaginationComponent />}
                     </>

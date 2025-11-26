@@ -18,7 +18,7 @@ const MicrosoftLoginButton = () => {
           alt="microsoft"
           className="w-5 h-5"
         />
-        Đăng nhập bằng Microsoft
+        Đăng nhập bằng Email PTIT
       </a>
     </div>
   );

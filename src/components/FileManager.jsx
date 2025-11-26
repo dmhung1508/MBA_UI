@@ -45,11 +45,11 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const headers = getAuthHeaders({
         'accept': 'application/json'
       });
-      
+
       const response = await fetch(API_ENDPOINTS.FILE_METADATA(source), {
         method: 'GET',
         headers: headers
@@ -63,7 +63,7 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
           setLoading(false);
           return;
         }
-        
+
         // Parse error message để kiểm tra lỗi thư mục không tồn tại
         try {
           const errorData = await response.json();
@@ -77,7 +77,7 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
         } catch (e) {
           // Ignore JSON parse errors
         }
-        
+
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -86,7 +86,7 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
       setFiles(data.metadata.files || []);
     } catch (err) {
       console.error('Error fetching metadata:', err);
-      
+
       // Không hiển thị lỗi, chỉ để trống danh sách file (hiển thị "Chưa có file nào")
       setMetadata({ files: [], total_files: 0 });
       setFiles([]);
@@ -101,16 +101,16 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
       setSelectedFile(filename);
       setShowViewer(true);
       setViewerContent(''); // Reset content
-      
+
       const encodedFilename = encodeURIComponent(filename);
       const fileExtension = filename.toLowerCase().split('.').pop();
-      
+
       // Thêm timeout để tránh lag
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout
-      
+
       let content = '';
-      
+
       // Kiểm tra loại file để xử lý phù hợp
       if (fileExtension === 'pdf') {
         // Đối với file PDF, hiển thị thông báo thay vì raw data
@@ -129,18 +129,18 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
 - Nguồn: ${source}
 
 💡 Lưu ý: File PDF đã được xử lý và đưa vào cơ sở dữ liệu để chatbot có thể trả lời câu hỏi dựa trên nội dung.`;
-        
+
       } else {
         // Đối với file text, docx, md... thử lấy nội dung
         const token = localStorage.getItem('access_token');
         const headers = {
           'accept': 'text/plain'
         };
-        
+
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        
+
         const response = await fetch(API_ENDPOINTS.FILE_VIEW(source, encodedFilename), {
           method: 'GET',
           headers: headers,
@@ -155,13 +155,13 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
 
         // Kiểm tra content-type để xử lý phù hợp
         const contentType = response.headers.get('content-type');
-        
+
         if (contentType && contentType.includes('application/json')) {
           const data = await response.json();
           content = JSON.stringify(data, null, 2);
         } else {
           content = await response.text();
-          
+
           // Kiểm tra nếu content là binary data (như PDF raw)
           if (content.startsWith('%PDF') || content.includes('endobj') || content.includes('/Filter')) {
             content = `📄 File: ${filename}
@@ -176,17 +176,17 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
           }
         }
       }
-      
+
       // Kiểm tra nếu content quá dài (> 100KB) thì cắt bớt
       if (content.length > 100000) {
         content = content.substring(0, 100000) + '\n\n... (Nội dung bị cắt để tránh lag. File quá dài để hiển thị đầy đủ)';
       }
-      
+
       setViewerContent(content);
-      
+
     } catch (err) {
       console.error('Error viewing file:', err);
-      
+
       if (err.name === 'AbortError') {
         setViewerContent('Timeout: File quá lớn hoặc mạng chậm. Vui lòng thử lại.');
         toast.error('Timeout khi tải file');
@@ -263,7 +263,7 @@ Có thể do:
     }
   };
 
-  const filteredFiles = files.filter(file => 
+  const filteredFiles = files.filter(file =>
     file.filename?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -284,11 +284,11 @@ Có thể do:
       const headers = {
         'accept': 'application/json'
       };
-      
+
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const encodedFilename = encodeURIComponent(filename);
       const response = await fetch(API_ENDPOINTS.FILE_DELETE_BY_FILENAME(source, encodedFilename), {
         method: 'DELETE',
@@ -301,13 +301,13 @@ Có thể do:
 
       const result = await response.json();
       console.log('Delete result:', result);
-      
+
       if (result.status === 'success') {
         toast.success(`Xóa thành công! ${result.message}`);
       } else {
         toast.success('Xóa file thành công!');
       }
-      
+
       fetchFileMetadata();
       setDeleteConfirm({ show: false, file: null });
     } catch (err) {
@@ -327,16 +327,16 @@ Có thể do:
   const downloadFile = async (filename) => {
     try {
       toast.info('Đang chuẩn bị tải xuống...');
-      
+
       const token = localStorage.getItem('access_token');
       const headers = {
         'accept': 'application/octet-stream'
       };
-      
+
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const encodedFilename = encodeURIComponent(filename);
       const response = await fetch(API_ENDPOINTS.FILE_VIEW(source, encodedFilename), {
         method: 'GET',
@@ -356,7 +356,7 @@ Có thể do:
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
+
       toast.success('Tải xuống thành công!');
     } catch (err) {
       console.error('Error downloading file:', err);
@@ -459,7 +459,7 @@ Có thể do:
             {files.length === 0 ? 'Chưa có file nào' : 'Không tìm thấy file phù hợp'}
           </h3>
           <p className="text-gray-400">
-            {files.length === 0 
+            {files.length === 0
               ? 'Upload file đầu tiên để bắt đầu sử dụng chatbot'
               : 'Thử thay đổi từ khóa tìm kiếm'
             }
@@ -493,8 +493,8 @@ Có thể do:
                   <tr key={index} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <FontAwesomeIcon 
-                          icon={getFileIcon(file.file_type)} 
+                        <FontAwesomeIcon
+                          icon={getFileIcon(file.file_type)}
                           className={`mr-3 text-lg ${getFileIconColor(file.file_type)}`}
                         />
                         <div>
@@ -508,11 +508,10 @@ Có thể do:
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        file.file_type === '.pdf' ? 'bg-red-100 text-red-800' :
-                        file.file_type === '.docx' ? 'bg-blue-100 text-blue-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${file.file_type === '.pdf' ? 'bg-red-100 text-red-800' :
+                          file.file_type === '.docx' ? 'bg-blue-100 text-blue-800' :
+                            'bg-green-100 text-green-800'
+                        }`}>
                         {file.file_type?.replace('.', '').toUpperCase() || 'N/A'}
                       </span>
                     </td>
@@ -524,16 +523,6 @@ Có thể do:
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        <button
-                          onClick={() => {
-                            setSelectedFileForViewing(file.filename);
-                            setShowContentViewer(true);
-                          }}
-                          className="text-blue-600 hover:text-blue-900 p-2 rounded hover:bg-blue-100 transition-colors"
-                          title="Xem file"
-                        >
-                          <FontAwesomeIcon icon={faEye} />
-                        </button>
                         <button
                           onClick={() => downloadFile(file.filename)}
                           className="text-green-600 hover:text-green-900 p-2 rounded hover:bg-green-100 transition-colors"
@@ -595,7 +584,7 @@ Có thể do:
       )}
 
       {/* File Uploader Modal */}
-      <FileUploader 
+      <FileUploader
         isOpen={showUploader}
         onClose={() => setShowUploader(false)}
         source={source}
@@ -603,7 +592,7 @@ Có thể do:
       />
 
       {/* Advanced File Content Viewer */}
-      <FileContentViewer 
+      <FileContentViewer
         isOpen={showContentViewer}
         filename={selectedFileForViewing}
         source={source}

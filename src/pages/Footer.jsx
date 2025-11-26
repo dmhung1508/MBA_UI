@@ -21,11 +21,11 @@ const Footer = () => {
               <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-3">
                 <FaRobot className="text-white text-lg" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">MBA Chatbot</h3>
+              <h3 className="text-lg font-bold text-gray-900">TA Chatbot</h3>
             </div>
             <p className="text-gray-600 leading-relaxed">
-              Trợ lý AI thông minh hỗ trợ học viên MBA của PTIT 24/7. 
-              Giải đáp thắc mắc về chương trình MBA, môn học và thông tin học vụ.
+              Trợ lý AI thông minh hỗ trợ sinh viên của PTIT 24/7.
+              Giải đáp thắc mắc về chương trình học, môn học và thông tin học vụ.
             </p>
           </div>
 
@@ -79,7 +79,7 @@ const Footer = () => {
           <div className="flex flex-col justify-center items-center space-y-4">
             <div className="text-center">
               <p className="text-gray-600 text-sm">
-                © 2025 MBA Chatbot - PTIT. Bảo lưu mọi quyền.
+                © 2025 TA Chatbot - PTIT. Bảo lưu mọi quyền.
               </p>
             </div>
             {/* <div className="flex items-center space-x-6 text-sm">

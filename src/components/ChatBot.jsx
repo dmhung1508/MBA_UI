@@ -59,7 +59,7 @@ const ChatUI = () => {
         setCurrentChat(defaultChatbots[0]);
         setChatHistories({
           0: [
-            { id: 1, text: "Rất vui được gặp bạn, mình là LISA, trợ lí cho môn học MBA. Mình có thể giúp gì cho bạn không?", sender: "bot", timestamp: new Date().toLocaleTimeString(), sources: [] }
+            { id: 1, text: "Rất vui được gặp bạn, mình là LISA, trợ lí AI. Mình có thể giúp gì cho bạn không?", sender: "bot", timestamp: new Date().toLocaleTimeString(), sources: [] }
           ]
         });
       }

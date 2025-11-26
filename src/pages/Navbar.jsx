@@ -108,7 +108,7 @@ const Navbar = () => {
               <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
                 <FaRobot className="text-white text-lg" />
               </div>
-              <span className="truncate">MBA Chatbot</span>
+              <span className="truncate">TA Chatbot</span>
             </a>
 
             {/* Desktop Menu - Only show if logged in */}
@@ -286,7 +286,7 @@ const Navbar = () => {
                   <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-3">
                     <FaRobot className="text-white text-lg" />
                   </div>
-                  <span className="text-lg font-bold text-gray-900">MBA Chatbot</span>
+                  <span className="text-lg font-bold text-gray-900">TA Chatbot</span>
                 </div>
                 <button
                   onClick={() => setIsMenuOpen(false)}

@@ -35,7 +35,7 @@ const UnifiedChatbot = ({
 
   // Các tin nhắn loading thú vị
   const loadingMessages = [
-    { text: "Trợ lý AI MBA đang suy nghĩ...", emoji: "💭", subtitle: "Đang xử lý câu hỏi của bạn" },
+    { text: "Trợ lý AI đang suy nghĩ...", emoji: "💭", subtitle: "Đang xử lý câu hỏi của bạn" },
     { text: "Đang tìm kiếm thông tin...", emoji: "🔍", subtitle: "Chờ chút nhé, sắp có kết quả rồi" },
     { text: "Đang phân tích dữ liệu...", emoji: "📊", subtitle: "Hệ thống đang làm việc chăm chỉ" },
     { text: "Chuẩn bị câu trả lời...", emoji: "✨", subtitle: "Sắp xong rồi, kiên nhẫn tí nha" },
@@ -461,7 +461,7 @@ const UnifiedChatbot = ({
 
               {/* Mô tả tối giản */}
               <p className="text-sm text-gray-500 leading-relaxed">
-                Tôi là trợ lý AI MBA.
+                Tôi là trợ lý AI.
                 Hỏi tôi bất cứ điều gì hoặc bắt đầu trò chuyện nhé!
               </p>
 
