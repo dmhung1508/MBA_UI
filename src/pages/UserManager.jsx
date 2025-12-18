@@ -267,10 +267,10 @@ const UserManager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
+    <div className="bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px'}}>
       <Navbar />
-      
-      <div className="container mx-auto px-4 py-8">
+
+      <div className="container mx-auto px-4 py-8 pb-16 flex-1">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
@@ -339,7 +339,7 @@ const UserManager = () => {
           if (roleUsers.length === 0 && filters.role && filters.role !== role) return null;
           
           return (
-            <div key={role} className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+            <div key={role} className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
               <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-800 flex items-center">
