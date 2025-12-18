@@ -64,7 +64,7 @@ const Profile = () => {
                                     <h1 className="text-2xl font-bold text-white">Thông tin tài khoản</h1>
                                     <div className="flex items-center space-x-2 text-red-100">
                                         <FaUniversity className="w-4 h-4" />
-                                        <span>MBA Chatbot - PTIT</span>
+                                        <span>TA Chatbot - PTIT</span>
                                     </div>
                                 </div>
                             </div>
@@ -83,7 +83,7 @@ const Profile = () => {
                                         Thông tin học viên MBA
                                     </h2>
                                     <p className="text-gray-600">
-                                        Quản lý thông tin cá nhân trong hệ thống MBA Chatbot
+                                        Quản lý thông tin cá nhân trong hệ thống TA Chatbot
                                     </p>
                                 </div>
 
