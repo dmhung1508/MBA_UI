@@ -693,11 +693,11 @@ const QuestionManager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
+    <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px' }}>
       <Navbar />
       <ToastContainer />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-1">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
@@ -1088,15 +1088,38 @@ const QuestionManager = () => {
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                         required
                       />
-                      <div className="mt-2 text-sm text-gray-600">
-                        <p className="font-medium">Format file Excel:</p>
-                        <ul className="list-disc list-inside mt-1 space-y-1">
-                          <li><code>question</code>: Câu hỏi</li>
-                          <li><code>choice_a</code>: Lựa chọn A (bắt buộc)</li>
-                          <li><code>choice_b</code>: Lựa chọn B (bắt buộc)</li>
-                          <li><code>choice_c</code>: Lựa chọn C (tùy chọn)</li>
-                          <li><code>choice_d</code>: Lựa chọn D (tùy chọn)</li>
-                          <li><code>correct_answer</code>: A, B, C hoặc D</li>
+                    </div>
+
+                    {/* Download Template Box */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-sm font-medium text-blue-900 mb-1">
+                            Tải file mẫu Excel
+                          </p>
+                          <p className="text-xs text-blue-700">
+                            Tải xuống file mẫu để điền câu hỏi theo đúng định dạng
+                          </p>
+                        </div>
+                        <a
+                          href="/quiz_template.xlsx"
+                          download="quiz_template.xlsx"
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 flex items-center whitespace-nowrap"
+                        >
+                          <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+                          Tải xuống
+                        </a>
+                      </div>
+
+                      <div className="text-sm text-blue-900 border-t border-blue-200 pt-3">
+                        <p className="font-medium mb-2">Format file Excel:</p>
+                        <ul className="list-disc list-inside space-y-1 text-xs">
+                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">question</code>: Câu hỏi</li>
+                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">choice_a</code>: Lựa chọn A (bắt buộc)</li>
+                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">choice_b</code>: Lựa chọn B (bắt buộc)</li>
+                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">choice_c</code>: Lựa chọn C (tùy chọn)</li>
+                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">choice_d</code>: Lựa chọn D (tùy chọn)</li>
+                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">correct_answer</code>: A, B, C hoặc D</li>
                         </ul>
                       </div>
                     </div>

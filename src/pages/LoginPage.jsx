@@ -73,13 +73,13 @@ const Login = () => {
                                 <div className="text-center mb-8">
                                     <div className="inline-flex items-center bg-red-100 text-red-800 px-4 py-2 rounded-full mb-4 font-medium">
                                         <FaRobot className="mr-2" />
-                                        MBA Chatbot - PTIT
+                                        TA Chatbot - PTIT
                                     </div>
                                     <h2 className="text-3xl font-bold text-gray-900 mb-2">
                                         Đăng nhập tài khoản
                                     </h2>
                                     <p className="text-gray-600">
-                                        Truy cập vào hệ thống MBA Chatbot của PTIT
+                                        Truy cập vào hệ thống TA Chatbot của PTIT
                                     </p>
                                 </div>
 
@@ -170,11 +170,11 @@ const Login = () => {
                                     </div>
                                     
                                     <h3 className="text-3xl font-bold mb-4">
-                                        Chào mừng đến với <br/> MBA Chatbot!
+                                        Chào mừng đến với <br/> TA Chatbot!
                                     </h3>
                                     <p className="text-red-100 mb-6 leading-relaxed">
-                                        Trợ lý AI thông minh dành riêng cho học viên MBA tại Học viện 
-                                        Công nghệ Bưu chính Viễn thông. Hỗ trợ học tập 24/7 với 
+                                        Trợ lý AI thông minh dành riêng cho học viên MBA tại Học viện
+                                        Công nghệ Bưu chính Viễn thông. Hỗ trợ học tập 24/7 với
                                         thông tin chính xác và cập nhật.
                                     </p>
                                     

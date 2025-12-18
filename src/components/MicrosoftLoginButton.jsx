@@ -11,7 +11,7 @@ const MicrosoftLoginButton = () => {
     <div className="mt-6">
       <a
         href={loginUrl}
-        className="flex items-center justify-center gap-3 w-full max-w-md mx-auto px-4 py-3 border border-red-600 text-red-600 font-medium rounded-lg transition-colors shadow-md"
+        className="flex items-center justify-center gap-3 w-full px-4 py-3 border border-red-600 text-red-600 font-medium rounded-lg transition-colors shadow-md"
       >
         <img
           src="https://img.icons8.com/color/48/microsoft.png"

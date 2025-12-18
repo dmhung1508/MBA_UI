@@ -91,7 +91,7 @@ const Signup = () => {
                     Gia nhập cộng đồng MBA PTIT!
                   </h3>
                   <p className="text-red-100 mb-6 leading-relaxed">
-                    Tạo tài khoản để truy cập MBA Chatbot và tận hưởng trải nghiệm 
+                    Tạo tài khoản để truy cập TA Chatbot và tận hưởng trải nghiệm
                     học tập thông minh với AI tư vấn chuyên biệt về quản trị kinh doanh.
                   </p>
                   
@@ -126,13 +126,13 @@ const Signup = () => {
                 <div className="text-center mb-8">
                   <div className="inline-flex items-center bg-red-100 text-red-800 px-4 py-2 rounded-full mb-4 font-medium">
                     <FaRobot className="mr-2" />
-                    MBA Chatbot - PTIT
+                    TA Chatbot - PTIT
                   </div>
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">
                     Tạo tài khoản mới
                   </h2>
                   <p className="text-gray-600">
-                    Đăng ký để truy cập hệ thống MBA Chatbot
+                    Đăng ký để truy cập hệ thống TA Chatbot
                   </p>
                 </div>
 
