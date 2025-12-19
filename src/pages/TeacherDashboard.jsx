@@ -2,21 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { API_ENDPOINTS } from '../config/api';
 import {
-  faChalkboardTeacher,
-  faBookOpen,
-  faQuestionCircle,
-  faFileAlt,
-  faUserGraduate,
-  faStar,
-  faCheck,
-  faExclamationTriangle,
-  faEdit,
-  faComments,
-  faClipboardList
-} from '@fortawesome/free-solid-svg-icons';
+  FaChalkboardTeacher,
+  FaBookOpen,
+  FaQuestionCircle,
+  FaFileAlt,
+  FaUserGraduate,
+  FaStar,
+  FaCheck,
+  FaExclamationTriangle,
+  FaEdit,
+  FaComments,
+  FaClipboardList
+} from 'react-icons/fa';
 
 const TeacherDashboard = () => {
   const [teacherInfo, setTeacherInfo] = useState(null);
@@ -122,8 +121,8 @@ const TeacherDashboard = () => {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                <FontAwesomeIcon icon={faChalkboardTeacher} className="mr-3" style={{ color: colors.primary }} />
+              <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                <FaChalkboardTeacher className="w-8 h-8 mr-3 inline-block align-middle" style={{ color: colors.primary }} />
                 Bảng Điều Khiển Giảng Viên
               </h1>
               <p className="text-gray-600">
@@ -158,7 +157,7 @@ const TeacherDashboard = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <FontAwesomeIcon icon={faBookOpen} className="text-blue-600 text-xl" />
+                <FaBookOpen className="w-6 h-6 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Môn Học Được Giao</p>
@@ -172,7 +171,7 @@ const TeacherDashboard = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-purple-100 mr-4">
-                <FontAwesomeIcon icon={faUserGraduate} className="text-purple-600 text-xl" />
+                <FaUserGraduate className="w-6 h-6 text-purple-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Vai trò</p>
@@ -187,7 +186,7 @@ const TeacherDashboard = () => {
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <FontAwesomeIcon icon={faStar} className="mr-2" />
+            <FaStar className="w-5 h-5 mr-2 inline-block align-middle" />
             Hành Động Nhanh
           </h3>
 
@@ -197,7 +196,7 @@ const TeacherDashboard = () => {
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-blue-300"
             >
               <div className="text-center">
-                <FontAwesomeIcon icon={faQuestionCircle} className="text-2xl text-blue-600 mb-2" />
+                <FaQuestionCircle className="w-8 h-8 text-blue-600 mb-2 mx-auto" />
                 <h4 className="font-medium text-gray-900">Quản lý Câu hỏi</h4>
                 <p className="text-sm text-gray-600">Tạo, sửa, xóa câu hỏi</p>
               </div>
@@ -208,7 +207,7 @@ const TeacherDashboard = () => {
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-green-300"
             >
               <div className="text-center">
-                <FontAwesomeIcon icon={faFileAlt} className="text-2xl text-green-600 mb-2" />
+                <FaFileAlt className="w-8 h-8 text-green-600 mb-2 mx-auto" />
                 <h4 className="font-medium text-gray-900">Quản lý File</h4>
                 <p className="text-sm text-gray-600">Upload dữ liệu lên chatbot</p>
               </div>
@@ -219,7 +218,7 @@ const TeacherDashboard = () => {
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-orange-300"
             >
               <div className="text-center">
-                <FontAwesomeIcon icon={faEdit} className="text-2xl text-orange-600 mb-2" />
+                <FaEdit className="text-2xl text-orange-600 mb-2" />
                 <h4 className="font-medium text-gray-900">Chỉnh sửa nguồn</h4>
                 <p className="text-sm text-gray-600">Thử nghiệm, chỉnh sửa AI</p>
               </div>
@@ -230,7 +229,7 @@ const TeacherDashboard = () => {
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-purple-300"
             >
               <div className="text-center">
-                <FontAwesomeIcon icon={faComments} className="text-2xl text-purple-600 mb-2" />
+                <FaComments className="w-8 h-8 text-purple-600 mb-2 mx-auto" />
                 <h4 className="font-medium text-gray-900">Quản lý Tin nhắn</h4>
                 <p className="text-sm text-gray-600">Xem tin nhắn người dùng</p>
               </div>
@@ -241,7 +240,7 @@ const TeacherDashboard = () => {
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-indigo-300"
             >
               <div className="text-center">
-                <FontAwesomeIcon icon={faClipboardList} className="text-2xl text-indigo-600 mb-2" />
+                <FaClipboardList className="w-8 h-8 text-indigo-600 mb-2 mx-auto" />
                 <h4 className="font-medium text-gray-900">Lịch Sử Làm Bài</h4>
                 <p className="text-sm text-gray-600">Xem lịch sử quiz học sinh</p>
               </div>
@@ -254,7 +253,7 @@ const TeacherDashboard = () => {
                   className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-purple-300"
                 >
                   <div className="text-center">
-                    <FontAwesomeIcon icon={faChalkboardTeacher} className="text-2xl text-purple-600 mb-2" />
+                    <FaChalkboardTeacher className="w-8 h-8 text-purple-600 mb-2 mx-auto" />
                     <h4 className="font-medium text-gray-900">Quản lý Chatbot</h4>
                     <p className="text-sm text-gray-600">Tạo, sửa chatbot</p>
                   </div>
@@ -265,7 +264,7 @@ const TeacherDashboard = () => {
                   className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-red-300"
                 >
                   <div className="text-center">
-                    <FontAwesomeIcon icon={faUserGraduate} className="text-2xl text-red-600 mb-2" />
+                    <FaUserGraduate className="w-8 h-8 text-red-600 mb-2 mx-auto" />
                     <h4 className="font-medium text-gray-900">Quản lý Người dùng</h4>
                     <p className="text-sm text-gray-600">Phân quyền, giao môn học</p>
                   </div>
@@ -279,7 +278,7 @@ const TeacherDashboard = () => {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
           <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-              <FontAwesomeIcon icon={faBookOpen} className="mr-2" />
+              <FaBookOpen className="w-5 h-5 mr-2 inline-block align-middle" />
               {teacherInfo?.role === 'admin' ? 'Tất Cả Môn Học' : 'Môn Học Được Giao Cho Bạn'}
             </h3>
           </div>
@@ -303,14 +302,14 @@ const TeacherDashboard = () => {
                             className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-100"
                             title="Quản lý câu hỏi"
                           >
-                            <FontAwesomeIcon icon={faQuestionCircle} />
+                            <FaQuestionCircle className="w-4 h-4" />
                           </a>
                           <a
                             href={`/mini/sources`}
                             className="text-green-600 hover:text-green-800 p-2 rounded hover:bg-green-100"
                             title="Quản lý file"
                           >
-                            <FontAwesomeIcon icon={faFileAlt} />
+                            <FaFileAlt className="w-4 h-4" />
                           </a>
                         </div>
                       </div>
@@ -326,7 +325,7 @@ const TeacherDashboard = () => {
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500">
-                <FontAwesomeIcon icon={faExclamationTriangle} className="text-6xl mb-4 text-gray-300" />
+                <FaExclamationTriangle className="w-24 h-24 mb-4 text-gray-300 mx-auto" />
                 <h3 className="text-xl font-medium mb-2">
                   {teacherInfo?.role === 'admin' ? 'Không có môn học nào' : 'Chưa được giao môn học nào'}
                 </h3>

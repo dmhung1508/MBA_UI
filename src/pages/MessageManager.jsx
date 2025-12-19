@@ -1,26 +1,109 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { API_ENDPOINTS } from '../config/api';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faComments,
-  faUsers, 
-  faEye, 
-  faCalendarAlt, 
-  faSearch, 
-  faTimes, 
-  faUser, 
-  faRobot, 
-  faChevronLeft, 
-  faChevronRight,
-  faFilter,
-  faEnvelope,
-  faClock,
-  faHashtag
-} from '@fortawesome/free-solid-svg-icons';
+import {
+  FaComments,
+  FaUsers,
+  FaEye,
+  FaCalendarAlt,
+  FaSearch,
+  FaTimes,
+  FaUser,
+  FaRobot,
+  FaChevronLeft,
+  FaChevronRight,
+  FaFilter,
+  FaEnvelope,
+  FaClock,
+  FaHashtag
+} from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
+
+// Memoized ChatMessage component for better performance
+const ChatMessage = memo(({ chat, formatTimestamp }) => {
+  return (
+    <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+      {/* User Message */}
+      <div className="flex items-start space-x-3 mb-4">
+        <div className="flex-shrink-0">
+          <div className="bg-blue-100 p-2 rounded-full">
+            <FaUser className="w-4 h-4 text-blue-600" />
+          </div>
+        </div>
+        <div className="flex-1">
+          <div className="bg-blue-50 rounded-lg p-3">
+            <p className="text-sm text-gray-900">{chat.message}</p>
+          </div>
+          <p className="text-xs text-gray-500 mt-1 flex items-center">
+            <FaClock className="w-3 h-3 mr-1 inline-block align-middle" />
+            {formatTimestamp(chat.timestamp)} • Session: {chat.session_id?.slice(0, 8)}...
+          </p>
+        </div>
+      </div>
+
+      {/* Bot Response */}
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0">
+          <div className="bg-green-100 p-2 rounded-full">
+            <FaRobot className="w-4 h-4 text-green-600" />
+          </div>
+        </div>
+        <div className="flex-1">
+          <div className="bg-gray-50 rounded-lg p-3">
+            {typeof chat.response === 'string' ? (
+              <ReactMarkdown className="text-sm text-gray-900 prose prose-sm max-w-none">
+                {chat.response}
+              </ReactMarkdown>
+            ) : chat.response?.response ? (
+              <ReactMarkdown className="text-sm text-gray-900 prose prose-sm max-w-none">
+                {chat.response.response}
+              </ReactMarkdown>
+            ) : (
+              <p className="text-sm text-gray-500 italic">Không có phản hồi</p>
+            )}
+
+            {/* Sources */}
+            {chat.response?.sources && chat.response.sources.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <p className="text-xs font-medium text-gray-700 mb-2 flex items-center">
+                  <FaSearch className="w-3 h-3 mr-1 inline-block align-middle" />
+                  Nguồn tham khảo ({chat.response.sources.length}):
+                </p>
+                <div className="space-y-1">
+                  {chat.response.sources.slice(0, 3).map((source, sourceIndex) => (
+                    <div key={sourceIndex} className="text-xs text-gray-600 bg-gray-100 rounded p-2">
+                      <p className="font-medium flex items-center">
+                        <FaEnvelope className="w-3 h-3 mr-1 inline-block align-middle" />
+                        {source.file_name}
+                      </p>
+                      <p className="truncate">{source.text?.slice(0, 100)}...</p>
+                      {source.score && (
+                        <p className="text-gray-500">Điểm: {(source.score * 100).toFixed(1)}%</p>
+                      )}
+                    </div>
+                  ))}
+                  {chat.response.sources.length > 3 && (
+                    <p className="text-xs text-gray-500 italic">
+                      ... và {chat.response.sources.length - 3} nguồn khác
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 mt-1 flex items-center">
+            <FaRobot className="w-3 h-3 mr-1 inline-block align-middle" />
+            LISA AI • {formatTimestamp(chat.created_at || chat.timestamp)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+ChatMessage.displayName = 'ChatMessage';
 
 const MessageManager = () => {
   const [availableChatbots, setAvailableChatbots] = useState([]);
@@ -56,8 +139,18 @@ const MessageManager = () => {
   const [userRole, setUserRole] = useState('');
   const [assignedTopics, setAssignedTopics] = useState([]);
 
-  // Search state
+  // Search state with debounce
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  // Debounce search term to prevent filtering on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // Initialize user role and fetch data
   useEffect(() => {
@@ -235,15 +328,17 @@ const MessageManager = () => {
     setChatPage(1);
   };
 
-  // Filter users based on search term
-  const filteredUsers = users.filter(user => 
-    user.user_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.first_message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.last_message.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter users based on debounced search term (memoized to prevent filtering on every render)
+  const filteredUsers = useMemo(() =>
+    users.filter(user =>
+      user.user_id.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      user.first_message.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      user.last_message.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    ), [users, debouncedSearchTerm]
   );
 
-  // Format timestamp
-  const formatTimestamp = (timestamp) => {
+  // Format timestamp (memoized to prevent recreation on every render)
+  const formatTimestamp = useCallback((timestamp) => {
     return new Date(timestamp).toLocaleString('vi-VN', {
       year: 'numeric',
       month: '2-digit',
@@ -252,7 +347,7 @@ const MessageManager = () => {
       minute: '2-digit',
       second: '2-digit'
     });
-  };
+  }, []);
 
   // Calculate pagination info
   const totalUsersPages = Math.ceil(totalUsers / usersLimit);
@@ -280,8 +375,8 @@ const MessageManager = () => {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                <FontAwesomeIcon icon={faComments} className="mr-3" style={{ color: colors.primary }} />
+              <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                <FaComments className="w-8 h-8 mr-3 inline-block align-middle" style={{ color: colors.primary }} />
                 Quản lý Tin nhắn
               </h1>
               <p className="text-gray-600">Xem và quản lý tin nhắn của người dùng với chatbot</p>
@@ -298,8 +393,8 @@ const MessageManager = () => {
           {/* Topic Selection */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-1">
-                <FontAwesomeIcon icon={faFilter} className="mr-2" />
+              <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                <FaFilter className="w-4 h-4 mr-2 inline-block align-middle" />
                 Chọn chủ đề
               </label>
               <select
@@ -320,8 +415,8 @@ const MessageManager = () => {
             {selectedTopic && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    <FontAwesomeIcon icon={faSearch} className="mr-2" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                    <FaSearch className="w-4 h-4 mr-2 inline-block align-middle" />
                     Tìm kiếm
                   </label>
                   <input
@@ -359,7 +454,7 @@ const MessageManager = () => {
             <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <FontAwesomeIcon icon={faUsers} className="mr-2" />
+                  <FaUsers className="w-5 h-5 mr-2 inline-block align-middle" />
                   Danh sách Người dùng - {selectedTopic}
                   <span className="ml-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
                     {filteredUsers.length}
@@ -376,12 +471,12 @@ const MessageManager = () => {
                 </div>
               ) : filteredUsers.length === 0 ? (
                 <div className="text-center py-12">
-                  <FontAwesomeIcon icon={faUsers} className="text-4xl mb-2 text-gray-300" />
+                  <FaUsers className="w-16 h-16 mb-2 text-gray-300 mx-auto" />
                   <p className="text-gray-500 text-lg font-medium">
-                    {searchTerm ? 'Không tìm thấy người dùng nào' : 'Chưa có người dùng nào'}
+                    {debouncedSearchTerm ? 'Không tìm thấy người dùng nào' : 'Chưa có người dùng nào'}
                   </p>
                   <p className="text-gray-400">
-                    {searchTerm ? 'Thử tìm kiếm với từ khóa khác' : 'Người dùng sẽ xuất hiện khi họ chat với chatbot này'}
+                    {debouncedSearchTerm ? 'Thử tìm kiếm với từ khóa khác' : 'Người dùng sẽ xuất hiện khi họ chat với chatbot này'}
                   </p>
                 </div>
               ) : (
@@ -416,7 +511,7 @@ const MessageManager = () => {
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-10 w-10">
                                 <div className="h-10 w-10 bg-red-100 rounded-full flex items-center justify-center">
-                                  <FontAwesomeIcon icon={faUser} className="w-5 h-5 text-red-600" />
+                                  <FaUser className="w-5 h-5 text-red-600" />
                                 </div>
                               </div>
                               <div className="ml-4">
@@ -430,22 +525,22 @@ const MessageManager = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900 max-w-xs truncate">
-                              <FontAwesomeIcon icon={faEnvelope} className="w-3 h-3 mr-1 text-gray-400" />
+                            <div className="text-sm text-gray-900 max-w-xs truncate flex items-center">
+                              <FaEnvelope className="w-3 h-3 mr-1 text-gray-400 inline-block align-middle" />
                               {user.first_message}
                             </div>
-                            <div className="text-xs text-gray-500">
-                              <FontAwesomeIcon icon={faClock} className="w-3 h-3 mr-1" />
+                            <div className="text-xs text-gray-500 flex items-center">
+                              <FaClock className="w-3 h-3 mr-1 inline-block align-middle" />
                               {formatTimestamp(user.first_timestamp)}
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900 max-w-xs truncate">
-                              <FontAwesomeIcon icon={faEnvelope} className="w-3 h-3 mr-1 text-gray-400" />
+                            <div className="text-sm text-gray-900 max-w-xs truncate flex items-center">
+                              <FaEnvelope className="w-3 h-3 mr-1 text-gray-400 inline-block align-middle" />
                               {user.last_message}
                             </div>
-                            <div className="text-xs text-gray-500">
-                              <FontAwesomeIcon icon={faClock} className="w-3 h-3 mr-1" />
+                            <div className="text-xs text-gray-500 flex items-center">
+                              <FaClock className="w-3 h-3 mr-1 inline-block align-middle" />
                               {formatTimestamp(user.last_timestamp)}
                             </div>
                           </td>
@@ -453,11 +548,11 @@ const MessageManager = () => {
                             <div className="text-sm text-gray-900">
                               <div className="flex flex-col space-y-1">
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                  <FontAwesomeIcon icon={faHashtag} className="w-3 h-3 mr-1" />
+                                  <FaHashtag className="w-3 h-3 mr-1 inline-block align-middle" />
                                   {user.message_count} tin nhắn
                                 </span>
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  <FontAwesomeIcon icon={faComments} className="w-3 h-3 mr-1" />
+                                  <FaComments className="w-3 h-3 mr-1 inline-block align-middle" />
                                   {user.session_count} phiên
                                 </span>
                               </div>
@@ -466,11 +561,11 @@ const MessageManager = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <div className="flex flex-col space-y-1">
                               <div className="flex items-center text-xs">
-                                <FontAwesomeIcon icon={faCalendarAlt} className="w-3 h-3 mr-1" />
+                                <FaCalendarAlt className="w-3 h-3 mr-1 inline-block align-middle" />
                                 Đầu: {new Date(user.first_timestamp).toLocaleDateString('vi-VN')}
                               </div>
                               <div className="flex items-center text-xs">
-                                <FontAwesomeIcon icon={faCalendarAlt} className="w-3 h-3 mr-1" />
+                                <FaCalendarAlt className="w-3 h-3 mr-1 inline-block align-middle" />
                                 Cuối: {new Date(user.last_timestamp).toLocaleDateString('vi-VN')}
                               </div>
                             </div>
@@ -481,7 +576,7 @@ const MessageManager = () => {
                               className="text-blue-600 hover:text-blue-900 p-2 rounded hover:bg-blue-100"
                               title="Xem lịch sử chat"
                             >
-                              <FontAwesomeIcon icon={faEye} />
+                              <FaEye className="w-4 h-4" />
                             </button>
                           </td>
                         </tr>
@@ -525,7 +620,7 @@ const MessageManager = () => {
                               disabled={usersPage <= 1}
                               className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <FontAwesomeIcon icon={faChevronLeft} className="h-5 w-5" />
+                              <FaChevronLeft className="w-5 h-5" />
                             </button>
                             {[...Array(Math.min(5, totalUsersPages))].map((_, index) => {
                               const pageNumber = Math.max(1, usersPage - 2) + index;
@@ -550,7 +645,7 @@ const MessageManager = () => {
                               disabled={usersPage >= totalUsersPages}
                               className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <FontAwesomeIcon icon={faChevronRight} className="h-5 w-5" />
+                              <FaChevronRight className="w-5 h-5" />
                             </button>
                           </nav>
                         </div>
@@ -572,16 +667,16 @@ const MessageManager = () => {
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="bg-red-100 p-2 rounded-lg">
-                      <FontAwesomeIcon icon={faComments} className="w-5 h-5 text-red-600" />
+                      <FaComments className="w-5 h-5 text-red-600" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
                         Lịch sử chat: {selectedUser.user_id}
                       </h3>
-                      <p className="text-sm text-gray-500">
-                        <FontAwesomeIcon icon={faHashtag} className="w-3 h-3 mr-1" />
-                        {selectedUser.message_count} tin nhắn • 
-                        <FontAwesomeIcon icon={faComments} className="w-3 h-3 ml-2 mr-1" />
+                      <p className="text-sm text-gray-500 flex items-center">
+                        <FaHashtag className="w-3 h-3 mr-1 inline-block align-middle" />
+                        {selectedUser.message_count} tin nhắn •
+                        <FaComments className="w-3 h-3 ml-2 mr-1 inline-block align-middle" />
                         {selectedUser.session_count} phiên chat
                       </p>
                     </div>
@@ -590,7 +685,7 @@ const MessageManager = () => {
                     onClick={handleCloseModal}
                     className="text-gray-400 hover:text-gray-600"
                   >
-                    <FontAwesomeIcon icon={faTimes} />
+                    <FaTimes className="w-5 h-5" />
                   </button>
                 </div>
 
@@ -603,89 +698,18 @@ const MessageManager = () => {
                     </div>
                   ) : chatHistory.length === 0 ? (
                     <div className="text-center py-12">
-                      <FontAwesomeIcon icon={faComments} className="text-4xl mb-2 text-gray-300" />
+                      <FaComments className="w-16 h-16 mb-2 text-gray-300 mx-auto" />
                       <p className="text-gray-500 text-lg font-medium">Không có tin nhắn nào</p>
                       <p className="text-gray-400">Lịch sử chat sẽ hiển thị ở đây</p>
                     </div>
                   ) : (
                     <div className="space-y-4 overflow-y-auto" style={{ maxHeight: '50vh' }}>
                       {chatHistory.reverse().map((chat, index) => (
-                        <div key={chat._id || index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                          {/* User Message */}
-                          <div className="flex items-start space-x-3 mb-4">
-                            <div className="flex-shrink-0">
-                              <div className="bg-blue-100 p-2 rounded-full">
-                                <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-blue-600" />
-                              </div>
-                            </div>
-                            <div className="flex-1">
-                              <div className="bg-blue-50 rounded-lg p-3">
-                                <p className="text-sm text-gray-900">{chat.message}</p>
-                              </div>
-                              <p className="text-xs text-gray-500 mt-1">
-                                <FontAwesomeIcon icon={faClock} className="w-3 h-3 mr-1" />
-                                {formatTimestamp(chat.timestamp)} • Session: {chat.session_id?.slice(0, 8)}...
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Bot Response */}
-                          <div className="flex items-start space-x-3">
-                            <div className="flex-shrink-0">
-                              <div className="bg-green-100 p-2 rounded-full">
-                                <FontAwesomeIcon icon={faRobot} className="w-4 h-4 text-green-600" />
-                              </div>
-                            </div>
-                            <div className="flex-1">
-                              <div className="bg-gray-50 rounded-lg p-3">
-                                {typeof chat.response === 'string' ? (
-                                  <ReactMarkdown className="text-sm text-gray-900 prose prose-sm max-w-none">
-                                    {chat.response}
-                                  </ReactMarkdown>
-                                ) : chat.response?.response ? (
-                                  <ReactMarkdown className="text-sm text-gray-900 prose prose-sm max-w-none">
-                                    {chat.response.response}
-                                  </ReactMarkdown>
-                                ) : (
-                                  <p className="text-sm text-gray-500 italic">Không có phản hồi</p>
-                                )}
-                                
-                                {/* Sources */}
-                                {chat.response?.sources && chat.response.sources.length > 0 && (
-                                  <div className="mt-3 pt-3 border-t border-gray-200">
-                                    <p className="text-xs font-medium text-gray-700 mb-2">
-                                      <FontAwesomeIcon icon={faSearch} className="w-3 h-3 mr-1" />
-                                      Nguồn tham khảo ({chat.response.sources.length}):
-                                    </p>
-                                    <div className="space-y-1">
-                                      {chat.response.sources.slice(0, 3).map((source, sourceIndex) => (
-                                        <div key={sourceIndex} className="text-xs text-gray-600 bg-gray-100 rounded p-2">
-                                          <p className="font-medium">
-                                            <FontAwesomeIcon icon={faEnvelope} className="w-3 h-3 mr-1" />
-                                            {source.file_name}
-                                          </p>
-                                          <p className="truncate">{source.text?.slice(0, 100)}...</p>
-                                          {source.score && (
-                                            <p className="text-gray-500">Điểm: {(source.score * 100).toFixed(1)}%</p>
-                                          )}
-                                        </div>
-                                      ))}
-                                      {chat.response.sources.length > 3 && (
-                                        <p className="text-xs text-gray-500 italic">
-                                          ... và {chat.response.sources.length - 3} nguồn khác
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-500 mt-1">
-                                <FontAwesomeIcon icon={faRobot} className="w-3 h-3 mr-1" />
-                                LISA AI • {formatTimestamp(chat.created_at || chat.timestamp)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                        <ChatMessage
+                          key={chat._id || index}
+                          chat={chat}
+                          formatTimestamp={formatTimestamp}
+                        />
                       ))}
                     </div>
                   )}
@@ -700,18 +724,18 @@ const MessageManager = () => {
                       <button
                         onClick={() => fetchChatHistory(selectedUser.user_id, selectedUser.source, chatPage - 1)}
                         disabled={chatPage <= 1}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                       >
-                        <FontAwesomeIcon icon={faChevronLeft} className="mr-1" />
+                        <FaChevronLeft className="w-3 h-3 mr-1 inline-block align-middle" />
                         Trước
                       </button>
                       <button
                         onClick={() => fetchChatHistory(selectedUser.user_id, selectedUser.source, chatPage + 1)}
                         disabled={chatPage >= totalChatPages}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                       >
                         Sau
-                        <FontAwesomeIcon icon={faChevronRight} className="ml-1" />
+                        <FaChevronRight className="w-3 h-3 ml-1 inline-block align-middle" />
                       </button>
                     </div>
                   </div>

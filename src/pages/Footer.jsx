@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import {
   FaRobot,
   FaFacebook,
@@ -100,4 +100,4 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+export default memo(Footer);

@@ -2,6 +2,7 @@ node_modules/
 .claude/
 dist/
 build/
+self_documents/
 
 # Logs
 *.log

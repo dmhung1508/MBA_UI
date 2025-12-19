@@ -3,8 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FaTimes, FaHourglassHalf } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Plyr from 'plyr';
-import 'plyr/dist/plyr.css';
 import { FaVolumeUp } from 'react-icons/fa';
 import explainData from '../assets/explain.json';
 import { API_ENDPOINTS } from '../config/api';
@@ -219,8 +217,17 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
 
   useEffect(() => {
     if (showVideo) {
-      new Plyr('#plyr-video', {
-        controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+      // Dynamically import Plyr and its CSS only when needed
+      Promise.all([
+        import('plyr'),
+        import('plyr/dist/plyr.css')
+      ]).then(([PlyrModule]) => {
+        const Plyr = PlyrModule.default;
+        new Plyr('#plyr-video', {
+          controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+        });
+      }).catch(err => {
+        console.error('Failed to load Plyr:', err);
       });
     }
   }, [showVideo]);

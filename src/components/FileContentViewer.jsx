@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faTimes,
-  faSpinner,
-  faFileAlt,
-  faDownload,
-  faSearch,
-  faInfoCircle
-} from '@fortawesome/free-solid-svg-icons';
+  FaTimes,
+  FaSpinner,
+  FaFileAlt,
+  FaDownload,
+  FaSearch,
+  FaInfoCircle
+} from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { API_ENDPOINTS } from '../config/api';
 
@@ -198,19 +197,19 @@ ${rawContent.substring(0, 100)}...
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <FontAwesomeIcon icon={faFileAlt} className="mr-2 text-blue-600" />
+              <FaFileAlt className="w-5 h-5 inline-block align-middle mr-2 text-blue-600" />
               Xem nội dung file
             </h3>
             <p className="text-sm text-gray-500 mt-1 truncate">{filename}</p>
           </div>
-          
+
           {/* View Mode Tabs */}
           <div className="flex items-center space-x-2 mx-4">
             <button
               onClick={() => handleViewModeChange('extracted')}
               className={`px-3 py-1 text-sm rounded ${
-                viewMode === 'extracted' 
-                  ? 'bg-blue-600 text-white' 
+                viewMode === 'extracted'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -219,28 +218,28 @@ ${rawContent.substring(0, 100)}...
             <button
               onClick={() => handleViewModeChange('raw')}
               className={`px-3 py-1 text-sm rounded ${
-                viewMode === 'raw' 
-                  ? 'bg-orange-600 text-white' 
+                viewMode === 'raw'
+                  ? 'bg-orange-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
               Xem Raw
             </button>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <button
               onClick={downloadFile}
               className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
               title="Tải xuống"
             >
-              <FontAwesomeIcon icon={faDownload} />
+              <FaDownload className="w-4 h-4" />
             </button>
             <button
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
             >
-              <FontAwesomeIcon icon={faTimes} size="lg" />
+              <FaTimes className="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -248,7 +247,7 @@ ${rawContent.substring(0, 100)}...
         {/* Search Bar */}
         <div className="p-4 border-b border-gray-200 bg-gray-50">
           <div className="relative">
-            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-3 text-gray-400" />
+            <FaSearch className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
             <input
               type="text"
               placeholder="Tìm kiếm trong nội dung..."
@@ -257,12 +256,12 @@ ${rawContent.substring(0, 100)}...
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           {/* Info */}
           <div className="mt-2 text-sm text-gray-600 flex items-center">
-            <FontAwesomeIcon icon={faInfoCircle} className="mr-2" />
-            {viewMode === 'extracted' 
-              ? 'Hiển thị nội dung đã được trích xuất và xử lý từ file' 
+            <FaInfoCircle className="w-3 h-3 inline-block align-middle mr-2" />
+            {viewMode === 'extracted'
+              ? 'Hiển thị nội dung đã được trích xuất và xử lý từ file'
               : 'Hiển thị dữ liệu thô của file (có thể không đọc được)'
             }
           </div>
@@ -272,7 +271,7 @@ ${rawContent.substring(0, 100)}...
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <FontAwesomeIcon icon={faSpinner} className="animate-spin text-blue-600 mr-3" />
+              <FaSpinner className="w-6 h-6 animate-spin text-blue-600 mr-3" />
               <span className="text-gray-600">Đang tải nội dung...</span>
             </div>
           ) : (

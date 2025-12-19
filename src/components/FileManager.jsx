@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { API_ENDPOINTS } from '../config/api';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faFile,
-  faFileAlt,
-  faFilePdf,
-  faFileWord,
-  faDownload,
-  faEye,
-  faTrash,
-  faUpload,
-  faSearch,
-  faCalendar,
-  faHdd,
-  faRefresh,
-  faExclamationTriangle,
-  faTimes
-} from '@fortawesome/free-solid-svg-icons';
+  FaFile,
+  FaFileAlt,
+  FaFilePdf,
+  FaFileWord,
+  FaDownload,
+  FaEye,
+  FaTrash,
+  FaUpload,
+  FaSearch,
+  FaCalendar,
+  FaHdd,
+  FaSync,
+  FaExclamationTriangle,
+  FaTimes
+} from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import FileUploader from './FileUploader';
 import FileContentViewer from './FileContentViewer';
@@ -212,15 +211,15 @@ Có thể do:
   const getFileIcon = (fileType) => {
     switch (fileType?.toLowerCase()) {
       case '.pdf':
-        return faFilePdf;
+        return FaFilePdf;
       case '.docx':
       case '.doc':
-        return faFileWord;
+        return FaFileWord;
       case '.txt':
       case '.md':
-        return faFileAlt;
+        return FaFileAlt;
       default:
-        return faFile;
+        return FaFile;
     }
   };
 
@@ -379,8 +378,8 @@ Có thể do:
       <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              <FontAwesomeIcon icon={faFile} className="mr-3 text-red-600" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center">
+              <FaFile className="w-8 h-8 inline-block align-middle mr-3 text-red-600" />
               Quản lý File Chatbot
             </h2>
             <p className="text-gray-600">
@@ -389,15 +388,15 @@ Có thể do:
             {metadata && (
               <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div className="flex items-center">
-                  <FontAwesomeIcon icon={faCalendar} className="mr-2 text-gray-500" />
+                  <FaCalendar className="w-4 h-4 inline-block align-middle mr-2 text-gray-500" />
                   <span>Cập nhật: {formatDate(metadata.last_upload_date)}</span>
                 </div>
                 <div className="flex items-center">
-                  <FontAwesomeIcon icon={faFile} className="mr-2 text-gray-500" />
+                  <FaFile className="w-4 h-4 inline-block align-middle mr-2 text-gray-500" />
                   <span>Tổng files: {files.length}</span>
                 </div>
                 <div className="flex items-center">
-                  <FontAwesomeIcon icon={faHdd} className="mr-2 text-gray-500" />
+                  <FaHdd className="w-4 h-4 inline-block align-middle mr-2 text-gray-500" />
                   <span>
                     Dung lượng: {formatFileSize(files.reduce((total, file) => total + (file.size_bytes || 0), 0))}
                   </span>
@@ -410,14 +409,14 @@ Có thể do:
               onClick={() => setShowUploader(true)}
               className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              <FontAwesomeIcon icon={faUpload} className="mr-2" />
+              <FaUpload className="w-4 h-4 inline-block align-middle mr-2" />
               Upload File
             </button>
             <button
               onClick={fetchFileMetadata}
               className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              <FontAwesomeIcon icon={faRefresh} className="mr-2" />
+              <FaSync className="w-4 h-4 inline-block align-middle mr-2" />
               Làm mới
             </button>
           </div>
@@ -426,7 +425,7 @@ Có thể do:
         {/* Search */}
         <div className="mt-4">
           <div className="relative">
-            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-3 text-gray-400" />
+            <FaSearch className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
             <input
               type="text"
               placeholder="Tìm kiếm file..."
@@ -442,7 +441,7 @@ Có thể do:
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-center">
-            <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-500 mr-3" />
+            <FaExclamationTriangle className="w-4 h-4 text-red-500 mr-3" />
             <div>
               <h3 className="text-red-800 font-medium">Lỗi</h3>
               <p className="text-red-700 text-sm mt-1">{error}</p>
@@ -454,7 +453,7 @@ Có thể do:
       {/* Files List */}
       {filteredFiles.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm p-12 text-center border border-gray-200">
-          <FontAwesomeIcon icon={faFile} className="text-gray-300 text-4xl mb-4" />
+          <FaFile className="w-16 h-16 mx-auto text-gray-300 mb-4" />
           <h3 className="text-gray-500 text-lg font-medium mb-2">
             {files.length === 0 ? 'Chưa có file nào' : 'Không tìm thấy file phù hợp'}
           </h3>
@@ -493,10 +492,9 @@ Có thể do:
                   <tr key={index} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <FontAwesomeIcon
-                          icon={getFileIcon(file.file_type)}
-                          className={`mr-3 text-lg ${getFileIconColor(file.file_type)}`}
-                        />
+                        {React.createElement(getFileIcon(file.file_type), {
+                          className: `w-5 h-5 mr-3 ${getFileIconColor(file.file_type)}`
+                        })}
                         <div>
                           <p className="text-sm font-medium text-gray-900 max-w-md truncate">
                             {file.filename}
@@ -528,14 +526,14 @@ Có thể do:
                           className="text-green-600 hover:text-green-900 p-2 rounded hover:bg-green-100 transition-colors"
                           title="Tải xuống"
                         >
-                          <FontAwesomeIcon icon={faDownload} />
+                          <FaDownload className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => confirmDelete(file)}
                           className="text-red-600 hover:text-red-900 p-2 rounded hover:bg-red-100 transition-colors"
                           title="Xóa file"
                         >
-                          <FontAwesomeIcon icon={faTrash} />
+                          <FaTrash className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -562,7 +560,7 @@ Có thể do:
                 onClick={closeViewer}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <FontAwesomeIcon icon={faTimes} size="lg" />
+                <FaTimes className="w-6 h-6" />
               </button>
             </div>
 
@@ -609,7 +607,7 @@ Có thể do:
           <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full">
             <div className="p-6">
               <div className="flex items-center mb-4">
-                <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-500 text-2xl mr-3" />
+                <FaExclamationTriangle className="w-8 h-8 text-red-500 mr-3" />
                 <h3 className="text-lg font-semibold text-gray-900">Xác nhận xóa file</h3>
               </div>
               <p className="text-gray-600 mb-2">

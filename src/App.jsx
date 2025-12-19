@@ -1,37 +1,44 @@
-import { useEffect, useState } from "react";
-// import NavBar from "./components/NavBar";
-// import HomePage from "./pages/HomePage";
-import ChatBot from "./components/ChatBot";
+import { useEffect, useState, lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// Eager load critical pages (HomePage and LoginPage)
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import Profile from "./pages/Profile";
-import QuizHistory from "./pages/QuizHistory";
-import Test from "./pages/Test";
-import EditPage from "./pages/EditPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import SourceManager from "./pages/SourceManager";
-import QuestionManager from "./pages/QuestionManager";
-import UserManager from "./pages/UserManager";
-import TeacherDashboard from "./pages/TeacherDashboard";
-import TeacherQuizHistory from "./pages/TeacherQuizHistory";
-import MessageManager from "./pages/MessageManager";
-import AdminLogs from "./pages/AdminLogs";
-// import FAQPage from "./pages/FAQPage"
-// import IssuePage from "./pages/IssuePage";
-import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
-import ScaleLoader from "react-spinners/ScaleLoader";
-import { ToastContainer } from 'react-toastify';
-import AuthSuccess from './components/AuthSuccess.jsx'
-import 'react-toastify/dist/ReactToastify.css';
+
+// Lazy load all other routes for code splitting
+const ChatBot = lazy(() => import("./components/ChatBot"));
+const SignupPage = lazy(() => import("./pages/SignupPage"));
+const Profile = lazy(() => import("./pages/Profile"));
+const QuizHistory = lazy(() => import("./pages/QuizHistory"));
+const Test = lazy(() => import("./pages/Test"));
+const EditPage = lazy(() => import("./pages/EditPage"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const SourceManager = lazy(() => import("./pages/SourceManager"));
+const QuestionManager = lazy(() => import("./pages/QuestionManager"));
+const UserManager = lazy(() => import("./pages/UserManager"));
+const TeacherDashboard = lazy(() => import("./pages/TeacherDashboard"));
+const TeacherQuizHistory = lazy(() => import("./pages/TeacherQuizHistory"));
+const MessageManager = lazy(() => import("./pages/MessageManager"));
+const AdminLogs = lazy(() => import("./pages/AdminLogs"));
+const AuthSuccess = lazy(() => import('./components/AuthSuccess.jsx'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
+  </div>
+);
 
 function App() {
   useEffect(() => { }, []);
   const [currentPage, SetCurrentPage] = useState("Home");
   return (
-    <BrowserRouter basename="/mini"> {/* Thêm basename vào đây */}
+    <BrowserRouter basename="/mini">
       <div className="App">
-        <Routes>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/mini"
             element={
@@ -139,7 +146,8 @@ function App() {
             }
           />
           <Route path="/access-auth" element={<AuthSuccess />} />
-        </Routes>
+          </Routes>
+        </Suspense>
 
         <ToastContainer
           position="top-right"

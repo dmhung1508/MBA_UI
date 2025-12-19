@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
 import { FaMicrophone, FaPaperPlane, FaQuestionCircle, FaVolumeMute, FaVolumeUp, FaHistory, FaTrash } from "react-icons/fa";
 import { v4 as uuidv4 } from 'uuid';
 import ReactMarkdown from 'react-markdown';
@@ -33,14 +33,14 @@ const UnifiedChatbot = ({
   const speechRecognition = useRef(null);
   const inactivityTimerRef = useRef(null);
 
-  // Các tin nhắn loading thú vị
-  const loadingMessages = [
+  // Các tin nhắn loading thú vị (memoized)
+  const loadingMessages = useMemo(() => [
     { text: "Trợ lý AI đang suy nghĩ...", emoji: "💭", subtitle: "Đang xử lý câu hỏi của bạn" },
     { text: "Đang tìm kiếm thông tin...", emoji: "🔍", subtitle: "Chờ chút nhé, sắp có kết quả rồi" },
     { text: "Đang phân tích dữ liệu...", emoji: "📊", subtitle: "Hệ thống đang làm việc chăm chỉ" },
     { text: "Chuẩn bị câu trả lời...", emoji: "✨", subtitle: "Sắp xong rồi, kiên nhẫn tí nha" },
     { text: "Đang kết nối với AI...", emoji: "🤖", subtitle: "Trí tuệ nhân tạo đang hoạt động" }
-  ];
+  ], []);
 
   // Trích xuất userId từ access_token
   const accessToken = localStorage.getItem('access_token');
@@ -56,7 +56,7 @@ const UnifiedChatbot = ({
   }
 
   // Function để format lịch sử chat từ API thành format message
-  const formatChatHistoryToMessages = (chatHistoryData) => {
+  const formatChatHistoryToMessages = useCallback((chatHistoryData) => {
     const formattedMessages = [];
 
     chatHistoryData.forEach(chatItem => {
@@ -99,10 +99,10 @@ const UnifiedChatbot = ({
     });
 
     return formattedMessages;
-  };
+  }, []);
 
   // Function để load lịch sử chat
-  const loadChatHistory = async () => {
+  const loadChatHistory = useCallback(async () => {
     if (!username || !chatbotConfig.source) return;
 
     setIsLoadingHistory(true);
@@ -143,26 +143,26 @@ const UnifiedChatbot = ({
     } finally {
       setIsLoadingHistory(false);
     }
-  };
+  }, [username, chatbotConfig.source, formatChatHistoryToMessages]);
 
   // Function để hiển thị toast notification
-  const showToastNotification = (message, type = "success") => {
+  const showToastNotification = useCallback((message, type = "success") => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
     setTimeout(() => {
       setShowToast(false);
     }, 3000);
-  };
+  }, []);
 
   // Function để xóa lịch sử chat
-  const clearChatHistory = async () => {
+  const clearChatHistory = useCallback(async () => {
     if (!username || !chatbotConfig.source) return;
     setShowDeleteConfirm(true);
-  };
+  }, [username, chatbotConfig.source]);
 
   // Function để xác nhận xóa lịch sử chat
-  const confirmClearHistory = async () => {
+  const confirmClearHistory = useCallback(async () => {
     setShowDeleteConfirm(false);
     setIsLoadingHistory(true);
 
@@ -201,19 +201,19 @@ const UnifiedChatbot = ({
     } finally {
       setIsLoadingHistory(false);
     }
-  };
+  }, [username, chatbotConfig.source, showToastNotification]);
 
   // Modify handleOpenQuiz
-  const handleOpenQuiz = () => {
+  const handleOpenQuiz = useCallback(() => {
     setIsQuizOpen(true);
     if (inactivityTimerRef.current) {
       clearTimeout(inactivityTimerRef.current);
       inactivityTimerRef.current = null;
     }
     setApiUrl(API_ENDPOINTS.RANDOM_QUESTIONS(chatbotConfig.quizTopic));
-  };
+  }, [chatbotConfig.quizTopic]);
 
-  const handleExplanationRequest = async (explanationData) => {
+  const handleExplanationRequest = useCallback(async (explanationData) => {
     const dataToSend = { ...explanationData, source: chatbotConfig.source };
     setIsLoading(true);
 
@@ -272,9 +272,9 @@ const UnifiedChatbot = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [chatbotConfig.source, isSpeakerActive, speakText, setIsLoading]);
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (inputMessage.trim() !== "" && !isLoading) {
       setIsLoading(true);
       setLoadingMessageIndex(0); // Reset loading message index
@@ -343,30 +343,30 @@ const UnifiedChatbot = ({
         setIsLoading(false);
       }
     }
-  };
+  }, [inputMessage, isLoading, chatbotConfig.id, chatbotConfig.source, username, isSpeakerActive, speakText, setIsLoading]);
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = useCallback((e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
-  };
+  }, [handleSendMessage]);
 
-  const toggleVoiceInput = () => {
+  const toggleVoiceInput = useCallback(() => {
     if (isVoiceInputActive) {
       speechRecognition.current.stop();
     } else {
       speechRecognition.current.start();
     }
     setIsVoiceInputActive(!isVoiceInputActive);
-  };
+  }, [isVoiceInputActive]);
 
-  const handleToggleSpeaker = (messageText) => {
+  const handleToggleSpeaker = useCallback((messageText) => {
     if (!isSpeakerActive) {
       speakText(messageText);
     }
     toggleSpeaker();
-  };
+  }, [isSpeakerActive, speakText, toggleSpeaker]);
 
   useEffect(() => {
     if (chatHistoryRef.current) {
@@ -659,4 +659,4 @@ const UnifiedChatbot = ({
   );
 };
 
-export default UnifiedChatbot; 
+export default memo(UnifiedChatbot); 

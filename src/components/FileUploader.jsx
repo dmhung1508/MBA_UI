@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../config/api';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUpload,
-  faTimes,
-  faCloudUploadAlt,
-  faFileAlt,
-  faSpinner,
-  faCheckCircle,
-  faExclamationTriangle
-} from '@fortawesome/free-solid-svg-icons';
+  FaUpload,
+  FaTimes,
+  FaCloudUploadAlt,
+  FaFileAlt,
+  FaSpinner,
+  FaCheckCircle,
+  FaExclamationTriangle
+} from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => {
@@ -179,7 +178,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
             disabled={uploading}
             className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
           >
-            <FontAwesomeIcon icon={faTimes} size="lg" />
+            <FaTimes className="w-6 h-6" />
           </button>
         </div>
 
@@ -196,9 +195,8 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
             >
-              <FontAwesomeIcon
-                icon={faCloudUploadAlt}
-                className={`text-4xl mb-4 ${dragOver ? 'text-red-500' : 'text-gray-400'}`}
+              <FaCloudUploadAlt
+                className={`w-16 h-16 mx-auto mb-4 ${dragOver ? 'text-red-500' : 'text-gray-400'}`}
               />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 Kéo thả file vào đây hoặc click để chọn
@@ -218,7 +216,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
                 htmlFor="file-input"
                 className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
               >
-                <FontAwesomeIcon icon={faFileAlt} className="mr-2" />
+                <FaFileAlt className="w-4 h-4 inline-block align-middle mr-2" />
                 Chọn File
               </label>
             </div>
@@ -229,7 +227,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
             <div className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <FontAwesomeIcon icon={faFileAlt} className="text-blue-600 text-2xl mr-3" />
+                  <FaFileAlt className="w-8 h-8 text-blue-600 mr-3" />
                   <div>
                     <p className="font-medium text-gray-900">{selectedFile.name}</p>
                     <p className="text-sm text-gray-500">
@@ -242,7 +240,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
                     onClick={removeFile}
                     className="text-red-600 hover:text-red-800 p-2 rounded hover:bg-red-100 transition-colors"
                   >
-                    <FontAwesomeIcon icon={faTimes} />
+                    <FaTimes className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -250,7 +248,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
               {uploading && (
                 <div className="mt-4">
                   <div className="flex items-center justify-center text-blue-600 mb-2">
-                    <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
+                    <FaSpinner className="w-4 h-4 animate-spin inline-block align-middle mr-2" />
                     <span className="font-medium">{uploadStep}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -271,7 +269,7 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
           {/* Upload Info */}
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start">
-              <FontAwesomeIcon icon={faExclamationTriangle} className="text-blue-600 mt-1 mr-3" />
+              <FaExclamationTriangle className="w-4 h-4 text-blue-600 mt-1 mr-3" />
               <div>
                 <h4 className="font-medium text-blue-900">Lưu ý khi upload file:</h4>
                 <ul className="text-sm text-blue-800 mt-2 space-y-1">
@@ -298,8 +296,8 @@ const FileUploader = ({ isOpen, onClose, source = 'hung', onUploadSuccess }) => 
             disabled={!selectedFile || uploading}
             className="flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {uploading && <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />}
-            <FontAwesomeIcon icon={uploading ? faSpinner : faUpload} className="mr-2" />
+            {uploading && <FaSpinner className="w-4 h-4 animate-spin inline-block align-middle mr-2" />}
+            <FaUpload className="w-4 h-4 inline-block align-middle mr-2" />
             {uploading ? 'Đang upload...' : 'Upload File'}
           </button>
         </div>
