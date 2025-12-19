@@ -88,7 +88,17 @@ const MessageManager = () => {
         setAssignedTopics(topics);
 
         // Fetch all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
+        const accessToken = localStorage.getItem('access_token');
+        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS,
+          {
+            method: 'GET',
+            headers: {
+              'accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }
+        );
         const chatbotsData = await chatbotsResponse.json();
         
         if (chatbotsData.chatbots) {
@@ -108,7 +118,17 @@ const MessageManager = () => {
   // Fetch all chatbots (for admin)
   const fetchChatbots = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.CHATBOTS);
+      const accessToken = localStorage.getItem('access_token');
+      const response = await fetch(API_ENDPOINTS.CHATBOTS,
+        {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
       const data = await response.json();
       
       if (data.chatbots) {

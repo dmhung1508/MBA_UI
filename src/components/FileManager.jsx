@@ -15,7 +15,8 @@ import {
   faHdd,
   faRefresh,
   faExclamationTriangle,
-  faTimes
+  faTimes,
+  faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import FileUploader from './FileUploader';
@@ -289,6 +290,10 @@ Có thể do:
         headers['Authorization'] = `Bearer ${token}`;
       }
 
+      // Optimistic update: Remove file immediately
+      setFiles(prevFiles => prevFiles.filter(f => f.filename !== filename));
+      setDeleteConfirm({ show: false, file: null });
+
       const encodedFilename = encodeURIComponent(filename);
       const response = await fetch(API_ENDPOINTS.FILE_DELETE_BY_FILENAME(source, encodedFilename), {
         method: 'DELETE',
@@ -303,16 +308,22 @@ Có thể do:
       console.log('Delete result:', result);
 
       if (result.status === 'success') {
-        toast.success(`Xóa thành công! ${result.message}`);
+        toast.success(`Đã xóa file ${filename}`);
       } else {
-        toast.success('Xóa file thành công!');
+        toast.success('Đã xóa file');
       }
 
+      // No need to fetch metadata again if we trust the optimistic update, 
+      // but fetching it ensures consistency if something else changed.
+      // However, to prevent the file from reappearing if the backend is slow to update (though we fixed that),
+      // we might want to delay the fetch or just rely on the optimistic update.
+      // Given the backend now removes metadata immediately, a fetch is safe.
       fetchFileMetadata();
-      setDeleteConfirm({ show: false, file: null });
+
     } catch (err) {
       console.error('Error deleting file:', err);
       toast.error('Không thể xóa file. Vui lòng thử lại.');
+      fetchFileMetadata(); // Revert optimistic update on error
     }
   };
 
@@ -509,8 +520,8 @@ Có thể do:
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${file.file_type === '.pdf' ? 'bg-red-100 text-red-800' :
-                          file.file_type === '.docx' ? 'bg-blue-100 text-blue-800' :
-                            'bg-green-100 text-green-800'
+                        file.file_type === '.docx' ? 'bg-blue-100 text-blue-800' :
+                          'bg-green-100 text-green-800'
                         }`}>
                         {file.file_type?.replace('.', '').toUpperCase() || 'N/A'}
                       </span>

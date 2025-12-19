@@ -19,7 +19,8 @@ import {
   FaCog,
   FaUsers,
   FaChalkboardTeacher,
-  FaClipboardList
+  FaClipboardList,
+  FaChartBar
 } from "react-icons/fa";
 import { isTokenValid, clearAuthData } from "../utils/auth";
 
@@ -215,6 +216,13 @@ const Navbar = () => {
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaClipboardList className="mr-2 text-sm inline" /> Quản lý Logs
+                          </a>
+                          <a
+                            href="/mini/teacher-stats"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                            onClick={() => setIsAdminDropdownOpen(false)}
+                          >
+                            <FaChartBar className="mr-2 text-sm inline" /> Thống kê Giáo viên
                           </a>
                         </div>
                       </div>
@@ -424,6 +432,14 @@ const Navbar = () => {
                           >
                             <FaClipboardList className="mr-3 text-sm" />
                             Quản lý Logs
+                          </a>
+                          <a
+                            href="/mini/teacher-stats"
+                            className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            <FaChartBar className="mr-3 text-sm" />
+                            Thống kê Giáo viên
                           </a>
                         </>
                       )}

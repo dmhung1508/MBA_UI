@@ -17,6 +17,7 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import TeacherQuizHistory from "./pages/TeacherQuizHistory";
 import MessageManager from "./pages/MessageManager";
 import AdminLogs from "./pages/AdminLogs";
+import TeacherStats from "./pages/TeacherStats";
 // import FAQPage from "./pages/FAQPage"
 // import IssuePage from "./pages/IssuePage";
 import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
@@ -29,7 +30,7 @@ function App() {
   useEffect(() => { }, []);
   const [currentPage, SetCurrentPage] = useState("Home");
   return (
-    <BrowserRouter basename="/mini"> {/* Thêm basename vào đây */}
+    <BrowserRouter basename="/mini" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}> {/* Thêm basename vào đây */}
       <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -79,6 +80,14 @@ function App() {
             element={
               <PrivateRoute>
                 <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher-stats"
+            element={
+              <PrivateRoute>
+                <TeacherStats />
               </PrivateRoute>
             }
           />

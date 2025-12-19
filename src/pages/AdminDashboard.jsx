@@ -60,7 +60,16 @@ const AdminDashboard = () => {
   const fetchChatbots = async () => {
     try {
       setLoading(true);
-      const response = await fetch(API_ENDPOINTS.CHATBOTS);
+      const response = await fetch(API_ENDPOINTS.CHATBOTS,
+        {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
       const data = await response.json();
       setChatbots(data.chatbots || []);
     } catch (err) {
