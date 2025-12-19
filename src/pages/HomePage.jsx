@@ -126,9 +126,9 @@ const HomePage = () => {
             <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16">
               <div className="w-full lg:w-1/2 text-center lg:text-left">
                 <div className="animate-fade-in-up">
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight mx-auto lg:mx-0">
                     Xin chào, tôi là <br />
-                    <span className="text-red-600 block lg:inline"> TA Chatbot</span>
+                    <span className="text-red-600"> TA Chatbot</span>
                   </h1>
 
                   <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
@@ -136,7 +136,7 @@ const HomePage = () => {
                     môn học và <br />các thông tin học vụ một cách nhanh chóng và chính xác.
                   </p>
 
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md mx-auto">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start max-w-md mx-auto lg:mx-0">
                     {isLoggedIn ? (
                       <a
                         href="/mini/mini"
