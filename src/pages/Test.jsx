@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { API_ENDPOINTS } from '../config/api';
 
 function Test() {
+  // Dynamically import Bootstrap CSS only when this page loads
+  useEffect(() => {
+    import('bootstrap/dist/css/bootstrap.min.css').catch(err => {
+      console.error('Failed to load Bootstrap CSS:', err);
+    });
+  }, []);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState(() => {
     const savedAnswers = localStorage.getItem('testAnswers');

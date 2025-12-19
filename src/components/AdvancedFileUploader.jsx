@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { API_ENDPOINTS } from '../config/api';
-import { 
-  faUpload, 
-  faTimes, 
-  faCloudUploadAlt,
-  faFileAlt,
-  faSpinner,
-  faCheckCircle,
-  faExclamationTriangle,
-  faFile,
-  faRobot
-} from '@fortawesome/free-solid-svg-icons';
+import {
+  FaUpload,
+  FaTimes,
+  FaCloudUploadAlt,
+  FaFileAlt,
+  FaSpinner,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaFile,
+  FaRobot
+} from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploadSuccess }) => {
@@ -195,7 +194,7 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
             disabled={uploading}
             className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
           >
-            <FontAwesomeIcon icon={faTimes} size="lg" />
+            <FaTimes className="w-6 h-6" />
           </button>
         </div>
 
@@ -203,8 +202,8 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
         <div className="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">
           {/* Select Chatbot */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <FontAwesomeIcon icon={faRobot} className="mr-2" />
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+              <FaRobot className="w-4 h-4 inline-block align-middle mr-2" />
               Chọn Chatbot
             </label>
             <select
@@ -241,9 +240,8 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
           >
-            <FontAwesomeIcon 
-              icon={faCloudUploadAlt} 
-              className={`text-4xl mb-4 ${dragOver ? 'text-red-500' : 'text-gray-400'}`} 
+            <FaCloudUploadAlt
+              className={`w-16 h-16 mx-auto mb-4 ${dragOver ? 'text-red-500' : 'text-gray-400'}`}
             />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Kéo thả file vào đây hoặc click để chọn
@@ -264,7 +262,7 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
               htmlFor="file-input-advanced"
               className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
             >
-              <FontAwesomeIcon icon={faFileAlt} className="mr-2" />
+              <FaFileAlt className="w-4 h-4 inline-block align-middle mr-2" />
               Chọn File
             </label>
           </div>
@@ -277,7 +275,7 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
                 {selectedFiles.map((file, index) => (
                   <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                     <div className="flex items-center">
-                      <FontAwesomeIcon icon={faFile} className="text-blue-500 mr-3" />
+                      <FaFile className="w-5 h-5 text-blue-500 mr-3" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">{file.name}</p>
                         <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
@@ -288,7 +286,7 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
                         onClick={() => removeFile(index)}
                         className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-100 transition-colors"
                       >
-                        <FontAwesomeIcon icon={faTimes} />
+                        <FaTimes className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -301,7 +299,7 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
           {uploading && (
             <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-center">
-                <FontAwesomeIcon icon={faSpinner} className="animate-spin text-blue-600 mr-3" />
+                <FaSpinner className="w-5 h-5 animate-spin text-blue-600 mr-3" />
                 <span className="text-blue-700">{uploadProgress}</span>
               </div>
             </div>
@@ -310,7 +308,7 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
           {/* Upload Info */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start">
-              <FontAwesomeIcon icon={faExclamationTriangle} className="text-blue-600 mt-1 mr-3" />
+              <FaExclamationTriangle className="w-4 h-4 text-blue-600 mt-1 mr-3" />
               <div>
                 <h4 className="font-medium text-blue-900">Lưu ý khi upload file:</h4>
                 <ul className="text-sm text-blue-800 mt-2 space-y-1">
@@ -338,8 +336,8 @@ const AdvancedFileUploader = ({ isOpen, onClose, availableChatbots = [], onUploa
             disabled={!selectedSource || selectedFiles.length === 0 || uploading}
             className="flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {uploading && <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />}
-            <FontAwesomeIcon icon={uploading ? faSpinner : faUpload} className="mr-2" />
+            {uploading && <FaSpinner className="w-4 h-4 animate-spin inline-block align-middle mr-2" />}
+            <FaUpload className="w-4 h-4 inline-block align-middle mr-2" />
             {uploading ? 'Đang upload...' : `Upload ${selectedFiles.length} file(s)`}
           </button>
         </div>

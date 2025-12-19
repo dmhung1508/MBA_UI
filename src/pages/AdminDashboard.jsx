@@ -3,20 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { API_ENDPOINTS } from '../config/api';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faRobot, 
-  faPlus, 
-  faEdit, 
-  faTrash, 
-  faSave, 
-  faTimes,
-  faEye,
-  faExclamationTriangle,
-  faUpload,
-  faDatabase,
-  faFile
-} from '@fortawesome/free-solid-svg-icons';
+import {
+  FaRobot,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+  FaEye,
+  FaExclamationTriangle,
+  FaUpload,
+  FaDatabase,
+  FaFile
+} from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [chatbots, setChatbots] = useState([]);
@@ -343,17 +342,17 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                <FontAwesomeIcon icon={faRobot} className="mr-3" style={{ color: colors.primary }} />
+              <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                <FaRobot className="w-8 h-8 mr-3 inline-block align-middle" style={{ color: colors.primary }} />
                 Quản lý Chatbot
               </h1>
               <p className="text-gray-600">Quản lý danh sách chatbot và dữ liệu trong hệ thống</p>
             </div>
             <button
               onClick={openCreateModal}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 flex items-center"
             >
-              <FontAwesomeIcon icon={faPlus} className="mr-2" />
+              <FaPlus className="w-4 h-4 mr-2 inline-block align-middle" />
               Thêm Chatbot
             </button>
           </div>
@@ -416,14 +415,14 @@ const AdminDashboard = () => {
                           className="text-blue-600 hover:text-blue-900 p-2 rounded hover:bg-blue-100"
                           title="Chỉnh sửa"
                         >
-                          <FontAwesomeIcon icon={faEdit} />
+                          <FaEdit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => openDeleteModal(chatbot)}
                           className="text-red-600 hover:text-red-900 p-2 rounded hover:bg-red-100"
                           title="Xóa"
                         >
-                          <FontAwesomeIcon icon={faTrash} />
+                          <FaTrash className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -434,7 +433,7 @@ const AdminDashboard = () => {
           </div>
           {chatbots.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              <FontAwesomeIcon icon={faRobot} className="text-6xl mb-4 text-gray-300" />
+              <FaRobot className="w-24 h-24 mb-4 text-gray-300 mx-auto" />
               <p className="text-xl">Chưa có chatbot nào</p>
             </div>
           )}
@@ -458,17 +457,14 @@ const AdminDashboard = () => {
                   onClick={closeModal}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <FontAwesomeIcon icon={faTimes} />
+                  <FaTimes className="w-5 h-5" />
                 </button>
               </div>
 
               {modalMode === 'delete' ? (
                 <div>
                   <div className="text-center mb-6">
-                    <FontAwesomeIcon 
-                      icon={faExclamationTriangle} 
-                      className="text-6xl text-red-500 mb-4" 
-                    />
+                    <FaExclamationTriangle className="w-24 h-24 text-red-500 mb-4 mx-auto" />
                     <p className="text-gray-700">
                       Bạn có chắc chắn muốn xóa chatbot <strong>{selectedChatbot?.name}</strong>?
                     </p>
@@ -566,9 +562,9 @@ const AdminDashboard = () => {
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
                     >
-                      <FontAwesomeIcon icon={faSave} className="mr-2" />
+                      <FaSave className="w-4 h-4 mr-2 inline-block align-middle" />
                       {modalMode === 'create' ? 'Tạo' : 'Cập nhật'}
                     </button>
                   </div>

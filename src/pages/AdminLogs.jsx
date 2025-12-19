@@ -2,24 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { API_ENDPOINTS } from '../config/api';
-import { 
-  faClipboardList,
-  faFilter,
-  faChartBar,
-  faTrash,
-  faSync,
-  faSearch,
-  faCalendar,
-  faUser,
-  faTag,
-  faBox,
-  faExclamationTriangle,
-  faTimes,
-  faChevronLeft,
-  faChevronRight
-} from '@fortawesome/free-solid-svg-icons';
+import {
+  FaClipboardList,
+  FaFilter,
+  FaChartBar,
+  FaTrash,
+  FaSync,
+  FaSearch,
+  FaCalendar,
+  FaUser,
+  FaTag,
+  FaBox,
+  FaExclamationTriangle,
+  FaTimes,
+  FaChevronLeft,
+  FaChevronRight
+} from 'react-icons/fa';
 
 const AdminLogs = () => {
   const [logs, setLogs] = useState([]);
@@ -238,7 +237,7 @@ const AdminLogs = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
+    <div className="bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
@@ -246,17 +245,17 @@ const AdminLogs = () => {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                <FontAwesomeIcon icon={faClipboardList} className="mr-3" style={{ color: colors.primary }} />
+              <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                <FaClipboardList className="w-8 h-8 inline-block align-middle mr-3" style={{ color: colors.primary }} />
                 Quản lý Logs
               </h1>
               <p className="text-gray-600">Theo dõi và quản lý logs hoạt động của admin và teacher</p>
             </div>
             <button
               onClick={() => setShowCleanupModal(true)}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105"
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 flex items-center"
             >
-              <FontAwesomeIcon icon={faTrash} className="mr-2" />
+              <FaTrash className="w-4 h-4 inline-block align-middle mr-2" />
               Dọn dẹp Logs
             </button>
           </div>
@@ -277,24 +276,24 @@ const AdminLogs = () => {
           <div className="flex border-b">
             <button
               onClick={() => handleTabChange('logs')}
-              className={`flex-1 py-4 px-6 font-semibold transition-colors ${
+              className={`flex-1 py-4 px-6 font-semibold transition-colors flex items-center justify-center ${
                 activeTab === 'logs'
                   ? 'text-red-600 border-b-2 border-red-600 bg-red-50'
                   : 'text-gray-600 hover:text-red-600 hover:bg-gray-50'
               }`}
             >
-              <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
+              <FaClipboardList className="w-4 h-4 inline-block align-middle mr-2" />
               Danh sách Logs
             </button>
             <button
               onClick={() => handleTabChange('stats')}
-              className={`flex-1 py-4 px-6 font-semibold transition-colors ${
+              className={`flex-1 py-4 px-6 font-semibold transition-colors flex items-center justify-center ${
                 activeTab === 'stats'
                   ? 'text-red-600 border-b-2 border-red-600 bg-red-50'
                   : 'text-gray-600 hover:text-red-600 hover:bg-gray-50'
               }`}
             >
-              <FontAwesomeIcon icon={faChartBar} className="mr-2" />
+              <FaChartBar className="w-4 h-4 inline-block align-middle mr-2" />
               Thống kê
             </button>
           </div>
@@ -305,23 +304,23 @@ const AdminLogs = () => {
               {/* Filters */}
               <div className="bg-gray-50 rounded-lg p-4 mb-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    <FontAwesomeIcon icon={faFilter} className="mr-2" />
+                  <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                    <FaFilter className="w-4 h-4 inline-block align-middle mr-2" />
                     Bộ lọc
                   </h3>
                   <div className="flex space-x-2">
                     <button
                       onClick={handleApplyFilters}
-                      className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                      className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex items-center"
                     >
-                      <FontAwesomeIcon icon={faSearch} className="mr-2" />
+                      <FaSearch className="w-4 h-4 inline-block align-middle mr-2" />
                       Áp dụng
                     </button>
                     <button
                       onClick={handleResetFilters}
-                      className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition duration-300"
+                      className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition duration-300 flex items-center"
                     >
-                      <FontAwesomeIcon icon={faSync} className="mr-2" />
+                      <FaSync className="w-4 h-4 inline-block align-middle mr-2" />
                       Đặt lại
                     </button>
                   </div>
@@ -329,8 +328,8 @@ const AdminLogs = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      <FontAwesomeIcon icon={faUser} className="mr-2" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <FaUser className="w-3 h-3 inline-block align-middle mr-2" />
                       Username
                     </label>
                     <input
@@ -343,8 +342,8 @@ const AdminLogs = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      <FontAwesomeIcon icon={faTag} className="mr-2" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <FaTag className="w-3 h-3 inline-block align-middle mr-2" />
                       Role
                     </label>
                     <select
@@ -359,8 +358,8 @@ const AdminLogs = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      <FontAwesomeIcon icon={faTag} className="mr-2" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <FaTag className="w-3 h-3 inline-block align-middle mr-2" />
                       Action
                     </label>
                     <select
@@ -377,8 +376,8 @@ const AdminLogs = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      <FontAwesomeIcon icon={faBox} className="mr-2" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <FaBox className="w-3 h-3 inline-block align-middle mr-2" />
                       Resource Type
                     </label>
                     <select
@@ -396,8 +395,8 @@ const AdminLogs = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      <FontAwesomeIcon icon={faCalendar} className="mr-2" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <FaCalendar className="w-3 h-3 inline-block align-middle mr-2" />
                       Từ ngày
                     </label>
                     <input
@@ -409,8 +408,8 @@ const AdminLogs = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      <FontAwesomeIcon icon={faCalendar} className="mr-2" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <FaCalendar className="w-3 h-3 inline-block align-middle mr-2" />
                       Đến ngày
                     </label>
                     <input
@@ -500,7 +499,7 @@ const AdminLogs = () => {
 
                   {logs.length === 0 && (
                     <div className="text-center py-12 text-gray-500">
-                      <FontAwesomeIcon icon={faClipboardList} className="text-6xl mb-4 text-gray-300" />
+                      <FaClipboardList className="w-24 h-24 mx-auto mb-4 text-gray-300" />
                       <p className="text-xl">Không có logs nào</p>
                     </div>
                   )}
@@ -517,14 +516,14 @@ const AdminLogs = () => {
                           disabled={pagination.current_page === 1}
                           className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <FontAwesomeIcon icon={faChevronLeft} />
+                          <FaChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handlePageChange(pagination.current_page + 1)}
                           disabled={!pagination.has_more}
                           className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <FontAwesomeIcon icon={faChevronRight} />
+                          <FaChevronRight className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -555,9 +554,9 @@ const AdminLogs = () => {
                   </select>
                   <button
                     onClick={fetchStats}
-                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded transition duration-300"
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded transition duration-300 flex items-center"
                   >
-                    <FontAwesomeIcon icon={faSync} className="mr-2" />
+                    <FaSync className="w-4 h-4 inline-block align-middle mr-2" />
                     Tải thống kê
                   </button>
                 </div>
@@ -641,7 +640,7 @@ const AdminLogs = () => {
                 </div>
               ) : (
                 <div className="text-center py-12 text-gray-500">
-                  <FontAwesomeIcon icon={faChartBar} className="text-6xl mb-4 text-gray-300" />
+                  <FaChartBar className="w-24 h-24 mx-auto mb-4 text-gray-300" />
                   <p className="text-xl">Nhấn "Tải thống kê" để xem dữ liệu</p>
                 </div>
               )}
@@ -661,14 +660,13 @@ const AdminLogs = () => {
                   onClick={() => setShowCleanupModal(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <FontAwesomeIcon icon={faTimes} />
+                  <FaTimes className="w-6 h-6" />
                 </button>
               </div>
 
               <div className="text-center mb-6">
-                <FontAwesomeIcon 
-                  icon={faExclamationTriangle} 
-                  className="text-6xl text-yellow-500 mb-4" 
+                <FaExclamationTriangle
+                  className="w-24 h-24 mx-auto text-yellow-500 mb-4"
                 />
                 <p className="text-gray-700 mb-4">
                   Xóa tất cả logs cũ hơn số ngày chỉ định. Hành động này không thể hoàn tác.
@@ -699,9 +697,9 @@ const AdminLogs = () => {
                 <button
                   onClick={handleCleanup}
                   disabled={loading || cleanupDays < 30 || cleanupDays > 365}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
-                  <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                  <FaTrash className="w-4 h-4 inline-block align-middle mr-2" />
                   Xóa
                 </button>
               </div>

@@ -4,11 +4,10 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import FileManager from '../components/FileManager';
 import AdvancedFileUploader from '../components/AdvancedFileUploader';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUpload,
-  faFile
-} from '@fortawesome/free-solid-svg-icons';
+  FaUpload,
+  FaFile
+} from 'react-icons/fa';
 import { API_ENDPOINTS } from '../config/api';
 
 const SourceManager = () => {
@@ -125,8 +124,8 @@ const SourceManager = () => {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                <FontAwesomeIcon icon={faFile} className="mr-3" style={{ color: colors.primary }} />
+              <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                <FaFile className="w-8 h-8 inline-block align-middle mr-3" style={{ color: colors.primary }} />
                 Quản lý File Chatbot
               </h1>
               <p className="text-gray-600">Quản lý file dữ liệu cho chatbot - xem, upload, download, xóa</p>
@@ -136,7 +135,7 @@ const SourceManager = () => {
                   onClick={() => setShowAdvancedUploader(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
                 >
-                  <FontAwesomeIcon icon={faUpload} className="mr-2" />
+                  <FaUpload className="mr-2" />
                   Upload File
                 </button> */}
               </div>

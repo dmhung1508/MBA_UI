@@ -2,24 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { API_ENDPOINTS } from '../config/api';
-import { 
-  faUsers,
-  faPlus, 
-  faEdit, 
-  faUserShield,
-  faChalkboardTeacher,
-  faUser,
-  faSave, 
-  faTimes,
-  faExclamationTriangle,
-  faSearch,
-  faFilter,
-  faCheck,
-  faStar,
-  faBookOpen
-} from '@fortawesome/free-solid-svg-icons';
+import {
+  FaUsers,
+  FaPlus,
+  FaEdit,
+  FaUserShield,
+  FaChalkboardTeacher,
+  FaUser,
+  FaSave,
+  FaTimes,
+  FaExclamationTriangle,
+  FaSearch,
+  FaFilter,
+  FaCheck,
+  FaStar,
+  FaBookOpen
+} from 'react-icons/fa';
 
 const UserManager = () => {
   const [users, setUsers] = useState([]);
@@ -63,9 +62,9 @@ const UserManager = () => {
   };
 
   const roleIcons = {
-    admin: faUserShield,
-    teacher: faChalkboardTeacher,
-    user: faUser
+    admin: FaUserShield,
+    teacher: FaChalkboardTeacher,
+    user: FaUser
   };
 
   // Kiểm tra quyền admin
@@ -275,8 +274,8 @@ const UserManager = () => {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                <FontAwesomeIcon icon={faUsers} className="mr-3" style={{ color: colors.primary }} />
+              <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                <FaUsers className="w-8 h-8 mr-3 inline-block align-middle" style={{ color: colors.primary }} />
                 Quản lý Người dùng
               </h1>
               <p className="text-gray-600">Quản lý role và phân quyền cho users, teachers</p>
@@ -286,8 +285,8 @@ const UserManager = () => {
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                <FontAwesomeIcon icon={faFilter} className="mr-2" />
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                <FaFilter className="w-4 h-4 mr-2 inline-block align-middle" />
                 Lọc theo role
               </label>
               <select
@@ -302,8 +301,8 @@ const UserManager = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                <FontAwesomeIcon icon={faSearch} className="mr-2" />
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                <FaSearch className="w-4 h-4 mr-2 inline-block align-middle" />
                 Tìm kiếm
               </label>
               <input
@@ -343,7 +342,7 @@ const UserManager = () => {
               <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                    <FontAwesomeIcon icon={roleIcons[role]} className="mr-2" />
+                    {React.createElement(roleIcons[role], { className: "w-5 h-5 mr-2 inline-block align-middle" })}
                     {role === 'admin' ? 'Administrators' : role === 'teacher' ? 'Teachers' : 'Users'}
                     <span className="ml-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
                       {roleUsers.length}
@@ -371,8 +370,8 @@ const UserManager = () => {
                           {user.username}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${roleColors[user.role] || 'bg-gray-100 text-gray-800'}`}>
-                            <FontAwesomeIcon icon={roleIcons[user.role]} className="mr-1" />
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${roleColors[user.role] || 'bg-gray-100 text-gray-800'} inline-flex items-center`}>
+                            {React.createElement(roleIcons[user.role], { className: "w-3 h-3 mr-1 inline-block align-middle" })}
                             {user.role}
                           </span>
                         </td>
@@ -398,7 +397,7 @@ const UserManager = () => {
                               className="text-blue-600 hover:text-blue-900 p-2 rounded hover:bg-blue-100"
                               title="Thay đổi role"
                             >
-                              <FontAwesomeIcon icon={faEdit} />
+                              <FaEdit className="w-4 h-4" />
                             </button>
                             {(user.role === 'teacher' || (user.role === 'user' && modalMode !== 'assign-topics')) && (
                               <button
@@ -406,7 +405,7 @@ const UserManager = () => {
                                 className="text-green-600 hover:text-green-900 p-2 rounded hover:bg-green-100"
                                 title="Assign topics"
                               >
-                                <FontAwesomeIcon icon={faBookOpen} />
+                                <FaBookOpen className="w-4 h-4" />
                               </button>
                             )}
                           </div>
@@ -418,7 +417,7 @@ const UserManager = () => {
                 
                 {roleUsers.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
-                    <FontAwesomeIcon icon={roleIcons[role]} className="text-4xl mb-2 text-gray-300" />
+                    {React.createElement(roleIcons[role], { className: "w-16 h-16 mb-2 text-gray-300 mx-auto" })}
                     <p>Không có {role} nào</p>
                   </div>
                 )}
@@ -442,7 +441,7 @@ const UserManager = () => {
                   onClick={closeModal}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <FontAwesomeIcon icon={faTimes} />
+                  <FaTimes className="w-5 h-5" />
                 </button>
               </div>
 
@@ -527,9 +526,9 @@ const UserManager = () => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
                   >
-                    <FontAwesomeIcon icon={faSave} className="mr-2" />
+                    <FaSave className="w-4 h-4 mr-2 inline-block align-middle" />
                     {modalMode === 'role' ? 'Cập nhật Role' : 'Assign Topics'}
                   </button>
                 </div>

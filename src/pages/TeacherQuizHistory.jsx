@@ -2,21 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { API_ENDPOINTS } from '../config/api';
 import {
-    faHistory,
-    faFilter,
-    faSearch,
-    faChartBar,
-    faUserGraduate,
-    faStar,
-    faCalendar,
-    faArrowLeft,
-    faRedo,
-    faChevronLeft,
-    faChevronRight
-} from '@fortawesome/free-solid-svg-icons';
+    FaHistory,
+    FaFilter,
+    FaSearch,
+    FaChartBar,
+    FaUserGraduate,
+    FaStar,
+    FaCalendar,
+    FaArrowLeft,
+    FaRedo,
+    FaChevronLeft,
+    FaChevronRight
+} from 'react-icons/fa';
 
 const TeacherQuizHistory = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -222,10 +221,10 @@ const TeacherQuizHistory = () => {
                                 onClick={() => navigate('/teacher')}
                                 className="mr-4 text-gray-600 hover:text-gray-800"
                             >
-                                <FontAwesomeIcon icon={faArrowLeft} className="text-xl" />
+                                <FaArrowLeft className="w-6 h-6" />
                             </button>
-                            <h1 className="text-3xl font-bold text-gray-800">
-                                <FontAwesomeIcon icon={faHistory} className="mr-3" style={{ color: colors.primary }} />
+                            <h1 className="text-3xl font-bold text-gray-800 flex items-center">
+                                <FaHistory className="w-8 h-8 inline-block align-middle mr-3" style={{ color: colors.primary }} />
                                 Lịch Sử Làm Bài Quiz
                             </h1>
                         </div>
@@ -259,7 +258,7 @@ const TeacherQuizHistory = () => {
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <div className="flex items-center">
                             <div className="p-3 rounded-full bg-blue-100 mr-4">
-                                <FontAwesomeIcon icon={faChartBar} className="text-blue-600 text-xl" />
+                                <FaChartBar className="w-6 h-6 text-blue-600" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-gray-600">Tổng Số Bài Làm</p>
@@ -273,7 +272,7 @@ const TeacherQuizHistory = () => {
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <div className="flex items-center">
                             <div className="p-3 rounded-full bg-green-100 mr-4">
-                                <FontAwesomeIcon icon={faStar} className="text-green-600 text-xl" />
+                                <FaStar className="w-6 h-6 text-green-600" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-gray-600">Điểm Trung Bình</p>
@@ -287,7 +286,7 @@ const TeacherQuizHistory = () => {
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <div className="flex items-center">
                             <div className="p-3 rounded-full bg-purple-100 mr-4">
-                                <FontAwesomeIcon icon={faUserGraduate} className="text-purple-600 text-xl" />
+                                <FaUserGraduate className="w-6 h-6 text-purple-600" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-gray-600">Số Học Sinh</p>
@@ -302,7 +301,7 @@ const TeacherQuizHistory = () => {
                 {/* Filters */}
                 <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <FontAwesomeIcon icon={faFilter} className="mr-2" />
+                        <FaFilter className="w-4 h-4 inline-block align-middle mr-2" />
                         Bộ Lọc
                     </h3>
 
@@ -341,16 +340,16 @@ const TeacherQuizHistory = () => {
                         <div className="flex items-end space-x-2">
                             <button
                                 onClick={handleFilter}
-                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center justify-center"
                             >
-                                <FontAwesomeIcon icon={faFilter} className="mr-2" />
+                                <FaFilter className="w-4 h-4 inline-block align-middle mr-2" />
                                 Lọc
                             </button>
                             <button
                                 onClick={handleReset}
-                                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors flex items-center justify-center"
                             >
-                                <FontAwesomeIcon icon={faRedo} className="mr-2" />
+                                <FaRedo className="w-4 h-4 inline-block align-middle mr-2" />
                                 Reset
                             </button>
                         </div>
@@ -427,8 +426,10 @@ const TeacherQuizHistory = () => {
                                                     {submission.correct_answers}/{submission.total_questions}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                    <FontAwesomeIcon icon={faCalendar} className="mr-2 text-gray-400" />
-                                                    {formatDate(submission.timestamp)}
+                                                    <div className="flex items-center">
+                                                        <FaCalendar className="w-4 h-4 inline-block align-middle mr-2 text-gray-400" />
+                                                        {formatDate(submission.timestamp)}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -447,24 +448,24 @@ const TeacherQuizHistory = () => {
                                             <button
                                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                                 disabled={currentPage === 1}
-                                                className={`px-4 py-2 rounded-md ${currentPage === 1
+                                                className={`px-4 py-2 rounded-md flex items-center ${currentPage === 1
                                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                                                     }`}
                                             >
-                                                <FontAwesomeIcon icon={faChevronLeft} className="mr-2" />
+                                                <FaChevronLeft className="w-4 h-4 inline-block align-middle mr-2" />
                                                 Trước
                                             </button>
                                             <button
                                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                                 disabled={currentPage === totalPages}
-                                                className={`px-4 py-2 rounded-md ${currentPage === totalPages
+                                                className={`px-4 py-2 rounded-md flex items-center ${currentPage === totalPages
                                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                                                     }`}
                                             >
                                                 Sau
-                                                <FontAwesomeIcon icon={faChevronRight} className="ml-2" />
+                                                <FaChevronRight className="w-4 h-4 inline-block align-middle ml-2" />
                                             </button>
                                         </div>
                                     </div>
@@ -473,7 +474,7 @@ const TeacherQuizHistory = () => {
                         </>
                     ) : (
                         <div className="text-center py-12 text-gray-500">
-                            <FontAwesomeIcon icon={faHistory} className="text-6xl mb-4 text-gray-300" />
+                            <FaHistory className="w-24 h-24 mx-auto mb-4 text-gray-300" />
                             <h3 className="text-xl font-medium mb-2">Không có dữ liệu</h3>
                             <p className="text-gray-400">
                                 {selectedTopic || searchUsername
@@ -584,8 +585,8 @@ const TeacherQuizHistory = () => {
                             {/* Modal Footer */}
                             <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
                                 <div className="flex justify-between items-center">
-                                    <p className="text-sm text-gray-600">
-                                        <FontAwesomeIcon icon={faCalendar} className="mr-2" />
+                                    <p className="text-sm text-gray-600 flex items-center">
+                                        <FaCalendar className="w-4 h-4 inline-block align-middle mr-2" />
                                         Thời gian làm bài: {formatDate(selectedSubmission.timestamp)}
                                     </p>
                                     <button

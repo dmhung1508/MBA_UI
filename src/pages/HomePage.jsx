@@ -184,6 +184,7 @@ const HomePage = () => {
                           <img
                             src={slide.image}
                             alt={slide.title}
+                            loading="lazy"
                             className="w-full h-80 sm:h-96 object-cover"
                           />
                           {/* Overlay with slide content */}

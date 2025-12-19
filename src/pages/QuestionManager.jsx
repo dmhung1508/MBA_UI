@@ -1,27 +1,94 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { API_ENDPOINTS } from '../config/api';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
-  faQuestionCircle,
-  faPlus,
-  faEdit,
-  faTrash,
-  faSave,
-  faTimes,
-  faExclamationTriangle,
-  faUpload,
-  faFileExcel,
-  faChevronLeft,
-  faChevronRight,
-  faSearch,
-  faList,
-  faStar
-} from '@fortawesome/free-solid-svg-icons';
+  FaQuestionCircle,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+  FaExclamationTriangle,
+  FaUpload,
+  FaFileExcel,
+  FaChevronLeft,
+  FaChevronRight,
+  FaSearch,
+  FaList,
+  FaStar
+} from 'react-icons/fa';
+
+// Memoized BulkQuestionItem component for better performance
+const BulkQuestionItem = memo(({ question, questionIndex, onUpdate, onUpdateText, onRemove, canRemove }) => {
+  return (
+    <div className="border border-gray-200 rounded-lg p-4 mb-4">
+      <div className="flex justify-between items-center mb-3">
+        <h4 className="font-medium text-gray-700">Câu hỏi {questionIndex + 1}</h4>
+        {canRemove && (
+          <button
+            type="button"
+            onClick={() => onRemove(questionIndex)}
+            className="text-red-600 hover:text-red-800"
+          >
+            <FaTrash className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Nội dung câu hỏi
+          </label>
+          <textarea
+            value={question.question_text}
+            onChange={(e) => onUpdateText(questionIndex, e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+            placeholder="Nhập nội dung câu hỏi"
+            rows="2"
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {question.choices.map((choice, choiceIndex) => (
+            <div key={choiceIndex}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Lựa chọn {String.fromCharCode(65 + choiceIndex)}
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={choice.text}
+                  onChange={(e) => onUpdate(questionIndex, choiceIndex, 'text', e.target.value)}
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  placeholder={`Nhập lựa chọn ${String.fromCharCode(65 + choiceIndex)}`}
+                  required={choiceIndex < 2}
+                />
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name={`correct_${questionIndex}`}
+                    checked={choice.is_correct}
+                    onChange={(e) => onUpdate(questionIndex, choiceIndex, 'is_correct', e.target.checked)}
+                    className="mr-1"
+                  />
+                  <span className="text-sm text-gray-600">Đúng</span>
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+BulkQuestionItem.displayName = 'BulkQuestionItem';
 
 const QuestionManager = () => {
   const [questions, setQuestions] = useState([]);
@@ -631,42 +698,54 @@ const QuestionManager = () => {
     setSuccess('');
   };
 
-  const handleTopicChange = (newTopic) => {
+  const handleTopicChange = useCallback((newTopic) => {
     setSelectedTopic(newTopic);
     setPagination(prev => ({ ...prev, offset: 0 }));
-  };
+  }, []);
 
   const handlePageChange = (newOffset) => {
     setPagination(prev => ({ ...prev, offset: newOffset }));
   };
 
-  const updateQuestionChoice = (choiceIndex, field, value) => {
-    const newChoices = [...questionForm.choices];
-    if (field === 'is_correct' && value) {
-      // Only one choice can be correct
-      newChoices.forEach((choice, idx) => {
-        choice.is_correct = idx === choiceIndex;
-      });
-    } else {
-      newChoices[choiceIndex][field] = value;
-    }
-    setQuestionForm(prev => ({ ...prev, choices: newChoices }));
-  };
+  const updateQuestionChoice = useCallback((choiceIndex, field, value) => {
+    setQuestionForm(prev => {
+      const newChoices = [...prev.choices];
+      if (field === 'is_correct' && value) {
+        // Only one choice can be correct
+        newChoices.forEach((choice, idx) => {
+          choice.is_correct = idx === choiceIndex;
+        });
+      } else {
+        newChoices[choiceIndex][field] = value;
+      }
+      return { ...prev, choices: newChoices };
+    });
+  }, []);
 
-  const updateBulkQuestionChoice = (questionIndex, choiceIndex, field, value) => {
-    const newBulkQuestions = [...bulkQuestions];
-    if (field === 'is_correct' && value) {
-      // Only one choice can be correct
-      newBulkQuestions[questionIndex].choices.forEach((choice, idx) => {
-        choice.is_correct = idx === choiceIndex;
-      });
-    } else {
-      newBulkQuestions[questionIndex].choices[choiceIndex][field] = value;
-    }
-    setBulkQuestions(newBulkQuestions);
-  };
+  const updateBulkQuestionChoice = useCallback((questionIndex, choiceIndex, field, value) => {
+    setBulkQuestions(prev => {
+      const newBulkQuestions = [...prev];
+      if (field === 'is_correct' && value) {
+        // Only one choice can be correct
+        newBulkQuestions[questionIndex].choices.forEach((choice, idx) => {
+          choice.is_correct = idx === choiceIndex;
+        });
+      } else {
+        newBulkQuestions[questionIndex].choices[choiceIndex][field] = value;
+      }
+      return newBulkQuestions;
+    });
+  }, []);
 
-  const addBulkQuestion = () => {
+  const updateBulkQuestionText = useCallback((questionIndex, text) => {
+    setBulkQuestions(prev => {
+      const newBulkQuestions = [...prev];
+      newBulkQuestions[questionIndex].question_text = text;
+      return newBulkQuestions;
+    });
+  }, []);
+
+  const addBulkQuestion = useCallback(() => {
     setBulkQuestions(prev => [...prev, {
       question_text: '',
       choices: [
@@ -676,13 +755,16 @@ const QuestionManager = () => {
         { text: '', is_correct: false }
       ]
     }]);
-  };
+  }, []);
 
-  const removeBulkQuestion = (index) => {
-    if (bulkQuestions.length > 1) {
-      setBulkQuestions(prev => prev.filter((_, idx) => idx !== index));
-    }
-  };
+  const removeBulkQuestion = useCallback((index) => {
+    setBulkQuestions(prev => {
+      if (prev.length > 1) {
+        return prev.filter((_, idx) => idx !== index);
+      }
+      return prev;
+    });
+  }, []);
 
   if (loading && questions.length === 0) {
     return (
@@ -702,8 +784,8 @@ const QuestionManager = () => {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                <FontAwesomeIcon icon={faQuestionCircle} className="mr-3" style={{ color: colors.primary }} />
+              <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                <FaQuestionCircle className="w-8 h-8 mr-3 inline-block align-middle" style={{ color: colors.primary }} />
                 Quản lý Câu hỏi
               </h1>
               <p className="text-gray-600">Quản lý câu hỏi quiz theo từng topic chatbot</p>
@@ -712,16 +794,16 @@ const QuestionManager = () => {
               <div className="flex space-x-3">
                 <button
                   onClick={openBulkCreateModal}
-                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105"
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 flex items-center"
                 >
-                  <FontAwesomeIcon icon={faPlus} className="mr-2" />
+                  <FaPlus className="w-4 h-4 mr-2 inline-block align-middle" />
                   Thêm câu hỏi
                 </button>
                 <button
                   onClick={openExcelUploadModal}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105"
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 flex items-center"
                 >
-                  <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+                  <FaFileExcel className="w-4 h-4 mr-2 inline-block align-middle" />
                   Upload Excel
                 </button>
               </div>
@@ -738,17 +820,17 @@ const QuestionManager = () => {
                   : 'text-gray-600 hover:text-gray-800'
                   }`}
               >
-                <FontAwesomeIcon icon={faList} className="mr-2" />
+                <FaList className="w-4 h-4 mr-2 inline-block align-middle" />
                 Duyệt câu hỏi
               </button>
               <button
                 onClick={() => setSearchMode(true)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${searchMode
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center ${searchMode
                   ? 'bg-white text-red-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
                   }`}
               >
-                <FontAwesomeIcon icon={faSearch} className="mr-2" />
+                <FaSearch className="w-4 h-4 mr-2 inline-block align-middle" />
                 Tìm kiếm
               </button>
             </div>
@@ -827,9 +909,9 @@ const QuestionManager = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition duration-300"
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition duration-300 flex items-center"
                 >
-                  <FontAwesomeIcon icon={faSearch} className="mr-2" />
+                  <FaSearch className="w-4 h-4 mr-2 inline-block align-middle" />
                   {loading ? 'Đang tìm...' : 'Tìm kiếm'}
                 </button>
                 <button
@@ -845,7 +927,7 @@ const QuestionManager = () => {
               {searchStats && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <div className="flex items-center text-sm text-blue-800">
-                    <FontAwesomeIcon icon={faSearch} className="mr-2" />
+                    <FaSearch className="w-4 h-4 mr-2 inline-block align-middle" />
                     <span>
                       Tìm thấy <strong>{searchStats.matched_questions}</strong> câu hỏi
                       từ <strong>{searchStats.total_questions_found}</strong> câu hỏi
@@ -922,7 +1004,7 @@ const QuestionManager = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             <div className="flex items-center">
-                              <FontAwesomeIcon icon={faStar} className="text-yellow-500 mr-1" />
+                              <FaStar className="w-4 h-4 text-yellow-500 mr-1 inline-block align-middle" />
                               <span className="font-medium">{question.relevance_score || 0}</span>
                             </div>
                           </td>
@@ -935,14 +1017,14 @@ const QuestionManager = () => {
                             className="text-blue-600 hover:text-blue-900 p-2 rounded hover:bg-blue-100"
                             title="Chỉnh sửa"
                           >
-                            <FontAwesomeIcon icon={faEdit} />
+                            <FaEdit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => openDeleteModal(question, searchMode ? (question.topic_index || 0) : (pagination.offset + index))}
                             className="text-red-600 hover:text-red-900 p-2 rounded hover:bg-red-100"
                             title="Xóa"
                           >
-                            <FontAwesomeIcon icon={faTrash} />
+                            <FaTrash className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -955,14 +1037,14 @@ const QuestionManager = () => {
             {/* Empty States */}
             {!searchMode && questions.length === 0 && !loading && (
               <div className="text-center py-12 text-gray-500">
-                <FontAwesomeIcon icon={faQuestionCircle} className="text-6xl mb-4 text-gray-300" />
+                <FaQuestionCircle className="w-24 h-24 mb-4 text-gray-300 mx-auto" />
                 <p className="text-xl">Chưa có câu hỏi nào cho topic này</p>
               </div>
             )}
 
             {searchMode && searchResults.length === 0 && !loading && searchParams.keyword && (
               <div className="text-center py-12 text-gray-500">
-                <FontAwesomeIcon icon={faSearch} className="text-6xl mb-4 text-gray-300" />
+                <FaSearch className="w-24 h-24 mb-4 text-gray-300 mx-auto" />
                 <p className="text-xl">Không tìm thấy câu hỏi nào</p>
                 <p className="text-sm mt-2">Thử thay đổi từ khóa hoặc bộ lọc khác</p>
               </div>
@@ -990,9 +1072,9 @@ const QuestionManager = () => {
                         handlePageChange(Math.max(0, pagination.offset - pagination.size))
                       }
                       disabled={searchMode ? searchPagination.offset === 0 : pagination.offset === 0}
-                      className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                      className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 flex items-center"
                     >
-                      <FontAwesomeIcon icon={faChevronLeft} className="mr-1" />
+                      <FaChevronLeft className="w-3 h-3 mr-1 inline-block align-middle" />
                       Trước
                     </button>
                     <button
@@ -1001,10 +1083,10 @@ const QuestionManager = () => {
                         handlePageChange(pagination.offset + pagination.size)
                       }
                       disabled={searchMode ? !searchPagination.has_more : !pagination.has_more}
-                      className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                      className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 flex items-center"
                     >
                       Sau
-                      <FontAwesomeIcon icon={faChevronRight} className="ml-1" />
+                      <FaChevronRight className="w-3 h-3 ml-1 inline-block align-middle" />
                     </button>
                   </div>
                 </div>
@@ -1015,7 +1097,7 @@ const QuestionManager = () => {
           !searchMode && !selectedTopic && (
             <div className="bg-white rounded-lg shadow-lg p-12">
               <div className="text-center text-gray-500">
-                <FontAwesomeIcon icon={faQuestionCircle} className="text-6xl mb-4 text-gray-300" />
+                <FaQuestionCircle className="w-24 h-24 mb-4 text-gray-300 mx-auto" />
                 <p className="text-xl">Chọn một topic để xem câu hỏi</p>
                 <p className="text-sm mt-2">Hoặc chuyển sang chế độ tìm kiếm để tìm câu hỏi trong tất cả topic</p>
               </div>
@@ -1041,17 +1123,14 @@ const QuestionManager = () => {
                   onClick={closeModal}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <FontAwesomeIcon icon={faTimes} />
+                  <FaTimes className="w-5 h-5" />
                 </button>
               </div>
 
               {modalMode === 'delete' ? (
                 <div>
                   <div className="text-center mb-6">
-                    <FontAwesomeIcon
-                      icon={faExclamationTriangle}
-                      className="text-6xl text-red-500 mb-4"
-                    />
+                    <FaExclamationTriangle className="w-24 h-24 text-red-500 mb-4 mx-auto" />
                     <p className="text-gray-700">
                       Bạn có chắc chắn muốn xóa câu hỏi này?
                     </p>
@@ -1106,7 +1185,7 @@ const QuestionManager = () => {
                           download="quiz_template.xlsx"
                           className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 flex items-center whitespace-nowrap"
                         >
-                          <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+                          <FaFileExcel className="w-4 h-4 mr-2 inline-block align-middle" />
                           Tải xuống
                         </a>
                       </div>
@@ -1135,9 +1214,9 @@ const QuestionManager = () => {
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
                     >
-                      <FontAwesomeIcon icon={faUpload} className="mr-2" />
+                      <FaUpload className="w-4 h-4 mr-2 inline-block align-middle" />
                       Upload
                     </button>
                   </div>
@@ -1148,78 +1227,23 @@ const QuestionManager = () => {
                     {modalMode === 'bulk-create' ? (
                       <div>
                         {bulkQuestions.map((question, questionIndex) => (
-                          <div key={questionIndex} className="border border-gray-200 rounded-lg p-4 mb-4">
-                            <div className="flex justify-between items-center mb-3">
-                              <h4 className="font-medium text-gray-700">Câu hỏi {questionIndex + 1}</h4>
-                              {bulkQuestions.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => removeBulkQuestion(questionIndex)}
-                                  className="text-red-600 hover:text-red-800"
-                                >
-                                  <FontAwesomeIcon icon={faTrash} />
-                                </button>
-                              )}
-                            </div>
-
-                            <div className="space-y-4">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Nội dung câu hỏi
-                                </label>
-                                <textarea
-                                  value={question.question_text}
-                                  onChange={(e) => {
-                                    const newBulkQuestions = [...bulkQuestions];
-                                    newBulkQuestions[questionIndex].question_text = e.target.value;
-                                    setBulkQuestions(newBulkQuestions);
-                                  }}
-                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                  placeholder="Nhập nội dung câu hỏi"
-                                  rows="2"
-                                  required
-                                />
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {question.choices.map((choice, choiceIndex) => (
-                                  <div key={choiceIndex}>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                      Lựa chọn {String.fromCharCode(65 + choiceIndex)}
-                                    </label>
-                                    <div className="flex space-x-2">
-                                      <input
-                                        type="text"
-                                        value={choice.text}
-                                        onChange={(e) => updateBulkQuestionChoice(questionIndex, choiceIndex, 'text', e.target.value)}
-                                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                        placeholder={`Nhập lựa chọn ${String.fromCharCode(65 + choiceIndex)}`}
-                                        required={choiceIndex < 2}
-                                      />
-                                      <label className="flex items-center">
-                                        <input
-                                          type="radio"
-                                          name={`correct_${questionIndex}`}
-                                          checked={choice.is_correct}
-                                          onChange={(e) => updateBulkQuestionChoice(questionIndex, choiceIndex, 'is_correct', e.target.checked)}
-                                          className="mr-1"
-                                        />
-                                        <span className="text-sm text-gray-600">Đúng</span>
-                                      </label>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
+                          <BulkQuestionItem
+                            key={questionIndex}
+                            question={question}
+                            questionIndex={questionIndex}
+                            onUpdate={updateBulkQuestionChoice}
+                            onUpdateText={updateBulkQuestionText}
+                            onRemove={removeBulkQuestion}
+                            canRemove={bulkQuestions.length > 1}
+                          />
                         ))}
 
                         <button
                           type="button"
                           onClick={addBulkQuestion}
-                          className="w-full border-2 border-dashed border-gray-300 rounded-lg py-3 text-gray-600 hover:border-gray-400 hover:text-gray-700"
+                          className="w-full border-2 border-dashed border-gray-300 rounded-lg py-3 text-gray-600 hover:border-gray-400 hover:text-gray-700 flex items-center justify-center"
                         >
-                          <FontAwesomeIcon icon={faPlus} className="mr-2" />
+                          <FaPlus className="w-4 h-4 mr-2 inline-block align-middle" />
                           Thêm câu hỏi mới
                         </button>
                       </div>
@@ -1282,9 +1306,9 @@ const QuestionManager = () => {
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
                     >
-                      <FontAwesomeIcon icon={faSave} className="mr-2" />
+                      <FaSave className="w-4 h-4 mr-2 inline-block align-middle" />
                       {modalMode === 'create' ? 'Tạo' : modalMode === 'bulk-create' ? `Tạo ${bulkQuestions.length} câu` : 'Cập nhật'}
                     </button>
                   </div>

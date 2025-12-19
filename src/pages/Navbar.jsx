@@ -1,5 +1,5 @@
 // Navbar.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import {
   FaRobot,
   FaBars,
@@ -78,23 +78,23 @@ const Navbar = () => {
   }, [isAdminDropdownOpen]);
 
   // Hàm xử lý đăng xuất
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     clearAuthData();
     setIsLoggedIn(false);
     setIsAdmin(false);
     setIsTeacher(false);
     window.location.href = "/mini/";
-  };
+  }, []);
 
   // Hàm xử lý khi người dùng nhấn vào Chat
-  const handleChatClick = (e) => {
+  const handleChatClick = useCallback((e) => {
     e.preventDefault(); // Ngăn chặn hành động mặc định của liên kết
     if (isLoggedIn) {
       window.location.href = "/mini/mini"; // Chuyển hướng đến trang Chat
     } else {
       window.location.href = "/mini/?message=login_required"; // Chuyển hướng về trang Home với thông báo cảnh báo
     }
-  };
+  }, [isLoggedIn]);
 
   return (
     <>
@@ -494,4 +494,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default memo(Navbar);
