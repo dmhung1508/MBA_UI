@@ -148,8 +148,8 @@ const ChatUI = () => {
   // Show loading if chatbots haven't loaded yet
   if (chatbots.length === 0 || !currentChat) {
     return (
-      <div className="flex h-screen bg-gray-100 items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
       </div>
     );
   }
