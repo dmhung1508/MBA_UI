@@ -772,4 +772,4 @@ const MessageManager = () => {
   );
 };
 
-export default MessageManager;
+export default memo(MessageManager);
