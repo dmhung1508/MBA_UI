@@ -60,7 +60,12 @@ const EditPage = () => {
         setAssignedTopics(topics);
 
         // Fetch all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
+        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
         const chatbotsData = await chatbotsResponse.json();
 
         if (chatbotsData.chatbots) {
@@ -83,7 +88,13 @@ const EditPage = () => {
   const fetchChatbots = async () => {
     try {
       setChatbotsLoading(true);
-      const response = await fetch(API_ENDPOINTS.CHATBOTS);
+      const accessToken = localStorage.getItem('access_token');
+      const response = await fetch(API_ENDPOINTS.CHATBOTS, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const data = await response.json();
       setChatbots(data.chatbots || []);
     } catch (err) {
