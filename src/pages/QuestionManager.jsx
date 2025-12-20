@@ -19,7 +19,9 @@ import {
   FaChevronRight,
   FaSearch,
   FaList,
-  FaStar
+  FaStar,
+  FaInfoCircle,
+  FaDownload
 } from 'react-icons/fa';
 
 // Memoized BulkQuestionItem component for better performance
@@ -803,7 +805,7 @@ const QuestionManager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px' }}>
+    <div className="bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px' }}>
       <Navbar />
       <ToastContainer />
 
@@ -827,7 +829,7 @@ const QuestionManager = () => {
                   }}
                   className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105"
                 >
-                  <FontAwesomeIcon icon={faInfoCircle} className="mr-2" />
+                  <FaInfoCircle className="mr-2 inline-block align-middle" />
                   Hướng dẫn upload
                 </button>
                 <button
@@ -1197,7 +1199,7 @@ const QuestionManager = () => {
                   <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
                     <div className="flex">
                       <div className="flex-shrink-0">
-                        <FontAwesomeIcon icon={faInfoCircle} className="text-blue-500" />
+                        <FaInfoCircle className="text-blue-500" />
                       </div>
                       <div className="ml-3">
                         <p className="text-sm text-blue-700">
@@ -1229,7 +1231,7 @@ const QuestionManager = () => {
                           download
                           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                         >
-                          <FontAwesomeIcon icon={faDownload} className="mr-2" />
+                          <FaDownload className="mr-2" />
                           Tải file mẫu ngay
                         </a>
                       </div>
@@ -1281,39 +1283,31 @@ const QuestionManager = () => {
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                         required
                       />
-                    </div>
-
-                    {/* Download Template Box */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="text-sm font-medium text-blue-900 mb-1">
-                            Tải file mẫu Excel
-                          </p>
-                          <p className="text-xs text-blue-700">
-                            Tải xuống file mẫu để điền câu hỏi theo đúng định dạng
+                      <div className="mt-2 text-sm text-gray-600">
+                        <div className="mt-2 text-sm text-gray-600">
+                          <div className="flex justify-between items-center mb-2">
+                            <p className="font-medium">Format file Excel:</p>
+                            <a
+                              href="/mini/sample_import.xlsx"
+                              download
+                              className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center hover:underline"
+                            >
+                              <FaDownload className="mr-1" />
+                              Tải file mẫu
+                            </a>
+                          </div>
+                          <ul className="list-disc list-inside mt-1 space-y-1 bg-gray-50 p-3 rounded-md border border-gray-200">
+                            <li><code>question</code>: Nội dung câu hỏi (Bắt buộc)</li>
+                            <li><code>choice_a</code>: Lựa chọn A (Bắt buộc)</li>
+                            <li><code>choice_b</code>: Lựa chọn B (Bắt buộc)</li>
+                            <li><code>choice_c</code>: Lựa chọn C (Tùy chọn)</li>
+                            <li><code>choice_d</code>: Lựa chọn D (Tùy chọn)</li>
+                            <li><code>correct_answer</code>: Đáp án đúng (nhập A, B, C hoặc D)</li>
+                          </ul>
+                          <p className="mt-2 text-xs text-gray-500 italic">
+                            * Vui lòng sử dụng file mẫu để đảm bảo định dạng đúng.
                           </p>
                         </div>
-                        <a
-                          href="/quiz_template.xlsx"
-                          download="quiz_template.xlsx"
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 flex items-center whitespace-nowrap"
-                        >
-                          <FaFileExcel className="w-4 h-4 mr-2 inline-block align-middle" />
-                          Tải xuống
-                        </a>
-                      </div>
-
-                      <div className="text-sm text-blue-900 border-t border-blue-200 pt-3">
-                        <p className="font-medium mb-2">Format file Excel:</p>
-                        <ul className="list-disc list-inside space-y-1 text-xs">
-                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">question</code>: Câu hỏi</li>
-                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">choice_a</code>: Lựa chọn A (bắt buộc)</li>
-                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">choice_b</code>: Lựa chọn B (bắt buộc)</li>
-                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">choice_c</code>: Lựa chọn C (tùy chọn)</li>
-                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">choice_d</code>: Lựa chọn D (tùy chọn)</li>
-                          <li><code className="bg-blue-100 px-1 py-0.5 rounded">correct_answer</code>: A, B, C hoặc D</li>
-                        </ul>
                       </div>
                     </div>
                   </div>

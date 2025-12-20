@@ -4,19 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { API_ENDPOINTS } from '../config/api';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faChartBar,
-    faUsers,
-    faFileUpload,
-    faQuestionCircle,
-    faArrowLeft,
-    faChevronDown,
-    faChevronUp,
-    faUserTie,
-    faFileExcel,
-    faSpinner
-} from '@fortawesome/free-solid-svg-icons';
+    FaChartBar,
+    FaUsers,
+    FaUpload,
+    FaQuestionCircle,
+    FaArrowLeft,
+    FaChevronDown,
+    FaChevronUp,
+    FaUserTie,
+    FaFileExcel,
+    FaSpinner
+} from 'react-icons/fa';
 
 const TeacherStats = () => {
     const [stats, setStats] = useState([]);
@@ -105,22 +104,16 @@ const TeacherStats = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
+        <div className="bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
             <Navbar />
 
             <div className="container mx-auto px-4 py-8">
                 <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center">
-                            <button
-                                onClick={() => navigate('/mini/admin')}
-                                className="mr-4 text-gray-600 hover:text-red-600 transition-colors"
-                            >
-                                <FontAwesomeIcon icon={faArrowLeft} size="lg" />
-                            </button>
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                                    <FontAwesomeIcon icon={faChartBar} className="mr-3 text-red-600" />
+                                    <FaChartBar className="mr-3 text-red-600 inline-block align-middle" />
                                     Thống kê hoạt động giáo viên
                                 </h1>
                                 <p className="text-gray-600">Theo dõi số lượng truy cập và upload tài liệu của giáo viên theo từng môn học</p>
@@ -134,10 +127,11 @@ const TeacherStats = () => {
                                 : 'bg-green-600 text-white hover:bg-green-700 shadow-md hover:shadow-lg'
                                 }`}
                         >
-                            <FontAwesomeIcon
-                                icon={exporting ? faSpinner : faFileExcel}
-                                className={`mr-2 ${exporting ? 'animate-spin' : ''}`}
-                            />
+                            {exporting ? (
+                                <FaSpinner className="mr-2 animate-spin" />
+                            ) : (
+                                <FaFileExcel className="mr-2" />
+                            )}
                             {exporting ? 'Đang xuất...' : 'Export Excel'}
                         </button>
                     </div>
@@ -161,19 +155,19 @@ const TeacherStats = () => {
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <div className="flex items-center">
-                                            <FontAwesomeIcon icon={faUsers} className="mr-2 text-blue-600" />
+                                            <FaUsers className="mr-2 text-blue-600" />
                                             Giáo viên truy cập
                                         </div>
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <div className="flex items-center">
-                                            <FontAwesomeIcon icon={faFileUpload} className="mr-2 text-green-600" />
+                                            <FaUpload className="mr-2 text-green-600" />
                                             Số file
                                         </div>
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <div className="flex items-center">
-                                            <FontAwesomeIcon icon={faQuestionCircle} className="mr-2 text-purple-600" />
+                                            <FaQuestionCircle className="mr-2 text-purple-600" />
                                             Số câu hỏi
                                         </div>
                                     </th>
@@ -189,10 +183,11 @@ const TeacherStats = () => {
                                                 onClick={() => toggleRow(index)}
                                             >
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    <FontAwesomeIcon
-                                                        icon={expandedRows[index] ? faChevronUp : faChevronDown}
-                                                        className={`transition-transform ${expandedRows[index] ? 'text-red-600' : 'text-gray-400'}`}
-                                                    />
+                                                    {expandedRows[index] ? (
+                                                        <FaChevronUp className="transition-transform text-red-600" />
+                                                    ) : (
+                                                        <FaChevronDown className="transition-transform text-gray-400" />
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap">
                                                     <div className="text-sm font-medium text-gray-900">{item.topic}</div>
@@ -221,7 +216,7 @@ const TeacherStats = () => {
                                                     <td colSpan="5" className="px-6 py-4">
                                                         <div className="ml-4">
                                                             <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                                                                <FontAwesomeIcon icon={faUserTie} className="mr-2 text-blue-600" />
+                                                                <FaUserTie className="mr-2 text-blue-600" />
                                                                 Danh sách giáo viên đã truy cập ({item.teacher_access_count || 0}):
                                                             </h4>
                                                             {item.teachers && item.teachers.length > 0 ? (
@@ -232,7 +227,7 @@ const TeacherStats = () => {
                                                                             className="px-3 py-2 bg-white border border-blue-200 rounded-lg text-sm shadow-sm"
                                                                         >
                                                                             <div className="flex items-center">
-                                                                                <FontAwesomeIcon icon={faUserTie} className="mr-2 text-blue-500" />
+                                                                                <FaUserTie className="mr-2 text-blue-500" />
                                                                                 <div>
                                                                                     <div className="font-medium text-blue-700">
                                                                                         {typeof teacher === 'object' ? teacher.full_name : teacher}
@@ -251,7 +246,7 @@ const TeacherStats = () => {
 
                                                             {/* Danh sách file */}
                                                             <h4 className="text-sm font-semibold text-gray-700 mb-3 mt-4 flex items-center">
-                                                                <FontAwesomeIcon icon={faFileUpload} className="mr-2 text-green-600" />
+                                                                <FaUpload className="mr-2 text-green-600" />
                                                                 Danh sách file đã upload ({item.file_count || 0} file):
                                                             </h4>
                                                             {item.files && item.files.length > 0 ? (
@@ -261,7 +256,7 @@ const TeacherStats = () => {
                                                                             key={fIndex}
                                                                             className="px-3 py-1.5 bg-white border border-green-200 rounded-lg text-sm text-green-700 shadow-sm"
                                                                         >
-                                                                            <FontAwesomeIcon icon={faFileUpload} className="mr-1.5 text-green-500" />
+                                                                            <FaUpload className="mr-1.5 text-green-500 inline-block align-middle" />
                                                                             {file.length > 40 ? file.substring(0, 40) + '...' : file}
                                                                         </span>
                                                                     ))}
