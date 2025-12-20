@@ -432,11 +432,11 @@ const HomePage = () => {
                 <FaRobot className="mr-2 text-red-600" />
                 TA Chatbot - PTIT Official
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 whitespace-nowrap">
-                Bắt đầu hành trình học tập cùng AI Assistant
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 sm:whitespace-nowrap">
+                Bắt đầu hành trình <br/> học tập cùng AI Assistant
               </h2>
               <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 px-4 leading-relaxed">
-                Gia nhập cộng đồng sinh viên PTIT và trải nghiệm học tập thông minh <br /> với chatbot chuyên biệt về các môn kinh tế.
+                Gia nhập cộng đồng sinh viên PTIT và trải nghiệm <br />học tập thông minh  với chatbot chuyên biệt về các môn kinh tế.
               </p>
 
               {!isLoggedIn && (
