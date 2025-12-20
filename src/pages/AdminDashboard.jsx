@@ -59,6 +59,7 @@ const AdminDashboard = () => {
   const fetchChatbots = async () => {
     try {
       setLoading(true);
+      const accessToken = localStorage.getItem('access_token');
       const response = await fetch(API_ENDPOINTS.CHATBOTS,
         {
           method: 'GET',

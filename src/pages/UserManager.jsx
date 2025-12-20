@@ -135,23 +135,21 @@ const UserManager = () => {
 
   const filterUsers = () => {
     let filtered = [...users];
-    
+
     // Filter by role
     if (filters.role) {
       filtered = filtered.filter(user => user.role === filters.role);
     }
-    
+
     // Filter by search term
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(user => 
+      filtered = filtered.filter(user =>
         user.username.toLowerCase().includes(searchLower) ||
-        (user.assigned_topics && user.assigned_topics.some(topic => 
-          topic.toLowerCase().includes(searchLower)
-        ))
+        (user.full_name && user.full_name.toLowerCase().includes(searchLower))
       );
     }
-    
+
     setFilteredUsers(filtered);
   };
 
@@ -320,7 +318,7 @@ const UserManager = () => {
                 value={filters.search}
                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                placeholder="Tìm theo username hoặc topic..."
+                placeholder="Tìm theo username hoặc họ tên..."
               />
             </div>
             <div className="flex items-end">
