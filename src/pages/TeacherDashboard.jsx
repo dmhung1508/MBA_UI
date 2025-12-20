@@ -123,7 +123,7 @@ const TeacherDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
+    <div className="bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
@@ -200,6 +200,19 @@ const TeacherDashboard = () => {
             Hành Động Nhanh
           </h3>
 
+          {/* Chỉnh sửa nguồn - Full width button */}
+          <a
+            href="/mini/edit"
+            className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-orange-300 mb-4"
+          >
+            <div className="text-center">
+              <FaEdit className="w-8 h-8 text-orange-600 mb-2 mx-auto" />
+              <h4 className="font-medium text-gray-900">Chỉnh sửa nguồn</h4>
+              <p className="text-sm text-gray-600">Thử nghiệm, chỉnh sửa AI</p>
+            </div>
+          </a>
+
+          {/* Other buttons in grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <a
               href="/mini/questions"
@@ -223,16 +236,7 @@ const TeacherDashboard = () => {
               </div>
             </a>
 
-            {/* <a
-              href="/mini/edit"
-              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-orange-300"
-            >
-              <div className="text-center">
-                <FaEdit className="text-2xl text-orange-600 mb-2" />
-                <h4 className="font-medium text-gray-900">Chỉnh sửa nguồn</h4>
-                <p className="text-sm text-gray-600">Thử nghiệm, chỉnh sửa AI</p>
-              </div>
-            </a> */}
+
 
             <a
               href="/mini/messages"
