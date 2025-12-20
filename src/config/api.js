@@ -68,6 +68,8 @@ export const API_ENDPOINTS = {
   // Teacher
   TEACHER_MY_TOPICS: `${AUTH_MINI_BASE}/teacher/my-topics`,
   TEACHER_QUIZ_HISTORY: `${AUTH_MINI_BASE}/teacher/quiz-history`,
+  TEACHER_ACTIVITY_STATS: `${AUTH_MINI_BASE}/admin/teacher-stats`,
+  TEACHER_ACTIVITY_STATS_EXPORT: `${AUTH_MINI_BASE}/admin/teacher-stats/export`,
 
   // ============================================
   // MBA_MINI SERVICE - RAG, Search, AI Features

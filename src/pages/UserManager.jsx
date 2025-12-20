@@ -113,7 +113,17 @@ const UserManager = () => {
 
   const fetchChatbots = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.CHATBOTS);
+      const accessToken = localStorage.getItem('access_token');
+      const response = await fetch(API_ENDPOINTS.CHATBOTS,
+        {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
       if (response.ok) {
         const data = await response.json();
         setAvailableChatbots(data.chatbots || []);
@@ -355,7 +365,7 @@ const UserManager = () => {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                       {role === 'teacher' && (
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Topics</th>
@@ -367,7 +377,7 @@ const UserManager = () => {
                     {roleUsers.map((user, index) => (
                       <tr key={user.username} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {user.username}
+                          {user.username} - {user.full_name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${roleColors[user.role] || 'bg-gray-100 text-gray-800'} inline-flex items-center`}>

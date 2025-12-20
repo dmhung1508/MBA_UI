@@ -35,7 +35,7 @@ function App() {
   useEffect(() => { }, []);
   const [currentPage, SetCurrentPage] = useState("Home");
   return (
-    <BrowserRouter basename="/mini">
+    <BrowserRouter basename="/mini" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}> {/* Thêm basename vào đây */}
       <div className="App">
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
@@ -86,6 +86,14 @@ function App() {
             element={
               <PrivateRoute>
                 <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher-stats"
+            element={
+              <PrivateRoute>
+                <TeacherStats />
               </PrivateRoute>
             }
           />

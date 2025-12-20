@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaPaperPlane, FaMicrophone, FaRobot, FaBars, FaTimes } from 'react-icons/fa';
+import { FaPaperPlane, FaMicrophone, FaRobot, FaBars, FaTimes, FaPlus } from 'react-icons/fa';
 import { v4 as uuidv4 } from 'uuid';
 import ReactMarkdown from 'react-markdown';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import EditSourceModal from '../components/EditSourceModal';
+import AddSourceModal from '../components/AddSourceModal';
 import SourceList from '../components/SourceList';
 import { API_ENDPOINTS } from '../config/api';
 
@@ -19,8 +19,8 @@ const EditPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isVoiceInputActive, setIsVoiceInputActive] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedSource, setSelectedSource] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState(null);
   const chatHistoryRef = useRef(null);
   const speechRecognition = useRef(null);
 
@@ -221,14 +221,20 @@ const EditPage = () => {
     setIsVoiceInputActive(!isVoiceInputActive);
   };
 
-  const handleEditSource = (source) => {
-    setSelectedSource(source);
-    setIsEditModalOpen(true);
+  const handleAddSource = (message) => {
+    // Tìm câu hỏi của user trước message bot này
+    const messageIndex = messages.findIndex(m => m.id === message.id);
+    const userQuestion = messageIndex > 0 ? messages[messageIndex - 1] : null;
+
+    setSelectedMessage({
+      ...message,
+      userQuestion: userQuestion?.text || ''
+    });
+    setIsAddModalOpen(true);
   };
 
-  const handleSaveSource = () => {
-    // Refresh messages or update source data if needed
-    console.log('Source updated successfully');
+  const handleAddSuccess = () => {
+    console.log('Source added successfully');
   };
 
   const toggleSidebar = () => {
@@ -278,8 +284,8 @@ const EditPage = () => {
                 <div
                   key={chatbot.id}
                   className={`flex items-center p-3 mb-2 rounded-lg cursor-pointer transition-colors ${selectedChatbot?.id === chatbot.id
-                      ? "bg-red-50 border-2 border-red-200"
-                      : "hover:bg-gray-100"
+                    ? "bg-red-50 border-2 border-red-200"
+                    : "hover:bg-gray-100"
                     }`}
                   onClick={() => handleChatbotSelect(chatbot)}
                 >
@@ -347,11 +353,24 @@ const EditPage = () => {
                         <p className={`${message.sender === "user" ? "text-red-200" : "text-gray-500"}`}>{message.timestamp}</p>
                       </div>
 
+                      {/* Add Source Button for Bot Messages */}
+                      {message.sender === "bot" && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <button
+                            onClick={() => handleAddSource(message)}
+                            className="w-full text-sm text-green-600 hover:text-green-700 hover:bg-green-50 px-3 py-2 rounded transition-colors flex items-center justify-center"
+                            title="Đóng góp thông tin chính xác"
+                          >
+                            <FaPlus className="mr-2" size={12} />
+                            Đóng góp thông tin đúng
+                          </button>
+                        </div>
+                      )}
+
                       {/* Sources */}
                       {message.sources && message.sources.length > 0 && (
                         <SourceList
                           sources={message.sources}
-                          onEditSource={handleEditSource}
                         />
                       )}
                     </div>
@@ -407,13 +426,14 @@ const EditPage = () => {
         </div>
       </div>
 
-      {/* Edit Source Modal */}
-      <EditSourceModal
-        isOpen={isEditModalOpen}
-        source={selectedSource}
+      {/* Add Source Modal */}
+      <AddSourceModal
+        isOpen={isAddModalOpen}
         fileId={selectedChatbot?.source || ''}
-        onClose={() => setIsEditModalOpen(false)}
-        onSave={handleSaveSource}
+        question={selectedMessage?.userQuestion || ''}
+        botAnswer={selectedMessage?.text}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleAddSuccess}
       />
 
       <Footer />

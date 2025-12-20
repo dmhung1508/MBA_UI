@@ -46,7 +46,7 @@ const SourceList = ({ sources, onEditSource }) => {
           Nguồn tham khảo ({sources.length})
         </span>
       </div>
-      
+
       <div className="space-y-2">
         {sources.map((source, index) => (
           <div key={source.id} className="border border-gray-200 rounded-lg overflow-hidden bg-white">
@@ -76,19 +76,8 @@ const SourceList = ({ sources, onEditSource }) => {
                   </div>
                 </div>
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEditSource(source);
-                  }}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                  title="Chỉnh sửa nguồn"
-                >
-                  <FaEdit size={14} />
-                </button>
-                
+
+              <div className="flex items-center">
                 {expandedSources.has(source.id) ? (
                   <FaChevronUp size={16} className="text-gray-400" />
                 ) : (
@@ -96,7 +85,7 @@ const SourceList = ({ sources, onEditSource }) => {
                 )}
               </div>
             </div>
-            
+
             {expandedSources.has(source.id) && (
               <div className="border-t border-gray-200 p-4 bg-gray-50">
                 <div className="grid grid-cols-2 gap-4 mb-4 text-xs">
@@ -117,14 +106,14 @@ const SourceList = ({ sources, onEditSource }) => {
                     <span className="ml-1 text-gray-600">{source.last_modified_date}</span>
                   </div>
                 </div>
-                
+
                 {source.section_summary && (
                   <div className="mb-4">
                     <span className="font-medium text-gray-700 text-xs">Tóm tắt phần:</span>
                     <p className="text-sm text-gray-600 mt-1">{source.section_summary}</p>
                   </div>
                 )}
-                
+
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-gray-700 text-xs">Nội dung:</span>

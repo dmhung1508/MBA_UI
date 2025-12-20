@@ -46,7 +46,17 @@ const SourceManager = () => {
 
   const fetchChatbots = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.CHATBOTS);
+      const accessToken = localStorage.getItem('access_token');
+      const response = await fetch(API_ENDPOINTS.CHATBOTS, 
+        {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
       if (response.ok) {
         const data = await response.json();
         const chatbots = data.chatbots || [];
@@ -89,7 +99,17 @@ const SourceManager = () => {
         setAssignedTopics(topics);
         
         // Then get all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
+        const accessToken = localStorage.getItem('access_token');
+        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS, 
+          {
+            method: 'GET',
+            headers: {
+              'accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }
+        );
         if (chatbotsResponse.ok) {
           const chatbotsData = await chatbotsResponse.json();
           const allChatbots = chatbotsData.chatbots || [];
@@ -152,7 +172,7 @@ const SourceManager = () => {
               >
                 {availableChatbots.map(cb => (
                   <option key={cb.id || cb.source} value={cb.source}>
-                    {cb.name} 
+                    {cb.name} - {cb.source}
                   </option>
                 ))}
               </select>

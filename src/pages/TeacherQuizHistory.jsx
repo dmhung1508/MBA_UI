@@ -85,7 +85,17 @@ const TeacherQuizHistory = () => {
             const topics = teacherData.assigned_topics || [];
 
             // Fetch all chatbots to get subject names
-            const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
+            const accessToken = localStorage.getItem('access_token');
+            const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS,
+                {
+                    method: 'GET',
+                    headers: {
+                        'accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                }
+            );
 
             if (chatbotsResponse.ok) {
                 const chatbotsData = await chatbotsResponse.json();

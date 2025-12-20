@@ -90,6 +90,11 @@ const BulkQuestionItem = memo(({ question, questionIndex, onUpdate, onUpdateText
 
 BulkQuestionItem.displayName = 'BulkQuestionItem';
 
+import imgStep1 from '../assets/1.png';
+import imgStep2 from '../assets/2.png';
+import imgStep3 from '../assets/3.png';
+import imgStep4 from '../assets/4.png';
+
 const QuestionManager = () => {
   const [questions, setQuestions] = useState([]);
   const [availableChatbots, setAvailableChatbots] = useState([]);
@@ -208,7 +213,17 @@ const QuestionManager = () => {
 
   const fetchChatbots = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.CHATBOTS);
+      const accessToken = localStorage.getItem('access_token');
+      const response = await fetch(API_ENDPOINTS.CHATBOTS,
+        {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
       if (response.ok) {
         const data = await response.json();
         const chatbots = data.chatbots || [];
@@ -235,7 +250,17 @@ const QuestionManager = () => {
         setAssignedTopics(topics);
 
         // Then get all chatbots and filter by assigned topics
-        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS);
+        const accessToken = localStorage.getItem('access_token');
+        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS,
+          {
+            method: 'GET',
+            headers: {
+              'accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }
+        );
         if (chatbotsResponse.ok) {
           const chatbotsData = await chatbotsResponse.json();
           const allChatbots = chatbotsData.chatbots || [];
@@ -277,10 +302,13 @@ const QuestionManager = () => {
           has_more: data.pagination?.has_more || false
         }));
       } else {
-        throw new Error('Không thể tải danh sách câu hỏi');
+        // throw new Error('Không thể tải danh sách câu hỏi');
+        console.error('Failed to fetch questions');
+        setQuestions([]);
       }
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      // setError(err.message);
       setQuestions([]);
     } finally {
       setLoading(false);
@@ -793,6 +821,16 @@ const QuestionManager = () => {
             {!searchMode && (
               <div className="flex space-x-3">
                 <button
+                  onClick={() => {
+                    setModalMode('instruction');
+                    setShowModal(true);
+                  }}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105"
+                >
+                  <FontAwesomeIcon icon={faInfoCircle} className="mr-2" />
+                  Hướng dẫn upload
+                </button>
+                <button
                   onClick={openBulkCreateModal}
                   className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 flex items-center"
                 >
@@ -1109,7 +1147,7 @@ const QuestionManager = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+          <div className={`bg-white rounded-lg shadow-xl w-full max-h-screen overflow-y-auto ${modalMode === 'instruction' ? 'max-w-7xl' : 'max-w-4xl'}`}>
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -1118,6 +1156,7 @@ const QuestionManager = () => {
                   {modalMode === 'excel-upload' && 'Upload Câu hỏi từ Excel'}
                   {modalMode === 'edit' && 'Chỉnh Sửa Câu hỏi'}
                   {modalMode === 'delete' && 'Xác Nhận Xóa'}
+                  {modalMode === 'instruction' && 'Hướng dẫn Upload Excel'}
                 </h3>
                 <button
                   onClick={closeModal}
@@ -1150,6 +1189,81 @@ const QuestionManager = () => {
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                     >
                       Xóa
+                    </button>
+                  </div>
+                </div>
+              ) : modalMode === 'instruction' ? (
+                <div className="space-y-6">
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <FontAwesomeIcon icon={faInfoCircle} className="text-blue-500" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-blue-700">
+                          Thực hiện theo 4 bước dưới đây để upload câu hỏi từ file Excel.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-8">
+                    {/* Step 1 */}
+                    <div className="border-b pb-6">
+                      <h4 className="font-bold text-lg text-gray-800 mb-3">Bước 1: Chọn Upload Excel</h4>
+                      <p className="text-gray-600 mb-3">Tại giao diện Quản lý câu hỏi, nhấn vào nút <strong>Upload Excel</strong>.</p>
+                      <img src={imgStep1} alt="Bước 1" className="rounded-lg shadow-md border border-gray-200 max-w-full h-auto" />
+                    </div>
+
+                    {/* Step 2 */}
+                    <div className="border-b pb-6">
+                      <h4 className="font-bold text-lg text-gray-800 mb-3">Bước 2: Tải file mẫu</h4>
+                      <div className="flex justify-between items-start mb-3">
+                        <p className="text-gray-600">Nhấn vào liên kết <strong>Tải file mẫu</strong> để tải về file Excel chuẩn.</p>
+                      </div>
+                      <img src={imgStep2} alt="Bước 2" className="rounded-lg shadow-md border border-gray-200 max-w-full h-auto mb-3" />
+                      <div className="flex items-center">
+                        <span className="mr-3 text-gray-600 font-medium">Hoặc:</span>
+                        <a
+                          href="/mini/sample_import.xlsx"
+                          download
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        >
+                          <FontAwesomeIcon icon={faDownload} className="mr-2" />
+                          Tải file mẫu ngay
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className="border-b pb-6">
+                      <h4 className="font-bold text-lg text-gray-800 mb-3">Bước 3: Điền thông tin</h4>
+                      <p className="text-gray-600 mb-3">Điền nội dung câu hỏi và câu trả lời vào file mẫu theo đúng cấu trúc sau:</p>
+                      <ul className="list-disc list-inside mb-4 space-y-1 bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm">
+                        <li><code className="bg-gray-200 px-1 rounded font-bold">question</code>: Nội dung câu hỏi (Bắt buộc)</li>
+                        <li><code className="bg-gray-200 px-1 rounded font-bold">choice_a</code>: Lựa chọn A (Bắt buộc)</li>
+                        <li><code className="bg-gray-200 px-1 rounded font-bold">choice_b</code>: Lựa chọn B (Bắt buộc)</li>
+                        <li><code className="bg-gray-200 px-1 rounded font-bold">choice_c</code>: Lựa chọn C (Tùy chọn)</li>
+                        <li><code className="bg-gray-200 px-1 rounded font-bold">choice_d</code>: Lựa chọn D (Tùy chọn)</li>
+                        <li><code className="bg-gray-200 px-1 rounded font-bold">correct_answer</code>: Đáp án đúng (nhập A, B, C hoặc D)</li>
+                      </ul>
+                      <img src={imgStep3} alt="Bước 3" className="rounded-lg shadow-md border border-gray-200 max-w-full h-auto" />
+                    </div>
+
+                    {/* Step 4 */}
+                    <div>
+                      <h4 className="font-bold text-lg text-gray-800 mb-3">Bước 4: Upload lên hệ thống</h4>
+                      <p className="text-gray-600 mb-3">Lưu file Excel đã điền, sau đó chọn file và nhấn nút <strong>Upload</strong> để tải lên hệ thống.</p>
+                      <img src={imgStep4} alt="Bước 4" className="rounded-lg shadow-md border border-gray-200 max-w-full h-auto" />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end mt-6 pt-4 border-t">
+                    <button
+                      onClick={closeModal}
+                      className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+                    >
+                      Đóng hướng dẫn
                     </button>
                   </div>
                 </div>
