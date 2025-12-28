@@ -429,13 +429,13 @@ const UnifiedChatbot = ({
 
   return (
     <div className="flex flex-col h-full bg-gray-100 overflow-hidden">
-      <style jsx>{`
+      <style>{`
         @keyframes loadingProgress {
           0% { width: 0%; }
           50% { width: 70%; }
           100% { width: 100%; }
         }
-        
+
         @keyframes fadeInOut {
           0%, 100% { opacity: 0.5; }
           50% { opacity: 1; }
