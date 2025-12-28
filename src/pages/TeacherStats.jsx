@@ -200,7 +200,7 @@ const TeacherStats = () => {
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                        {item.file_count || 0} file
+                                                        {item.files?.length || item.file_count || 0} file
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -247,7 +247,7 @@ const TeacherStats = () => {
                                                             {/* Danh sách file */}
                                                             <h4 className="text-sm font-semibold text-gray-700 mb-3 mt-4 flex items-center">
                                                                 <FaUpload className="mr-2 text-green-600" />
-                                                                Danh sách file đã upload ({item.file_count || 0} file):
+                                                                Danh sách file đã upload ({item.files?.length || item.file_count || 0} file):
                                                             </h4>
                                                             {item.files && item.files.length > 0 ? (
                                                                 <div className="flex flex-wrap gap-2">
@@ -260,9 +260,9 @@ const TeacherStats = () => {
                                                                             {file.length > 40 ? file.substring(0, 40) + '...' : file}
                                                                         </span>
                                                                     ))}
-                                                                    {item.file_count > 10 && (
+                                                                    {(item.files?.length || item.file_count || 0) > 10 && (
                                                                         <span className="px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-600">
-                                                                            ... và {item.file_count - 10} file khác
+                                                                            ... và {(item.files?.length || item.file_count || 0) - 10} file khác
                                                                         </span>
                                                                     )}
                                                                 </div>
@@ -284,7 +284,7 @@ const TeacherStats = () => {
                                                                     <div>
                                                                         <span className="text-gray-500">Tổng:</span>
                                                                         <span className="ml-2 font-medium text-gray-700">
-                                                                            {item.file_count || 0} file, {item.question_count || 0} câu hỏi
+                                                                            {item.files?.length || item.file_count || 0} file, {item.question_count || 0} câu hỏi
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -318,13 +318,15 @@ const TeacherStats = () => {
                                 </div>
                                 <div className="bg-blue-50 rounded-lg p-4 text-center">
                                     <div className="text-2xl font-bold text-blue-600">
-                                        {[...new Set(stats.flatMap(s => s.teachers || []))].length}
+                                        {new Set(stats.flatMap(s => s.teachers || []).map(t =>
+                                            typeof t === 'object' ? (t.email || t.full_name) : t
+                                        )).size}
                                     </div>
                                     <div className="text-sm text-gray-600">Tổng giáo viên</div>
                                 </div>
                                 <div className="bg-green-50 rounded-lg p-4 text-center">
                                     <div className="text-2xl font-bold text-green-600">
-                                        {stats.reduce((sum, s) => sum + (s.file_count || 0), 0)}
+                                        {stats.reduce((sum, s) => sum + (s.files?.length || s.file_count || 0), 0)}
                                     </div>
                                     <div className="text-sm text-gray-600">Tổng file</div>
                                 </div>

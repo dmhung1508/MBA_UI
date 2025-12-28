@@ -133,6 +133,17 @@ const UserManager = () => {
     }
   };
 
+  // Remove Vietnamese diacritics for search
+  const removeVietnameseDiacritics = (str) => {
+    if (!str) return '';
+    return str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .toLowerCase();
+  };
+
   const filterUsers = () => {
     let filtered = [...users];
 
@@ -143,10 +154,10 @@ const UserManager = () => {
 
     // Filter by search term
     if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
+      const searchNormalized = removeVietnameseDiacritics(filters.search);
       filtered = filtered.filter(user =>
-        user.username.toLowerCase().includes(searchLower) ||
-        (user.full_name && user.full_name.toLowerCase().includes(searchLower))
+        removeVietnameseDiacritics(user.username).includes(searchNormalized) ||
+        (user.full_name && removeVietnameseDiacritics(user.full_name).includes(searchNormalized))
       );
     }
 
