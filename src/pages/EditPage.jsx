@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaPaperPlane, FaMicrophone, FaRobot, FaBars, FaTimes, FaPlus } from 'react-icons/fa';
+import { FaPaperPlane, FaMicrophone, FaRobot, FaBars, FaTimes, FaPlus, FaSearch } from 'react-icons/fa';
 import { v4 as uuidv4 } from 'uuid';
 import ReactMarkdown from 'react-markdown';
 import Navbar from './Navbar';
@@ -21,6 +21,7 @@ const EditPage = () => {
   const [isVoiceInputActive, setIsVoiceInputActive] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const chatHistoryRef = useRef(null);
   const speechRecognition = useRef(null);
 
@@ -252,6 +253,22 @@ const EditPage = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  // Remove Vietnamese diacritics for search
+  const removeVietnameseDiacritics = (str) => {
+    if (!str) return '';
+    return str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .toLowerCase();
+  };
+
+  // Filter chatbots based on search query
+  const filteredChatbots = chatbots.filter(chatbot =>
+    removeVietnameseDiacritics(chatbot.name).includes(removeVietnameseDiacritics(searchQuery))
+  );
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
@@ -273,6 +290,20 @@ const EditPage = () => {
             </button>
           </div>
 
+          {/* Search Box */}
+          <div className="p-3 border-b border-gray-200">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Tìm kiếm chatbot..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              />
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            </div>
+          </div>
+
           <div className="p-4">
             {chatbotsLoading ? (
               <div className="flex justify-center items-center py-8">
@@ -290,8 +321,13 @@ const EditPage = () => {
                   </p>
                 )}
               </div>
+            ) : filteredChatbots.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <FaSearch className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                <p>Không tìm thấy chatbot nào</p>
+              </div>
             ) : (
-              chatbots.map((chatbot) => (
+              filteredChatbots.map((chatbot) => (
                 <div
                   key={chatbot.id}
                   className={`flex items-center p-3 mb-2 rounded-lg cursor-pointer transition-colors ${selectedChatbot?.id === chatbot.id
@@ -429,7 +465,7 @@ const EditPage = () => {
                 <FaRobot className="w-24 h-24 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-500 mb-2">Chọn một chatbot</h3>
                 <p className="text-gray-400">
-                  Chọn một trong {chatbots.length} chatbot chuyên môn để bắt đầu trò chuyện và chỉnh sửa nguồn.
+                  Chọn một trong {filteredChatbots.length} chatbot chuyên môn để bắt đầu trò chuyện và chỉnh sửa nguồn.
                 </p>
               </div>
             </div>

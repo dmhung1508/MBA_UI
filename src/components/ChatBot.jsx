@@ -145,6 +145,17 @@ const ChatUI = () => {
     }));
   };
 
+  // Remove Vietnamese diacritics for search
+  const removeVietnameseDiacritics = (str) => {
+    if (!str) return '';
+    return str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .toLowerCase();
+  };
+
   // Show loading if chatbots haven't loaded yet
   if (chatbots.length === 0 || !currentChat) {
     return (
@@ -156,7 +167,7 @@ const ChatUI = () => {
 
   // Filter chatbots based on search query
   const filteredChatbots = chatbots.filter(chatbot =>
-    chatbot.name.toLowerCase().includes(searchQuery.toLowerCase())
+    removeVietnameseDiacritics(chatbot.name).includes(removeVietnameseDiacritics(searchQuery))
   );
 
   return (
