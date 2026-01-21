@@ -20,9 +20,11 @@ import {
   FaUsers,
   FaChalkboardTeacher,
   FaClipboardList,
-  FaChartBar
+  FaChartBar,
+  FaTicketAlt
 } from "react-icons/fa";
 import { isTokenValid, clearAuthData } from "../utils/auth";
+import { API_ENDPOINTS } from "../config/api";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -31,6 +33,7 @@ const Navbar = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isTeacher, setIsTeacher] = useState(false);
   const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
+  const [openTicketCount, setOpenTicketCount] = useState(0);
 
   // Kiểm tra trạng thái đăng nhập khi component được mount
   useEffect(() => {
@@ -77,6 +80,40 @@ const Navbar = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isAdminDropdownOpen]);
+
+  // Fetch open ticket count for badge (MOCK DATA for now)
+  useEffect(() => {
+    const fetchTicketCount = async () => {
+      if (!isLoggedIn) {
+        setOpenTicketCount(0);
+        return;
+      }
+
+      // Fetch ticket count from backend
+      try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(API_ENDPOINTS.TICKET_OPEN_COUNT, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'accept': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setOpenTicketCount(data.count || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching ticket count:', error);
+      }
+    };
+
+    fetchTicketCount();
+
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchTicketCount, 30000);
+    return () => clearInterval(interval);
+  }, [isLoggedIn]);
 
   // Hàm xử lý đăng xuất
   const handleLogout = useCallback(() => {
@@ -134,6 +171,20 @@ const Navbar = () => {
                 >
                   <FaHistory className="mr-1 text-sm" /> Lịch sử
                 </a>
+                {/* Show "Hỗ trợ" for non-admin users only (admins have "Quản lý Hỗ trợ" in dropdown) */}
+                {!isAdmin && (
+                  <a
+                    href="/mini/tickets"
+                    className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium relative"
+                  >
+                    <FaTicketAlt className="mr-1 text-sm" /> Hỗ trợ
+                    {openTicketCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {openTicketCount}
+                      </span>
+                    )}
+                  </a>
+                )}
                 {isTeacher && (
                   <>
                     <a
@@ -216,6 +267,13 @@ const Navbar = () => {
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaClipboardList className="mr-2 text-sm inline" /> Quản lý Logs
+                          </a>
+                          <a
+                            href="/mini/admin/tickets"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                            onClick={() => setIsAdminDropdownOpen(false)}
+                          >
+                            <FaTicketAlt className="mr-2 text-sm inline" /> Quản lý Hỗ trợ
                           </a>
                           <a
                             href="/mini/teacher-stats"
@@ -340,6 +398,23 @@ const Navbar = () => {
                         Lịch sử
                       </a>
 
+                      {/* Show "Hỗ trợ" for non-admin users only (admins have "Quản lý Hỗ trợ" in dropdown) */}
+                      {!isAdmin && (
+                        <a
+                          href="/mini/tickets"
+                          className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          <FaTicketAlt className="mr-3 text-sm" />
+                          Hỗ trợ
+                          {openTicketCount > 0 && (
+                            <span className="ml-auto bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                              {openTicketCount}
+                            </span>
+                          )}
+                        </a>
+                      )}
+
                       {isTeacher && (
                         <>
                           <a
@@ -432,6 +507,14 @@ const Navbar = () => {
                           >
                             <FaClipboardList className="mr-3 text-sm" />
                             Quản lý Logs
+                          </a>
+                          <a
+                            href="/mini/admin/tickets"
+                            className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            <FaTicketAlt className="mr-3 text-sm" />
+                            Quản lý Hỗ trợ
                           </a>
                           <a
                             href="/mini/teacher-stats"
