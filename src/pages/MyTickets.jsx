@@ -125,7 +125,7 @@ const MyTickets = () => {
   );
 
   return (
-    <div className="bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px' }}>
+    <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px' }}>
       <Navbar />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl flex-1 pb-12">
         {/* Header */}
