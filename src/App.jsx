@@ -25,6 +25,10 @@ const MessageManager = lazy(() => import("./pages/MessageManager"));
 const AdminLogs = lazy(() => import("./pages/AdminLogs"));
 const AuthSuccess = lazy(() => import('./components/AuthSuccess.jsx'));
 
+// Ticket System pages
+const MyTickets = lazy(() => import("./pages/MyTickets"));
+const AdminTickets = lazy(() => import("./pages/AdminTickets"));
+
 // Loading fallback component
 const LoadingFallback = () => (
   <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
@@ -151,6 +155,22 @@ function App() {
             element={
               <PrivateRoute>
                 <AdminLogs />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/tickets"
+            element={
+              <PrivateRoute>
+                <MyTickets />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/tickets"
+            element={
+              <PrivateRoute>
+                <AdminTickets />
               </PrivateRoute>
             }
           />
