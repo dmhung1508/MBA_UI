@@ -71,6 +71,14 @@ export const API_ENDPOINTS = {
   TEACHER_ACTIVITY_STATS: `${AUTH_MINI_BASE}/admin/teacher-stats`,
   TEACHER_ACTIVITY_STATS_EXPORT: `${AUTH_MINI_BASE}/admin/teacher-stats/export`,
 
+  // AI Q&A (Vấn đáp với AI)
+  AI_QA_RANDOM_QUESTION: (topic) => `${AUTH_MINI_BASE}/ai-qa/random-question?topic=${topic}`,
+  AI_QA_SUBMIT: `${AUTH_MINI_BASE}/ai-qa/submit`,
+  AI_QA_MY_RESPONSES: `${AUTH_MINI_BASE}/ai-qa/my-responses`,
+  TEACHER_AI_QA_RESPONSES: `${AUTH_MINI_BASE}/teacher/ai-qa/responses`,
+  TEACHER_AI_QA_EVALUATE: (responseId) => `${AUTH_MINI_BASE}/teacher/ai-qa/evaluate/${responseId}`,
+  TEACHER_AI_QA_STATS: `${AUTH_MINI_BASE}/teacher/ai-qa/stats`,
+
   // ============================================
   // MBA_MINI SERVICE - RAG, Search, AI Features
   // ============================================

@@ -134,6 +134,12 @@ const Navbar = () => {
                 >
                   <FaHistory className="mr-1 text-sm" /> Lịch sử
                 </a>
+                <a
+                  href="/mini/ai-qa"
+                  className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
+                >
+                  <FaRobot className="mr-1 text-sm" /> Vấn đáp AI
+                </a>
                 {isTeacher && (
                   <>
                     <a
@@ -338,6 +344,14 @@ const Navbar = () => {
                       >
                         <FaHistory className="mr-3 text-sm" />
                         Lịch sử
+                      </a>
+                      <a
+                        href="/mini/ai-qa"
+                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <FaRobot className="mr-3 text-sm" />
+                        Vấn đáp AI
                       </a>
 
                       {isTeacher && (
