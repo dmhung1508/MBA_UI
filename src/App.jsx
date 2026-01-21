@@ -27,6 +27,10 @@ const AuthSuccess = lazy(() => import('./components/AuthSuccess.jsx'));
 const AIQAPage = lazy(() => import('./pages/AIQAPage'));
 const TeacherAIQA = lazy(() => import('./pages/TeacherAIQA'));
 
+// Ticket System pages
+const MyTickets = lazy(() => import("./pages/MyTickets"));
+const AdminTickets = lazy(() => import("./pages/AdminTickets"));
+
 // Loading fallback component
 const LoadingFallback = () => (
   <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
@@ -173,6 +177,137 @@ function App() {
               }
             />
             <Route path="/access-auth" element={<AuthSuccess />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/mini"
+            element={
+              <PrivateRoute>
+                <ChatBot />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route
+            path="/account"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/quiz-history"
+            element={
+              <PrivateRoute>
+                <QuizHistory />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/test"
+            element={
+              <PrivateRoute>
+                <Test />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/edit"
+            element={
+              <PrivateRoute>
+                <EditPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher-stats"
+            element={
+              <PrivateRoute>
+                <TeacherStats />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sources"
+            element={
+              <PrivateRoute>
+                <SourceManager />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/questions"
+            element={
+              <PrivateRoute>
+                <QuestionManager />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <PrivateRoute>
+                <UserManager />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher"
+            element={
+              <PrivateRoute>
+                <TeacherDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher/quiz-history"
+            element={
+              <PrivateRoute>
+                <TeacherQuizHistory />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <PrivateRoute>
+                <MessageManager />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/logs"
+            element={
+              <PrivateRoute>
+                <AdminLogs />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/tickets"
+            element={
+              <PrivateRoute>
+                <MyTickets />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/tickets"
+            element={
+              <PrivateRoute>
+                <AdminTickets />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/access-auth" element={<AuthSuccess />} />
           </Routes>
         </Suspense>
 

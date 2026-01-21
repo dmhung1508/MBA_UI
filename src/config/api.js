@@ -96,6 +96,33 @@ export const API_ENDPOINTS = {
 
   // Source Management
   MBA_SOURCE_USERS: (topic, limit, offset) => `${MBA_MINI_BASE}/source/${encodeURIComponent(topic)}/users?limit=${limit}&skip=${offset}`,
+
+  // ============================================
+  // TICKET SYSTEM
+  // ============================================
+
+  // User Ticket Endpoints
+  TICKET_CREATE: `${AUTH_MINI_BASE}/tickets`,
+  TICKET_MY_LIST: (limit, offset, status, type) =>
+    `${AUTH_MINI_BASE}/tickets/my?limit=${limit}&offset=${offset}${status ? `&status=${status}` : ''}${type ? `&type=${type}` : ''}`,
+  TICKET_DETAIL: (ticketId) => `${AUTH_MINI_BASE}/tickets/${ticketId}`,
+  TICKET_CLOSE: (ticketId) => `${AUTH_MINI_BASE}/tickets/${ticketId}/close`,
+  TICKET_REOPEN: (ticketId) => `${AUTH_MINI_BASE}/tickets/${ticketId}/reopen`,
+  TICKET_ADD_COMMENT: (ticketId) => `${AUTH_MINI_BASE}/tickets/${ticketId}/comments`,
+  TICKET_UPLOAD_ATTACHMENT: `${AUTH_MINI_BASE}/tickets/upload`,
+  TICKET_DOWNLOAD_ATTACHMENT: (ticketId, filename) => `${AUTH_MINI_BASE}/tickets/${ticketId}/attachments/${encodeURIComponent(filename)}`,
+  TICKET_OPEN_COUNT: `${AUTH_MINI_BASE}/tickets/count/open`,
+
+  // Comment Attachments
+  COMMENT_UPLOAD_ATTACHMENT: (commentId) => `${AUTH_MINI_BASE}/tickets/comments/${commentId}/upload`,
+  COMMENT_DOWNLOAD_ATTACHMENT: (commentId, filename) => `${AUTH_MINI_BASE}/tickets/comments/${commentId}/attachments/${encodeURIComponent(filename)}`,
+
+  // Admin Ticket Endpoints
+  ADMIN_TICKETS_LIST: (limit, offset, status, type, assigned_to, search) =>
+    `${AUTH_MINI_BASE}/admin/tickets?limit=${limit}&offset=${offset}${status ? `&status=${status}` : ''}${type ? `&type=${type}` : ''}${assigned_to ? `&assigned_to=${assigned_to}` : ''}${search ? `&search=${search}` : ''}`,
+  ADMIN_TICKET_UPDATE: (ticketId) => `${AUTH_MINI_BASE}/admin/tickets/${ticketId}`,
+  ADMIN_TICKET_DELETE: (ticketId) => `${AUTH_MINI_BASE}/admin/tickets/${ticketId}`,
+  ADMIN_TICKET_STATS: `${AUTH_MINI_BASE}/admin/tickets/stats`,
 };
 
 export default API_BASE_URL;
