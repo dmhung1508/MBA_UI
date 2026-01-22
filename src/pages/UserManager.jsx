@@ -44,7 +44,8 @@ const UserManager = () => {
     role: '',
     assigned_topics: []
   });
-  
+  const [topicSearch, setTopicSearch] = useState('');
+
   const navigate = useNavigate();
 
   const colors = {
@@ -219,6 +220,7 @@ const UserManager = () => {
       role: user.role || 'user',
       assigned_topics: user.assigned_topics || []
     });
+    setTopicSearch('');
     setShowModal(true);
   };
 
@@ -229,6 +231,7 @@ const UserManager = () => {
       role: user.role || 'teacher',
       assigned_topics: user.assigned_topics || []
     });
+    setTopicSearch('');
     setShowModal(true);
   };
 
@@ -239,6 +242,7 @@ const UserManager = () => {
       role: '',
       assigned_topics: []
     });
+    setTopicSearch('');
   };
 
   const handleSubmit = (e) => {
@@ -271,6 +275,25 @@ const UserManager = () => {
       }));
     }
   };
+
+  // Remove Vietnamese diacritics for search
+  const removeVietnameseTones = (str) => {
+    return str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D');
+  };
+
+  // Filter chatbots based on search
+  const filteredChatbots = availableChatbots.filter(chatbot => {
+    const searchNormalized = removeVietnameseTones(topicSearch.toLowerCase());
+    const nameNormalized = removeVietnameseTones(chatbot.name.toLowerCase());
+    const sourceNormalized = removeVietnameseTones(chatbot.source.toLowerCase());
+
+    return nameNormalized.includes(searchNormalized) ||
+           sourceNormalized.includes(searchNormalized);
+  });
 
   const getUsersByRole = (role) => {
     return filteredUsers.filter(user => user.role === role);
@@ -488,19 +511,35 @@ const UserManager = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Assign Topics (tùy chọn)
                         </label>
+                        <div className="mb-2 relative">
+                          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                          <input
+                            type="text"
+                            value={topicSearch}
+                            onChange={(e) => setTopicSearch(e.target.value)}
+                            placeholder="Tìm kiếm môn học..."
+                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                          />
+                        </div>
                         <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                          {availableChatbots.map(chatbot => (
-                            <label key={chatbot.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                              <input
-                                type="checkbox"
-                                checked={roleForm.assigned_topics.includes(chatbot.source)}
-                                onChange={() => handleTopicToggle(chatbot.source)}
-                                className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                              />
-                              <span className="text-sm">{chatbot.name}</span>
-                              <code className="text-xs bg-gray-100 px-1 rounded">{chatbot.source}</code>
-                            </label>
-                          ))}
+                          {filteredChatbots.length > 0 ? (
+                            filteredChatbots.map(chatbot => (
+                              <label key={chatbot.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={roleForm.assigned_topics.includes(chatbot.source)}
+                                  onChange={() => handleTopicToggle(chatbot.source)}
+                                  className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                                />
+                                <span className="text-sm">{chatbot.name}</span>
+                                <code className="text-xs bg-gray-100 px-1 rounded">{chatbot.source}</code>
+                              </label>
+                            ))
+                          ) : (
+                            <div className="col-span-2 text-center py-4 text-gray-500 text-sm">
+                              Không tìm thấy môn học
+                            </div>
+                          )}
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
                           Đã chọn: {roleForm.assigned_topics.length} topics
@@ -514,19 +553,35 @@ const UserManager = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Assign Topics cho {selectedUser?.username}
                       </label>
+                      <div className="mb-2 relative">
+                        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="text"
+                          value={topicSearch}
+                          onChange={(e) => setTopicSearch(e.target.value)}
+                          placeholder="Tìm kiếm môn học..."
+                          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                        />
+                      </div>
                       <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                        {availableChatbots.map(chatbot => (
-                          <label key={chatbot.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                            <input
-                              type="checkbox"
-                              checked={roleForm.assigned_topics.includes(chatbot.source)}
-                              onChange={() => handleTopicToggle(chatbot.source)}
-                              className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                            />
-                            <span className="text-sm">{chatbot.name}</span>
-                            <code className="text-xs bg-gray-100 px-1 rounded">{chatbot.source}</code>
-                          </label>
-                        ))}
+                        {filteredChatbots.length > 0 ? (
+                          filteredChatbots.map(chatbot => (
+                            <label key={chatbot.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                              <input
+                                type="checkbox"
+                                checked={roleForm.assigned_topics.includes(chatbot.source)}
+                                onChange={() => handleTopicToggle(chatbot.source)}
+                                className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                              />
+                              <span className="text-sm">{chatbot.name}</span>
+                              <code className="text-xs bg-gray-100 px-1 rounded">{chatbot.source}</code>
+                            </label>
+                          ))
+                        ) : (
+                          <div className="col-span-2 text-center py-4 text-gray-500 text-sm">
+                            Không tìm thấy môn học
+                          </div>
+                        )}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
                         Đã chọn: {roleForm.assigned_topics.length} topics

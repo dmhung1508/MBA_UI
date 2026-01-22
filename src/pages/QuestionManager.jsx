@@ -805,7 +805,7 @@ const QuestionManager = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px' }}>
+    <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px' }}>
       <Navbar />
       <ToastContainer />
 

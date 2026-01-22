@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "react-scripts start"
+    "start": "vite start"
   },
   "dependencies": {
     "@emailjs/browser": "^3.11.0",
@@ -33,6 +33,7 @@
     "react-toastify": "^10.0.6",
     "react-type-animation": "^3.2.0",
     "react-window": "^2.2.3",
+    "recharts": "^3.7.0",
     "regenerator-runtime": "^0.14.1",
     "tailwind-scrollbar": "^3.0.5",
     "uuidv4": "^6.2.13"

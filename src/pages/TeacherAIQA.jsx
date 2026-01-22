@@ -218,19 +218,19 @@ const TeacherAIQA = () => {
     };
 
     return (
-        <div className="bg-gradient-to-br from-purple-50 to-indigo-100 min-h-screen" style={{ paddingTop: '80px' }}>
+        <div className="bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px' }}>
             <Navbar />
 
-            <div className="container mx-auto px-4 py-8">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl flex-1 pb-12 py-8">
                 {/* Header */}
-                <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                     <div className="flex items-center">
-                        <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl mr-4">
-                            <FaChalkboardTeacher className="text-white text-2xl" />
+                        <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mr-4">
+                            <FaChalkboardTeacher className="text-white text-xl" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-800">Đánh Giá Vấn Đáp AI</h1>
-                            <p className="text-gray-600">Xem và đánh giá câu trả lời vấn đáp của sinh viên</p>
+                            <h1 className="text-2xl font-bold text-gray-900">Đánh Giá Vấn Đáp AI</h1>
+                            <p className="text-sm text-gray-600">Xem và đánh giá câu trả lời vấn đáp của sinh viên</p>
                         </div>
                     </div>
                 </div>
@@ -238,7 +238,7 @@ const TeacherAIQA = () => {
                 {/* Stats Cards */}
                 {stats && (
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                        <div className="bg-white rounded-xl shadow-md p-5">
+                        <div className="bg-white rounded-lg shadow-sm p-5">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-500">Tổng câu trả lời</p>
@@ -250,7 +250,7 @@ const TeacherAIQA = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-md p-5">
+                        <div className="bg-white rounded-lg shadow-sm p-5">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-500">Đã đánh giá</p>
@@ -262,7 +262,7 @@ const TeacherAIQA = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-md p-5">
+                        <div className="bg-white rounded-lg shadow-sm p-5">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-500">Chờ đánh giá</p>
@@ -274,16 +274,16 @@ const TeacherAIQA = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-md p-5">
+                        <div className="bg-white rounded-lg shadow-sm p-5">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-500">Điểm trung bình</p>
-                                    <p className="text-3xl font-bold text-purple-600">
+                                    <p className="text-3xl font-bold text-red-600">
                                         {stats.avg_score !== null ? stats.avg_score : '-'}
                                     </p>
                                 </div>
-                                <div className="p-3 bg-purple-100 rounded-full">
-                                    <FaStar className="text-purple-600 text-xl" />
+                                <div className="p-3 bg-red-100 rounded-full">
+                                    <FaStar className="text-red-600 text-xl" />
                                 </div>
                             </div>
                         </div>
@@ -291,7 +291,7 @@ const TeacherAIQA = () => {
                 )}
 
                 {/* Filters */}
-                <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                     <div className="flex items-center mb-4">
                         <FaFilter className="mr-2 text-gray-500" />
                         <h3 className="font-semibold text-gray-800">Bộ lọc</h3>
@@ -303,7 +303,7 @@ const TeacherAIQA = () => {
                             <select
                                 value={filters.topic}
                                 onChange={(e) => handleFilterChange('topic', e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
                             >
                                 <option value="">Tất cả môn</option>
                                 {chatbots.map((chatbot) => (
@@ -319,7 +319,7 @@ const TeacherAIQA = () => {
                             <select
                                 value={filters.evaluated}
                                 onChange={(e) => handleFilterChange('evaluated', e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
                             >
                                 <option value="">Tất cả</option>
                                 <option value="false">Chờ đánh giá</option>
@@ -335,7 +335,7 @@ const TeacherAIQA = () => {
                                     value={filters.username}
                                     onChange={(e) => handleFilterChange('username', e.target.value)}
                                     placeholder="Nhập username..."
-                                    className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none"
+                                    className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
                                 />
                                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                             </div>
@@ -344,11 +344,11 @@ const TeacherAIQA = () => {
                 </div>
 
                 {/* Responses Table */}
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                         {loading ? (
                             <div className="text-center py-12">
-                                <FaSpinner className="animate-spin text-3xl text-indigo-600 mx-auto mb-4" />
+                                <FaSpinner className="animate-spin text-3xl text-red-600 mx-auto mb-4" />
                                 <p className="text-gray-500">Đang tải...</p>
                             </div>
                         ) : responses.length === 0 ? (
@@ -373,8 +373,8 @@ const TeacherAIQA = () => {
                                         <tr key={resp.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center">
-                                                    <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
-                                                        <FaUserGraduate className="text-indigo-600 text-sm" />
+                                                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                                        <FaUserGraduate className="text-red-600 text-sm" />
                                                     </div>
                                                     <div>
                                                         <p className="font-medium text-gray-800">{resp.username}</p>
@@ -383,7 +383,7 @@ const TeacherAIQA = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">
+                                                <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">
                                                     {resp.topic_name || resp.topic}
                                                 </span>
                                             </td>
@@ -415,7 +415,7 @@ const TeacherAIQA = () => {
                                                             feedback: resp.feedback || ''
                                                         });
                                                     }}
-                                                    className="p-2 bg-indigo-100 text-indigo-600 rounded-lg hover:bg-indigo-200 transition-colors"
+                                                    className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
                                                     title={resp.evaluated ? 'Xem chi tiết' : 'Đánh giá'}
                                                 >
                                                     {resp.evaluated ? <FaEye /> : <FaCheck />}
@@ -445,7 +445,7 @@ const TeacherAIQA = () => {
                                 <button
                                     onClick={() => setPagination(prev => ({ ...prev, skip: prev.skip + prev.limit }))}
                                     disabled={pagination.skip + pagination.limit >= pagination.total}
-                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
                                 >
                                     Sau
                                 </button>
@@ -456,18 +456,18 @@ const TeacherAIQA = () => {
 
                 {/* Stats by Topic */}
                 {stats && stats.by_topic && stats.by_topic.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
+                    <div className="bg-white rounded-lg shadow-sm p-6 mt-8">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                            <FaChartBar className="mr-2 text-indigo-600" />
+                            <FaChartBar className="mr-2 text-red-600" />
                             Thống Kê Theo Môn Học
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {stats.by_topic.map((topic, index) => (
-                                <div key={index} className="border border-gray-200 rounded-xl p-4">
+                                <div key={index} className="border border-gray-200 rounded-lg p-4">
                                     <div className="flex items-center justify-between mb-3">
                                         <span className="font-medium text-gray-800">{topic.topic_name}</span>
                                         {topic.avg_score !== null && (
-                                            <span className="flex items-center text-purple-600">
+                                            <span className="flex items-center text-red-600">
                                                 <FaStar className="mr-1" />
                                                 {topic.avg_score}
                                             </span>
@@ -488,7 +488,7 @@ const TeacherAIQA = () => {
             {/* Evaluation Modal */}
             {selectedResponse && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
                             <h3 className="text-lg font-semibold text-gray-800">
                                 {selectedResponse.evaluated ? 'Chi Tiết Đánh Giá' : 'Đánh Giá Câu Trả Lời'}
@@ -503,16 +503,16 @@ const TeacherAIQA = () => {
 
                         <div className="p-6 space-y-6">
                             {/* Student Info */}
-                            <div className="flex items-center bg-gray-50 rounded-xl p-4">
-                                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mr-4">
-                                    <FaUserGraduate className="text-indigo-600 text-xl" />
+                            <div className="flex items-center bg-gray-50 rounded-lg p-4">
+                                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                                    <FaUserGraduate className="text-red-600 text-xl" />
                                 </div>
                                 <div>
                                     <p className="font-semibold text-gray-800">{selectedResponse.username}</p>
                                     <p className="text-sm text-gray-500">{selectedResponse.full_name || 'N/A'}</p>
                                 </div>
                                 <div className="ml-auto text-right">
-                                    <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">
+                                    <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">
                                         {selectedResponse.topic_name || selectedResponse.topic}
                                     </span>
                                     <p className="text-xs text-gray-500 mt-1">{formatDate(selectedResponse.submitted_at)}</p>
@@ -522,7 +522,7 @@ const TeacherAIQA = () => {
                             {/* Question */}
                             <div>
                                 <h4 className="font-medium text-gray-700 mb-2">Câu hỏi</h4>
-                                <div className="bg-indigo-50 rounded-xl p-4 border-l-4 border-indigo-500">
+                                <div className="bg-red-50 rounded-lg p-4 border-l-4 border-red-500">
                                     <p className="text-gray-800">{selectedResponse.question}</p>
                                 </div>
                             </div>
@@ -530,7 +530,7 @@ const TeacherAIQA = () => {
                             {/* Answer */}
                             <div>
                                 <h4 className="font-medium text-gray-700 mb-2">Câu trả lời của sinh viên</h4>
-                                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                                     <p className="text-gray-800 whitespace-pre-wrap">{selectedResponse.answer}</p>
                                 </div>
                             </div>
@@ -542,15 +542,15 @@ const TeacherAIQA = () => {
                                         <FaRobot className="mr-2 text-green-600" />
                                         Phản hồi từ AI
                                     </h4>
-                                    <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                                         <p className="text-gray-800 whitespace-pre-wrap">{selectedResponse.ai_response}</p>
                                     </div>
                                 </div>
                             )}
 
                             {/* Evaluation Form */}
-                            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-5 border border-purple-200">
-                                <h4 className="font-medium text-purple-700 mb-4 flex items-center">
+                            <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-5 border border-red-200">
+                                <h4 className="font-medium text-red-700 mb-4 flex items-center">
                                     <FaStar className="mr-2" />
                                     Đánh Giá
                                 </h4>
@@ -569,7 +569,7 @@ const TeacherAIQA = () => {
                                             className="flex-1"
                                             disabled={selectedResponse.evaluated}
                                         />
-                                        <span className="text-2xl font-bold text-purple-600 w-12 text-center">
+                                        <span className="text-2xl font-bold text-red-600 w-12 text-center">
                                             {evaluationForm.score}
                                         </span>
                                     </div>
@@ -583,7 +583,7 @@ const TeacherAIQA = () => {
                                         value={evaluationForm.feedback}
                                         onChange={(e) => setEvaluationForm(prev => ({ ...prev, feedback: e.target.value }))}
                                         rows={4}
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none resize-none"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none resize-none"
                                         placeholder="Nhập nhận xét cho sinh viên..."
                                         disabled={selectedResponse.evaluated}
                                     />
@@ -593,7 +593,7 @@ const TeacherAIQA = () => {
                                     <button
                                         onClick={handleEvaluate}
                                         disabled={evaluating}
-                                        className="w-full py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl font-medium hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center disabled:opacity-50"
+                                        className="w-full py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-medium hover:from-red-700 hover:to-red-800 transition-all duration-200 flex items-center justify-center disabled:opacity-50"
                                     >
                                         {evaluating ? (
                                             <>

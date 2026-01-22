@@ -166,14 +166,22 @@ const AdminTickets = () => {
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px' }}>
       <Navbar />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl flex-1 pb-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-          <FaTicketAlt className="inline mr-3 text-red-600" />
-          Quản lý Hỗ trợ
-        </h1>
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="flex items-center">
+            <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mr-4">
+              <FaTicketAlt className="text-white text-xl" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Quản lý Hỗ trợ</h1>
+              <p className="text-sm text-gray-600">Xem và quản lý tất cả yêu cầu hỗ trợ</p>
+            </div>
+          </div>
+        </div>
 
         {/* Statistics Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-gray-400">
               <div className="text-sm text-gray-600 mb-1">Tổng số tickets</div>
               <div className="text-3xl font-bold text-gray-900">{stats.total_tickets}</div>
@@ -199,7 +207,7 @@ const AdminTickets = () => {
 
         {/* Additional Stats */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Theo loại</h3>
@@ -230,13 +238,13 @@ const AdminTickets = () => {
                 <div>
                   <div className="text-sm text-gray-600 mb-1">Thời gian giải quyết TB</div>
                   <div className="text-2xl font-bold text-gray-900">
-                    {stats.avg_resolution_time_hours?.toFixed(1)}h
+                    {stats.avg_resolution_time_hours ? stats.avg_resolution_time_hours.toFixed(1) : '0'}h
                   </div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-600 mb-1">Tỷ lệ hoàn thành</div>
                   <div className="text-2xl font-bold text-green-600">
-                    {((stats.resolved_tickets / stats.total_tickets) * 100).toFixed(0)}%
+                    {stats.total_tickets === 0 ? '100' : ((stats.resolved_tickets / stats.total_tickets) * 100).toFixed(0)}%
                   </div>
                 </div>
               </div>
