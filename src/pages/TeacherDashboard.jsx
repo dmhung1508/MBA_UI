@@ -116,7 +116,7 @@ const TeacherDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
+      <div className=" bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
       </div>
     );
@@ -200,20 +200,19 @@ const TeacherDashboard = () => {
             Hành Động Nhanh
           </h3>
 
-          {/* Chỉnh sửa nguồn - Full width button */}
-          <a
-            href="/mini/edit"
-            className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-orange-300 mb-4"
-          >
-            <div className="text-center">
-              <FaEdit className="w-8 h-8 text-orange-600 mb-2 mx-auto" />
-              <h4 className="font-medium text-gray-900">Chỉnh sửa nguồn</h4>
-              <p className="text-sm text-gray-600">Thử nghiệm, chỉnh sửa AI</p>
-            </div>
-          </a>
+          {/* All buttons in grid with 3 per row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a
+              href="/mini/messages"
+              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-purple-300"
+            >
+              <div className="text-center">
+                <FaComments className="w-8 h-8 text-purple-600 mb-2 mx-auto" />
+                <h4 className="font-medium text-gray-900">Quản lý Tin nhắn</h4>
+                <p className="text-sm text-gray-600">Xem tin nhắn người dùng</p>
+              </div>
+            </a>
 
-          {/* Other buttons in grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <a
               href="/mini/questions"
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-blue-300"
@@ -236,16 +235,14 @@ const TeacherDashboard = () => {
               </div>
             </a>
 
-
-
             <a
-              href="/mini/messages"
-              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-purple-300"
+              href="/mini/edit"
+              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-orange-300"
             >
               <div className="text-center">
-                <FaComments className="w-8 h-8 text-purple-600 mb-2 mx-auto" />
-                <h4 className="font-medium text-gray-900">Quản lý Tin nhắn</h4>
-                <p className="text-sm text-gray-600">Xem tin nhắn người dùng</p>
+                <FaEdit className="w-8 h-8 text-orange-600 mb-2 mx-auto" />
+                <h4 className="font-medium text-gray-900">Chỉnh sửa nguồn</h4>
+                <p className="text-sm text-gray-600">Thử nghiệm, chỉnh sửa AI</p>
               </div>
             </a>
 

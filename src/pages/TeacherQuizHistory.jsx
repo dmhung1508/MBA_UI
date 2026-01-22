@@ -14,8 +14,10 @@ import {
     FaArrowLeft,
     FaRedo,
     FaChevronLeft,
-    FaChevronRight
+    FaChevronRight,
+    FaChartPie
 } from 'react-icons/fa';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 const TeacherQuizHistory = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -24,6 +26,8 @@ const TeacherQuizHistory = () => {
         average_score: 0,
         unique_students: 0
     });
+    const [scoreDistribution, setScoreDistribution] = useState([]);
+    const [hoveredScore, setHoveredScore] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -154,7 +158,8 @@ const TeacherQuizHistory = () => {
             }
 
             const data = await response.json();
-            setSubmissions(data.submissions || []);
+            const submissions = data.submissions || [];
+            setSubmissions(submissions);
             setStatistics(data.statistics || {
                 total_submissions: 0,
                 average_score: 0,
@@ -162,11 +167,57 @@ const TeacherQuizHistory = () => {
             });
             setTotalItems(data.total || 0);
 
+            // Calculate score distribution
+            calculateScoreDistribution(submissions);
+
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
+    };
+
+    // Calculate score distribution for pie chart
+    const calculateScoreDistribution = (submissions) => {
+        if (!Array.isArray(submissions) || submissions.length === 0) {
+            setScoreDistribution([]);
+            return;
+        }
+
+        // Group submissions by score and collect student info
+        const scoreGroups = {};
+        submissions.forEach((submission) => {
+            const score = submission.score || 0;
+            if (!scoreGroups[score]) {
+                scoreGroups[score] = {
+                    score: score,
+                    count: 0,
+                    students: []
+                };
+            }
+            scoreGroups[score].count++;
+            scoreGroups[score].students.push({
+                username: submission.username,
+                fullName: submission.full_name || submission.username,
+                date: submission.timestamp,
+                correctAnswers: submission.correct_answers,
+                totalQuestions: submission.total_questions
+            });
+        });
+
+        // Convert to array and calculate percentages
+        const distribution = Object.values(scoreGroups).map(group => ({
+            name: `${group.score} điểm`,
+            value: group.count,
+            score: group.score,
+            percentage: ((group.count / submissions.length) * 100).toFixed(1),
+            students: group.students
+        }));
+
+        // Sort by score descending
+        distribution.sort((a, b) => b.score - a.score);
+
+        setScoreDistribution(distribution);
     };
 
     useEffect(() => {
@@ -219,7 +270,7 @@ const TeacherQuizHistory = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
+        <div className="bg-gradient-to-br from-red-100 to-pink-100" style={{ paddingTop: '100px' }}>
             <Navbar />
 
             <div className="container mx-auto px-4 py-8">
@@ -365,6 +416,94 @@ const TeacherQuizHistory = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Score Distribution Chart */}
+                {scoreDistribution.length > 0 && (
+                    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <FaChartPie className="mr-2 text-red-600" />
+                            Phân Bố Điểm Số
+                        </h3>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Left: Information Panel */}
+                            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                {hoveredScore ? (
+                                    <div>
+                                        <div className="mb-4">
+                                            <h4 className="text-2xl font-bold text-gray-900 mb-2">{hoveredScore.name}</h4>
+                                            <p className="text-lg text-gray-600">
+                                                <strong>{hoveredScore.value}</strong> học sinh ({hoveredScore.percentage}%)
+                                            </p>
+                                        </div>
+                                        <div className="border-t border-gray-300 pt-4">
+                                            <p className="text-sm font-semibold text-gray-700 mb-3">Học sinh đạt điểm này:</p>
+                                            <div className="max-h-64 overflow-y-auto space-y-3">
+                                                {hoveredScore.students.map((student, idx) => (
+                                                    <div key={idx} className="bg-white rounded-lg p-3 border border-gray-200">
+                                                        <div className="font-medium text-gray-900">{student.fullName}</div>
+                                                        <div className="text-sm text-gray-600 mt-1">
+                                                            @{student.username}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mt-1">
+                                                            {new Date(student.date).toLocaleDateString('vi-VN', {
+                                                                year: 'numeric',
+                                                                month: 'long',
+                                                                day: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </div>
+                                                        <div className="text-sm text-gray-600 mt-1">
+                                                            <span className="font-medium">{student.correctAnswers}/{student.totalQuestions}</span> câu đúng
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-center">
+                                        <div>
+                                            <FaChartPie className="text-6xl text-gray-300 mx-auto mb-4" />
+                                            <p className="text-gray-500">Di chuột qua biểu đồ để xem chi tiết</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Right: Pie Chart */}
+                            <div className="h-96">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={scoreDistribution}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            label={({ name, percentage }) => `${name}: ${percentage}%`}
+                                            outerRadius={120}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                            onMouseEnter={(data) => setHoveredScore(data)}
+                                            onMouseLeave={() => setHoveredScore(null)}
+                                        >
+                                            {scoreDistribution.map((entry, index) => {
+                                                const colors = ['#dc2626', '#ea580c', '#ca8a04', '#65a30d', '#16a34a', '#0891b2', '#2563eb', '#7c3aed', '#c026d3', '#db2777'];
+                                                return <Cell
+                                                    key={`cell-${index}`}
+                                                    fill={colors[index % colors.length]}
+                                                    opacity={hoveredScore && hoveredScore.score === entry.score ? 1 : hoveredScore ? 0.3 : 1}
+                                                    style={{ cursor: 'pointer' }}
+                                                />;
+                                            })}
+                                        </Pie>
+                                        <Legend />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Results Table */}
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden">
