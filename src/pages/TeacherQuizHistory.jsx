@@ -28,6 +28,7 @@ const TeacherQuizHistory = () => {
     });
     const [scoreDistribution, setScoreDistribution] = useState([]);
     const [hoveredScore, setHoveredScore] = useState(null);
+    const [lockedScore, setLockedScore] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -214,8 +215,8 @@ const TeacherQuizHistory = () => {
             students: group.students
         }));
 
-        // Sort by score descending
-        distribution.sort((a, b) => b.score - a.score);
+        // Sort by score ascending (low to high)
+        distribution.sort((a, b) => a.score - b.score);
 
         setScoreDistribution(distribution);
     };
@@ -427,18 +428,25 @@ const TeacherQuizHistory = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Left: Information Panel */}
                             <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                                {hoveredScore ? (
+                                {(lockedScore || hoveredScore) ? (
                                     <div>
                                         <div className="mb-4">
-                                            <h4 className="text-2xl font-bold text-gray-900 mb-2">{hoveredScore.name}</h4>
+                                            <div className="flex items-center justify-between">
+                                                <h4 className="text-2xl font-bold text-gray-900 mb-2">{(lockedScore || hoveredScore).name}</h4>
+                                                {lockedScore && (
+                                                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-medium">
+                                                        Đã khóa
+                                                    </span>
+                                                )}
+                                            </div>
                                             <p className="text-lg text-gray-600">
-                                                <strong>{hoveredScore.value}</strong> học sinh ({hoveredScore.percentage}%)
+                                                <strong>{(lockedScore || hoveredScore).value}</strong> học sinh ({(lockedScore || hoveredScore).percentage}%)
                                             </p>
                                         </div>
                                         <div className="border-t border-gray-300 pt-4">
                                             <p className="text-sm font-semibold text-gray-700 mb-3">Học sinh đạt điểm này:</p>
                                             <div className="max-h-64 overflow-y-auto space-y-3">
-                                                {hoveredScore.students.map((student, idx) => (
+                                                {(lockedScore || hoveredScore).students.map((student, idx) => (
                                                     <div key={idx} className="bg-white rounded-lg p-3 border border-gray-200">
                                                         <div className="font-medium text-gray-900">{student.fullName}</div>
                                                         <div className="text-sm text-gray-600 mt-1">
@@ -466,13 +474,14 @@ const TeacherQuizHistory = () => {
                                         <div>
                                             <FaChartPie className="text-6xl text-gray-300 mx-auto mb-4" />
                                             <p className="text-gray-500">Di chuột qua biểu đồ để xem chi tiết</p>
+                                            <p className="text-sm text-gray-400 mt-2">Nhấp vào phân đoạn để khóa</p>
                                         </div>
                                     </div>
                                 )}
                             </div>
 
                             {/* Right: Pie Chart */}
-                            <div className="h-96">
+                            <div className="h-96" onClick={() => setLockedScore(null)}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
@@ -484,15 +493,29 @@ const TeacherQuizHistory = () => {
                                             outerRadius={120}
                                             fill="#8884d8"
                                             dataKey="value"
-                                            onMouseEnter={(data) => setHoveredScore(data)}
-                                            onMouseLeave={() => setHoveredScore(null)}
+                                            onMouseEnter={(data) => {
+                                                if (!lockedScore) {
+                                                    setHoveredScore(data);
+                                                }
+                                            }}
+                                            onMouseLeave={() => {
+                                                if (!lockedScore) {
+                                                    setHoveredScore(null);
+                                                }
+                                            }}
+                                            onClick={(data, index, e) => {
+                                                e.stopPropagation();
+                                                setLockedScore(lockedScore?.score === data.score ? null : data);
+                                                setHoveredScore(null);
+                                            }}
                                         >
                                             {scoreDistribution.map((entry, index) => {
                                                 const colors = ['#dc2626', '#ea580c', '#ca8a04', '#65a30d', '#16a34a', '#0891b2', '#2563eb', '#7c3aed', '#c026d3', '#db2777'];
+                                                const activeScore = lockedScore || hoveredScore;
                                                 return <Cell
                                                     key={`cell-${index}`}
                                                     fill={colors[index % colors.length]}
-                                                    opacity={hoveredScore && hoveredScore.score === entry.score ? 1 : hoveredScore ? 0.3 : 1}
+                                                    opacity={activeScore && activeScore.score === entry.score ? 1 : activeScore ? 0.3 : 1}
                                                     style={{ cursor: 'pointer' }}
                                                 />;
                                             })}
