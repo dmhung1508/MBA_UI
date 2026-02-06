@@ -40,10 +40,10 @@ const Login = () => {
             const data = await response.json();
             const { access_token, token_type, user_role } = data;
 
-            // Tính thời gian hết hạn: 30 ngày (1 tháng)
-            const expirationTime = new Date().getTime() + (30 * 24 * 60 * 60 * 1000); // 30 days in milliseconds
-            
-            // Store the token and user role  
+            // Tính thời gian hết hạn: 3 phút (access token lifetime)
+            const expirationTime = new Date().getTime() + (3 * 60 * 1000); // 3 minutes in milliseconds
+
+            // Store the token and user role
             localStorage.setItem('access_token', access_token);
             localStorage.setItem('token_type', token_type);
             localStorage.setItem('user_role', user_role);

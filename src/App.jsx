@@ -2,6 +2,7 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useTokenRefresh } from './hooks/useTokenRefresh';
 
 // Eager load critical pages (HomePage and LoginPage)
 import HomePage from "./pages/HomePage";
@@ -41,6 +42,10 @@ const LoadingFallback = () => (
 function App() {
   useEffect(() => { }, []);
   const [currentPage, SetCurrentPage] = useState("Home");
+
+  // Monitor user activity and refresh token proactively
+  useTokenRefresh();
+
   return (
     <BrowserRouter basename="/mini" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}> {/* Thêm basename vào đây */}
       <div className="App">
