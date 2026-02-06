@@ -4,6 +4,10 @@ dist/
 build/
 self_documents/
 
+# Test coverage and output
+coverage/
+.vitest/
+
 # Logs
 *.log
 nohup.out
