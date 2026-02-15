@@ -26,6 +26,7 @@ const Login = () => {
         try {
             const response = await fetch(API_ENDPOINTS.TOKEN, {
                 method: 'POST',
+                credentials: 'include', // Required to receive refresh token cookie
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },

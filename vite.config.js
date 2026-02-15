@@ -12,7 +12,21 @@ export default defineConfig({
       port: 24679,
       host: 'localhost'
     },
-    allowedHosts: ['mba.ptit.edu.vn', 'mini.dinhmanhhung.net']
+    allowedHosts: ['mba.ptit.edu.vn', 'mini.dinhmanhhung.net'],
+    // Local dev proxy: routes API calls to local BE, strips prefix
+    // This avoids CORS issues and makes cookies work (same-origin)
+    proxy: {
+      '/auth_mini': {
+        target: 'http://localhost:4559',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/auth_mini/, ''),
+      },
+      '/mba_mini': {
+        target: 'http://localhost:4559',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/mba_mini/, '/mba'),
+      },
+    },
   },
 
   build: {
