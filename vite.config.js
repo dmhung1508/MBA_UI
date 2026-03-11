@@ -12,7 +12,7 @@ export default defineConfig({
       port: 24679,
       host: 'localhost'
     },
-    allowedHosts: ['mba.ptit.edu.vn', 'mini.dinhmanhhung.net']
+    allowedHosts: ['mba.ptit.edu.vn', 'mini.dinhmanhhung.net', 'ptitai.org']
   },
 
   build: {
