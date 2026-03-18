@@ -21,7 +21,8 @@ import {
   FaChalkboardTeacher,
   FaClipboardList,
   FaChartBar,
-  FaTicketAlt
+  FaTicketAlt,
+  FaStar
 } from "react-icons/fa";
 import { isTokenValid, clearAuthData } from "../utils/auth";
 import { API_ENDPOINTS } from "../config/api";
@@ -176,6 +177,19 @@ const Navbar = () => {
                   className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                 >
                   <FaRobot className="mr-1 text-sm" /> Vấn đáp AI
+                </a>
+                <a
+                  href="/mini/study-with-ami"
+                  className="text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  <img
+                    src="/mini/ami-avatar.png"
+                    alt="Ami"
+                    className="mr-1"
+                    style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #ff2b78', flexShrink: 0 }}
+                  />
+                  Học cùng Ami
                 </a>
                 {!isAdmin && (
                   <a
@@ -409,6 +423,19 @@ const Navbar = () => {
                       >
                         <FaRobot className="mr-3 text-sm" />
                         Vấn đáp AI
+                      </a>
+                      <a
+                        href="/mini/study-with-ami"
+                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-all duration-200"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <img
+                          src="/mini/ami-avatar.png"
+                          alt="Ami"
+                          className="mr-3"
+                          style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #ff2b78', flexShrink: 0 }}
+                        />
+                        Học bài cùng Ami
                       </a>
 
                       {/* Show "Hỗ trợ" for non-admin users only (admins have "Quản lý Hỗ trợ" in dropdown) */}
