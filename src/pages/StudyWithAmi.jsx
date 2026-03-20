@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { API_ENDPOINTS } from "../config/api";
+import { resolveApiBaseUrl } from "../config/runtimeConfig";
 
 // KHÔNG dùng Navbar chính - trang này có thanh header riêng để tránh chồng chéo
 
@@ -28,15 +28,22 @@ function getInitials(fullName, username) {
     return name.slice(0, 2).toUpperCase();
 }
 
+function resolveAmiApiBase() {
+    return String(resolveApiBaseUrl() || "").replace(/\/+$/, "");
+}
+
 const StudyWithAmi = () => {
     const iframeRef = useRef(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [chatbots, setChatbots] = useState([]);
+    const [currentUserProfile, setCurrentUserProfile] = useState(null);
 
     const AMI_URL = "/mini/ami_clone/index.html";
     const AMI_AVATAR = "/mini/ami-avatar.png";
     const HEADER_H = 48;
+    const amiApiBase = resolveAmiApiBase();
+    const amiChatbotsEndpoint = `${amiApiBase}/auth_mini/chatbots`;
 
     // Lấy user info từ JWT — instant
     const token = localStorage.getItem("access_token");
@@ -46,13 +53,48 @@ const StudyWithAmi = () => {
         full_name: jwt.full_name || jwt.name || "",
         role: localStorage.getItem("user_role") || jwt.role || "user",
     } : null;
+    const effectiveUserProfile = currentUserProfile || userProfile;
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const fetchCurrentUser = async () => {
+            if (!token) {
+                setCurrentUserProfile(userProfile);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${amiApiBase}/auth_mini/users/me`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!res.ok) return;
+
+                const data = await res.json();
+                if (!cancelled && data?.username) {
+                    setCurrentUserProfile({
+                        username: data.username,
+                        full_name: data.full_name || data.name || userProfile?.full_name || "",
+                        role: data.role || localStorage.getItem("user_role") || userProfile?.role || "user",
+                    });
+                }
+            } catch (e) {
+                console.error("StudyWithAmi: fetchCurrentUser failed", e);
+            }
+        };
+
+        fetchCurrentUser();
+        return () => {
+            cancelled = true;
+        };
+    }, [amiApiBase, token]);
 
     // Fetch danh sách chatbot (môn học) user được phép
     useEffect(() => {
         const fetchChatbots = async () => {
             if (!token) return;
             try {
-                const res = await fetch(API_ENDPOINTS.CHATBOTS, {
+                const res = await fetch(amiChatbotsEndpoint, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!res.ok) return;
@@ -70,10 +112,10 @@ const StudyWithAmi = () => {
         if (!iframeRef.current?.contentWindow) return;
         iframeRef.current.contentWindow.postMessage({
             type: "AMI_USER_SYNC",
-            payload: userProfile ? {
-                username: userProfile.username,
-                fullName: userProfile.full_name,
-                role: userProfile.role,
+            payload: effectiveUserProfile ? {
+                username: effectiveUserProfile.username,
+                fullName: effectiveUserProfile.full_name,
+                role: effectiveUserProfile.role,
             } : null,
         }, "*");
 
@@ -84,7 +126,7 @@ const StudyWithAmi = () => {
                     chatbots,
                     token,
                     // API base URL để iframe tự gọi RAG
-                    apiBase: import.meta.env.VITE_API_BASE_URL || "",
+                    apiBase: amiApiBase,
                 },
             }, "*");
         }
@@ -93,7 +135,7 @@ const StudyWithAmi = () => {
     // Re-send khi chatbots load xong
     useEffect(() => {
         if (!isLoading) sendContextToIframe();
-    }, [chatbots, isLoading]);
+    }, [chatbots, currentUserProfile, isLoading]);
 
     const handleIframeLoad = () => {
         setIsLoading(false);

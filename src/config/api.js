@@ -1,8 +1,9 @@
 // API Configuration
 // This file centralizes all API-related configuration
+import { resolveApiBaseUrl } from "./runtimeConfig";
 
 // Base URL from environment variable
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = resolveApiBaseUrl();
 
 // Service-specific base URLs
 const AUTH_MINI_BASE = `${API_BASE_URL}/auth_mini`;

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { resolveApiBaseUrl } from '../config/runtimeConfig';
 
 /**
  * Hook to proactively refresh token based on user activity
@@ -18,6 +19,7 @@ export const useTokenRefresh = () => {
   const RECENTLY_ACTIVE_THRESHOLD = 30000; // 30 seconds
   const INACTIVITY_TIMEOUT = 240000; // 4 minutes
   const CHECK_INTERVAL = 5000; // Check every 5 seconds
+  const apiBaseUrl = resolveApiBaseUrl();
 
   /**
    * Force logout due to inactivity
@@ -59,7 +61,7 @@ export const useTokenRefresh = () => {
       isRefreshingRef.current = true;
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/auth_mini/refresh`,
+        `${apiBaseUrl}/auth_mini/refresh`,
         {},
         { withCredentials: true }
       );
