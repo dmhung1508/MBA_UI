@@ -4,599 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Ami Live2D Demo</title>
-  <style>
-    :root {
-      --sidebar-w: 64px;
-      --drawer-w: 310px;
-      --line: rgba(255, 255, 255, 0.12);
-      --glass: rgba(0, 0, 0, 0.76);
-      --panel-surface: linear-gradient(180deg, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.74));
-      --soft: rgba(255, 255, 255, 0.08);
-      --soft-2: rgba(255, 255, 255, 0.16);
-      --text-soft: rgba(255, 255, 255, 0.76);
-      --accent: #ff2b78;
-    }
+    <link rel="stylesheet" href="./ami.css" />
 
-    html,
-    body {
-      margin: 0;
-      height: 100%;
-      background: #0f172a;
-      color: #fff;
-      font-family: "Segoe UI", Arial, sans-serif;
-      overflow: hidden;
-    }
-
-    body {
-      user-select: none;
-    }
-
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    #app {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      isolation: isolate;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 28%),
-        linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.18)),
-        url("./public/background/ptit_bg.png") center center / cover no-repeat;
-    }
-
-    #app::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      background:
-        radial-gradient(circle at center 35%, rgba(255, 255, 255, 0.06), transparent 26%),
-        radial-gradient(circle at center bottom, rgba(255, 255, 255, 0.08), transparent 32%);
-      pointer-events: none;
-    }
-
-    #app canvas {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      display: block;
-    }
-
-    #sidebar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      z-index: 30;
-      width: var(--sidebar-w);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 18px 0 14px;
-      background: var(--panel-surface);
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
-      box-shadow: 18px 0 40px rgba(0, 0, 0, 0.18);
-      backdrop-filter: blur(10px);
-    }
-
-    .sidebar-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-    }
-
-    .sidebar-group.bottom {
-      margin-top: auto;
-    }
-
-    .side-icon {
-      width: 38px;
-      height: 38px;
-      display: grid;
-      place-items: center;
-      border: 0;
-      border-radius: 11px;
-      background: transparent;
-      color: #fff;
-      cursor: pointer;
-      transition: background 160ms ease, transform 160ms ease, opacity 160ms ease;
-    }
-
-    .side-icon:hover,
-    .side-icon.is-active {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .side-icon:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    .side-icon svg {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-    }
-
-    .avatar-badge {
-      width: 32px;
-      height: 32px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.92);
-      color: #111827;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-
-    #drawer {
-      position: absolute;
-      top: 0;
-      left: var(--sidebar-w);
-      bottom: 0;
-      z-index: 25;
-      width: var(--drawer-w);
-      overflow: hidden;
-      transform: translateX(-100%);
-      transition: transform 220ms ease;
-      pointer-events: none;
-    }
-
-    #drawer.is-open {
-      transform: translateX(0);
-      pointer-events: auto;
-    }
-
-    #drawer-panel {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 100%;
-      padding: 26px 18px 18px;
-      background: var(--panel-surface);
-      backdrop-filter: blur(12px);
-      border-right: 1px solid rgba(255, 255, 255, 0.06);
-      overflow: hidden;
-    }
-
-    .drawer-page {
-      display: none;
-      height: 100%;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .drawer-page.is-active {
-      display: flex;
-    }
-
-    .drawer-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .drawer-title {
-      margin: 0;
-      font-size: 19px;
-      font-weight: 700;
-    }
-
-    .drawer-close {
-      width: 34px;
-      height: 34px;
-      border: 0;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      background: rgba(255, 255, 255, 0.04);
-      color: #fff;
-      cursor: pointer;
-    }
-
-    .drawer-close svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-    }
-
-    .drawer-actions {
-      display: grid;
-      gap: 10px;
-    }
-
-    .drawer-action {
-      border: 0;
-      border-radius: 14px;
-      background: transparent;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 10px;
-      text-align: left;
-      cursor: pointer;
-    }
-
-    .drawer-action:hover {
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .drawer-action svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-      flex: none;
-    }
-
-    .conversation-list {
-      display: grid;
-      gap: 8px;
-      overflow: auto;
-      padding-right: 4px;
-    }
-
-    .conversation-card {
-      position: relative;
-      border-radius: 12px;
-      padding: 12px 14px 12px 16px;
-      background: transparent;
-      border: 1px solid transparent;
-      color: #fff;
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .conversation-card:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.08);
-    }
-
-    .conversation-card.is-active {
-      background: rgba(0, 61, 90, 0.42);
-      border-color: rgba(31, 156, 255, 0.16);
-    }
-
-    .conversation-card.is-active::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 10px;
-      bottom: 10px;
-      width: 4px;
-      border-radius: 0 999px 999px 0;
-      background: var(--accent);
-    }
-
-    .conversation-title {
-      display: block;
-      font-size: 15px;
-      margin-bottom: 6px;
-    }
-
-    .conversation-time {
-      display: block;
-      color: var(--text-soft);
-      font-size: 12px;
-    }
-
-    .conversation-tools {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      display: none;
-      gap: 10px;
-    }
-
-    .conversation-card.is-active .conversation-tools {
-      display: flex;
-    }
-
-    .tool-icon {
-      width: 18px;
-      height: 18px;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      opacity: 0.9;
-    }
-
-    .tool-icon svg {
-      width: 15px;
-      height: 15px;
-      stroke: currentColor;
-    }
-
-    .drawer-footer {
-      margin-top: auto;
-      padding-top: 10px;
-      border-top: 1px solid var(--line);
-      display: grid;
-      gap: 6px;
-    }
-
-    .drawer-foot-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-height: 42px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      color: #fff;
-      text-decoration: none;
-    }
-
-    .drawer-foot-item:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .drawer-foot-item svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-      flex: none;
-    }
-
-    .expr-layout {
-      display: grid;
-      gap: 12px;
-      overflow: auto;
-      padding-right: 4px;
-    }
-
-    .expr-section {
-      border-top: 1px solid var(--line);
-      padding-top: 14px;
-    }
-
-    .expr-section:first-of-type {
-      border-top: 0;
-      padding-top: 0;
-    }
-
-    .expr-label {
-      margin: 0 0 12px;
-      color: var(--text-soft);
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .option-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .option-button {
-      width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.88);
-      border-radius: 10px;
-      padding: 14px 12px;
-      background: rgba(255, 255, 255, 0.02);
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .option-button:hover {
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .option-button:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    .mini-copy {
-      color: var(--text-soft);
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    #status {
-      position: absolute;
-      top: 16px;
-      left: 82px;
-      z-index: 20;
-      max-width: 270px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(15, 23, 42, 0.54);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      backdrop-filter: blur(8px);
-      font-size: 13px;
-      white-space: pre-wrap;
-    }
-
-    #chat-hint {
-      position: absolute;
-      left: 50%;
-      bottom: 18px;
-      z-index: 20;
-      transform: translateX(-50%);
-      padding: 14px 24px;
-      border-radius: 999px;
-      background: rgba(109, 82, 60, 0.68);
-      color: rgba(255, 255, 255, 0.94);
-      font-size: 15px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
-    }
-
-    #quick-actions {
-      position: absolute;
-      right: 16px;
-      bottom: 14px;
-      z-index: 20;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .quick-btn {
-      width: 42px;
-      height: 42px;
-      display: grid;
-      place-items: center;
-      border: 0;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      cursor: pointer;
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
-    }
-
-    .quick-btn svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-    }
-
-    #chat-shell {
-      position: absolute;
-      right: 16px;
-      bottom: 72px;
-      z-index: 20;
-      width: min(420px, calc(100vw - 96px));
-      max-height: min(56vh, 620px);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 14px;
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0.64), rgba(0, 0, 0, 0.48));
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(14px);
-      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22);
-    }
-
-    #message-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow: auto;
-      min-height: 160px;
-      max-height: min(42vh, 460px);
-      padding-right: 4px;
-    }
-
-    .empty-chat {
-      color: var(--text-soft);
-      font-size: 14px;
-      line-height: 1.6;
-      padding: 10px 2px;
-    }
-
-    .message {
-      max-width: 88%;
-      padding: 12px 14px;
-      border-radius: 18px;
-      line-height: 1.5;
-      font-size: 14px;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .message.user {
-      align-self: flex-end;
-      background: rgba(255, 255, 255, 0.12);
-      border-bottom-right-radius: 6px;
-    }
-
-    .message.assistant {
-      align-self: flex-start;
-      background: rgba(4, 123, 255, 0.16);
-      border: 1px solid rgba(72, 166, 255, 0.18);
-      border-bottom-left-radius: 6px;
-    }
-
-    .message.is-pending {
-      opacity: 0.8;
-    }
-
-    .message-meta {
-      display: block;
-      margin-top: 6px;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 11px;
-    }
-
-    #chat-form {
-      display: flex;
-      gap: 10px;
-    }
-
-    #chat-input {
-      flex: 1;
-      min-width: 0;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 16px;
-      padding: 14px 16px;
-      background: rgba(255, 255, 255, 0.06);
-      color: #fff;
-      font: inherit;
-      outline: none;
-    }
-
-    #chat-input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    #send-btn {
-      border: 0;
-      min-width: 54px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.14);
-      color: #fff;
-      font: inherit;
-      cursor: pointer;
-    }
-
-    #send-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    @media (max-width: 900px) {
-      :root {
-        --sidebar-w: 58px;
-        --drawer-w: min(280px, calc(100vw - 58px));
-      }
-
-      #status {
-        left: 70px;
-        max-width: calc(100vw - 84px);
-      }
-
-      .option-grid {
-        grid-template-columns: 1fr;
-      }
-
-      #chat-hint {
-        left: 74px;
-        right: 74px;
-        transform: none;
-        text-align: center;
-      }
-
-      #chat-shell {
-        left: 74px;
-        right: 12px;
-        width: auto;
-      }
-    }
-  </style>
 </head>
 
 <body>
@@ -624,12 +33,31 @@
           <span id="sidebar-subject-dot"
             style="display:none;position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#22c55e;"></span>
         </button>
-        <button class="side-icon" data-sidebar-action="history" onclick="openDrawerPage('home', true)"
-          aria-label="Lich su chat">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
-            <path d="M4 6h16v10H8l-4 4V6Z" />
+        <button class="side-icon" data-sidebar-action="history" onclick="return handleAmiHistoryButtonClick(event)"
+          aria-label="Lich su chat" title="Lịch sử chat Ami">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+            <path d="M12 7v5l3 2" />
+            <path d="M12 3a9 9 0 1 1-9 9" />
+            <path d="M5 4v4H1" />
           </svg>
         </button>
+        <button class="side-icon" data-sidebar-action="debate" onclick="openDrawerPage('debate', true)"
+          aria-label="Thu thach Ami" title="Thử thách Ami">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+            <path d="M8 21h8M12 17v4M7 4h10c1.7 0 3 1.3 3 3v2c0 2.2-1.8 4-4 4h-8c-2.2 0-4-1.8-4-4V7c0-1.7 1.3-3 3-3Z" />
+          </svg>
+        </button>
+        <button class="side-icon" data-sidebar-action="leaderboard" onclick="openDrawerPage('leaderboard', true)"
+          aria-label="Bang xep hang" title="Bảng xếp hạng">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+            <path d="M8 21h8" />
+            <path d="M12 17v4" />
+            <path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" />
+            <path d="M5 6H4a2 2 0 0 0 0 4h2" />
+            <path d="M19 6h1a2 2 0 1 1 0 4h-2" />
+          </svg>
+        </button>
+
       </div>
 
       <div class="sidebar-group bottom">
@@ -642,7 +70,7 @@
         </button>
         <button class="side-icon" data-sidebar-action="profile" onclick="openDrawerPage('profile', true)"
           aria-label="Avatar">
-          <span class="avatar-badge">BQ</span>
+          <span class="avatar-badge">?</span>
         </button>
         <button class="side-icon" data-sidebar-action="settings" onclick="openDrawerPage('settings', true)"
           aria-label="Cai dat">
@@ -682,43 +110,26 @@
               </svg>
               <span>Chọn môn</span>
             </button>
+            <button class="drawer-action" onclick="openDrawerPage('debate', true)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                <path
+                  d="M8 21h8M12 17v4M7 4h10c1.7 0 3 1.3 3 3v2c0 2.2-1.8 4-4 4h-8c-2.2 0-4-1.8-4-4V7c0-1.7 1.3-3 3-3Z" />
+              </svg>
+              <span style="color:#fbbf24; font-weight:bold;">Tranh biện ngay</span>
+            </button>
+            <button class="drawer-action" onclick="openDrawerPage('leaderboard', true)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                <path d="M8 21h8" />
+                <path d="M12 17v4" />
+                <path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" />
+                <path d="M5 6H4a2 2 0 0 0 0 4h2" />
+                <path d="M19 6h1a2 2 0 1 1 0 4h-2" />
+              </svg>
+              <span>Xem bảng xếp hạng</span>
+            </button>
           </div>
 
-          <div class="conversation-list" id="conversation-list">
-            <button class="conversation-card" onclick="selectConversation(this, 'Cuoc tro chuyen moi', '17:28 11-03')">
-              <span class="conversation-title">Cuộc trò chuyện mới</span>
-              <span class="conversation-time">17:28 11-03</span>
-            </button>
-            <button class="conversation-card is-active"
-              onclick="selectConversation(this, 'Cuoc tro chuyen moi', '01:28 12-03')">
-              <span class="conversation-title">Cuộc trò chuyện mới</span>
-              <span class="conversation-time">01:28 12-03</span>
-              <span class="conversation-tools">
-                <span class="tool-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
-                    <path d="m16 4 4 4M4 20l4.5-1 9-9-3.5-3.5-9 9L4 20Z" />
-                  </svg>
-                </span>
-                <span class="tool-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
-                    <path d="M5 7h14M9 7V4h6v3m-7 4v6m4-6v6M7 7l1 12h8l1-12" />
-                  </svg>
-                </span>
-              </span>
-            </button>
-            <button class="conversation-card" onclick="selectConversation(this, 'Cuoc tro chuyen moi', '17:12 11-03')">
-              <span class="conversation-title">Cuộc trò chuyện mới</span>
-              <span class="conversation-time">17:12 11-03</span>
-            </button>
-            <button class="conversation-card" onclick="selectConversation(this, 'Cuoc tro chuyen moi', '17:03 11-03')">
-              <span class="conversation-title">Cuộc trò chuyện mới</span>
-              <span class="conversation-time">17:03 11-03</span>
-            </button>
-            <button class="conversation-card" onclick="selectConversation(this, 'Cuoc tro chuyen moi', '16:51 11-03')">
-              <span class="conversation-title">Cuộc trò chuyện mới</span>
-              <span class="conversation-time">16:51 11-03</span>
-            </button>
-          </div>
+
 
           <div class="drawer-footer">
             <a href="#" class="drawer-foot-item" onclick="openDrawerPage('expressions', true); return false;">
@@ -779,12 +190,7 @@
                   #2</button>
                 <button class="option-button" data-motion="Checkin3" onclick="playMotion(this.dataset.motion)">Tạo
                   dáng</button>
-                <button class="option-button" data-motion="Reading" onclick="playMotion(this.dataset.motion)">Đọc
-                  sách</button>
-                <button class="option-button" data-motion="Head_Nod" onclick="playMotion(this.dataset.motion)">Gật
-                  đầu</button>
-                <button class="option-button" data-motion="Head_Shake" onclick="playMotion(this.dataset.motion)">Lắc
-                  đầu</button>
+
               </div>
             </section>
 
@@ -851,35 +257,239 @@
               </svg>
             </button>
           </div>
-          <div id="subjects-list" style="padding:12px 4px;display:flex;flex-direction:column;gap:8px;">
-            <p style="color:var(--text-soft);font-size:13px;text-align:center;padding:16px 0;" id="subjects-empty">Đang
-              tải danh sách môn...</p>
+          <div class="drawer-scroll">
+            <div class="subject-hero-card">
+              <span class="panel-kicker">Chọn đúng môn để Ami học cùng bạn nhé</span>
+              <h3 class="panel-title">Chọn đúng môn để Ami học cùng bạn nhé</h3>
+              <p class="panel-copy">Sau khi chọn môn, Ami sẽ trả lời theo ngữ cảnh riêng của môn đó và mở luôn chế độ
+                học phù hợp cho bạn.</p>
+            </div>
+            <div id="subjects-list" class="subject-list">
+              <p class="panel-empty" id="subjects-empty">Đang tải danh sách môn...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Trang Thử thách Ami -->
+        <section class="drawer-page" data-drawer-page="debate">
+          <div class="drawer-header">
+            <h2 class="drawer-title" style="color: #fbbf24;">Thử thách Ami</h2>
+            <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
+          <div class="drawer-scroll">
+            <div class="debate-panel">
+              <span class="panel-kicker panel-kicker--warm">Đấu trí học thuật</span>
+              <h3 class="panel-title">Ami sẽ đưa thử thách, phản biện lại câu trả lời của bạn và chấm điểm cuối cùng</h3>
+              <p class="panel-copy" id="debate-subject-copy">Hãy chọn môn học trước khi bắt đầu để Ami đưa thử thách đúng tài
+                liệu và chấm sát hơn.</p>
+              <div class="debate-time-box">
+                <p class="expr-label">Thời gian cho mỗi lượt phản biện</p>
+                <div class="option-grid debate-time-grid">
+                  <button class="option-button debate-time-option" type="button" data-debate-time-option="2m"
+                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">2 phút</button>
+                  <button class="option-button debate-time-option" type="button" data-debate-time-option="3m"
+                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">3 phút</button>
+                  <button class="option-button debate-time-option" type="button" data-debate-time-option="5m"
+                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">5 phút</button>
+                  <button class="option-button debate-time-option" type="button" data-debate-time-option="unlimited"
+                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">Không giới hạn</button>
+                </div>
+                <p class="panel-copy debate-time-copy" id="debate-time-bonus-copy">
+                  Hoàn thành đủ 3 lượt, không lượt nào dưới 50 điểm và không vượt mốc để nhận thưởng thời gian.
+                </p>
+              </div>
+              <div class="study-actions">
+                <button class="hero-btn hero-btn--warm" type="button" onclick="startDebate()">Bắt đầu thử thách</button>
+                <button class="hero-btn hero-btn--ghost" type="button" onclick="openDrawerPage('leaderboard', true)">Xem bảng xếp hạng</button>
+                <button class="hero-btn hero-btn--ghost" type="button" onclick="cancelDebate()">Dừng thử thách Ami</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-page" data-drawer-page="history">
+          <div class="drawer-header history-drawer-header">
+            <h2 class="drawer-title">Lịch sử chat Ami</h2>
+            <div class="history-drawer-actions">
+              <button class="history-new-session-btn" type="button" onclick="newConversation()" aria-label="Tạo session mới" title="Tạo session mới">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke="currentColor">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </button>
+              <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="drawer-scroll history-drawer-scroll">
+            <div id="ami-history-list" class="ami-session-list ami-session-list--compact">
+              <p class="panel-empty">Ami đang tải lịch sử chat...</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-page" data-drawer-page="leaderboard">
+          <div class="drawer-header">
+            <h2 class="drawer-title">Bảng xếp hạng</h2>
+            <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
+          <div class="drawer-scroll">
+            <div class="leaderboard-hero-card">
+              <span class="panel-kicker">Bảng vàng Ami</span>
+              <h3 class="panel-title">Theo dõi thứ hạng theo từng môn học</h3>
+              <p class="panel-copy" id="leaderboard-copy">Chọn môn học để xem top người học có điểm thử thách cao nhất.</p>
+            </div>
+            <div id="leaderboard-page-list" class="leaderboard-list">
+              <p class="panel-empty">Vui lòng chọn môn học để xem bảng xếp hạng.</p>
+            </div>
           </div>
         </section>
       </div>
     </div>
 
-    <div id="status">Đang load model...</div>
-    <div id="chat-hint">Nhấn ENTER để chat với Ami, nhấn giữ để bật mic</div>
+    <button id="drawer-backdrop" type="button" aria-label="Dong drawer" onclick="toggleDrawer(false)"></button>
+
+    <div id="status" aria-live="polite"></div>
+    <div id="chat-hint">Chọn môn học để bắt đầu cùng Ami</div>
 
     <section id="chat-shell">
+      <div id="chat-shell-header" class="chat-shell-header" onpointerdown="startChatShellDrag(event)">
+        <div class="chat-shell-presence">
+          <span class="chat-shell-dot"></span>
+          <span id="chat-shell-status">Sẵn sàng</span>
+        </div>
+        <div class="chat-shell-meta">
+          <strong id="chat-shell-title">Học cùng Ami</strong>
+          <span id="chat-shell-subtitle">Chọn môn học để bắt đầu</span>
+        </div>
+        <div class="chat-shell-controls">
+          <button id="chat-shell-collapse-btn" class="shell-action-btn" type="button"
+            aria-label="An phan mon hoc" title="Ẩn/hiện phần môn học"
+            onclick="toggleShellPanels(); event.stopPropagation();" onpointerdown="event.stopPropagation()">
+            <span id="chat-shell-collapse-icon">▴</span>
+          </button>
+          <button id="chat-shell-minimize-btn" class="shell-action-btn" type="button"
+            aria-label="An hien khung chat" title="Ẩn/hiện khung chat"
+            onclick="toggleChatShellVisibility(); event.stopPropagation();" onpointerdown="event.stopPropagation()">
+            <span id="chat-shell-minimize-icon">▾</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="chat-shell-top" class="chat-shell-top">
+        <div id="study-panel" class="study-panel">
+          <div class="panel-frame-head">
+            <span class="panel-kicker">Học cùng Ami</span>
+            <button class="panel-close-btn" type="button" aria-label="Dong hoc cung Ami" title="Đóng"
+              onclick="closeStudyPanel(); event.stopPropagation();" onpointerdown="event.stopPropagation()">
+              ×
+            </button>
+          </div>
+          <div class="study-copy">
+            <h3 class="panel-title" id="study-title">Chọn đúng môn để Ami học cùng bạn nhé</h3>
+            <p class="panel-copy" id="study-description">Ami là sinh viên PTIT đồng hành cùng bạn. Chọn môn trước để Ami trả
+              lời đúng ngữ cảnh và mở luôn chế độ học phù hợp.</p>
+          </div>
+          <div class="study-actions">
+            <button class="hero-btn hero-btn--primary" type="button" onclick="openDrawerPage('subjects', true)">Chọn môn học</button>
+            <button class="hero-btn hero-btn--ghost" type="button" onclick="openDrawerPage('leaderboard', true)">Bảng xếp hạng</button>
+          </div>
+        </div>
+
+        <div id="subject-inline-picker" class="subject-inline-picker">
+          <div class="subject-inline-head">
+            <span>Danh sách môn học của bạn</span>
+            <div class="subject-inline-actions">
+              <button class="link-btn" type="button" onclick="openDrawerPage('subjects', true)">Xem đầy đủ</button>
+              <button class="panel-close-btn" type="button" aria-label="Dong danh sach mon hoc" title="Đóng"
+                onclick="closeSubjectPanel(); event.stopPropagation();" onpointerdown="event.stopPropagation()">
+                ×
+              </button>
+            </div>
+          </div>
+          <div id="subject-inline-empty" class="panel-empty">Đang tải danh sách môn...</div>
+          <div id="subject-inline-list" class="subject-inline-list"></div>
+          <div id="subject-inline-more" class="subject-inline-more" hidden></div>
+        </div>
+      </div>
+      <div id="debate-header" class="debate-header">
+        <div class="debate-heading">
+          <span class="debate-badge">Thử thách Ami</span>
+          <span id="debate-time-note" class="debate-meta">Chọn mốc thời gian trước khi bắt đầu</span>
+        </div>
+        <div class="debate-pill-group">
+          <span id="debate-turn-indicator" class="debate-turn-pill">Lượt 1/3</span>
+          <span id="debate-timer-indicator" class="debate-time-pill">∞</span>
+        </div>
+      </div>
       <div id="message-list">
         <div class="empty-chat">Chọn môn học rồi hỏi Ami bất cứ câu gì nhé! 📖</div>
       </div>
       <form id="chat-form">
+        <div id="voice-recorder-shell" class="voice-recorder-shell" hidden>
+          <button id="voice-record-cancel-btn" class="voice-recorder-cancel" type="button" aria-label="Hủy ghi âm"
+            title="Hủy ghi âm" onclick="cancelVoiceRecording()">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9">
+              <path d="M6 6l12 12" />
+              <path d="M18 6 6 18" />
+            </svg>
+          </button>
+          <div class="voice-recorder-track">
+            <button id="voice-record-stop-btn" class="voice-recorder-stop" type="button" aria-label="Dừng ghi âm"
+              title="Dừng ghi âm và chép lời" onclick="finishVoiceRecording()">
+              <span></span>
+            </button>
+            <div class="voice-recorder-copy">
+              <span id="voice-record-title" class="voice-recorder-title">Ami đang nghe bạn nói</span>
+              <span id="voice-record-subtitle" class="voice-recorder-subtitle">Nhấn nút vuông để chốt ghi âm và chép lời</span>
+              <div class="voice-recorder-wave" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            <span id="voice-record-timer" class="voice-recorder-timer">0:00</span>
+          </div>
+        </div>
         <input id="chat-input" type="text" autocomplete="off" placeholder="Nhắn Ami..." />
+        <button id="voice-record-btn" class="composer-icon-btn" type="button" aria-label="Ghi âm"
+          title="Bấm để nói với Ami" onclick="toggleVoiceRecording()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <path d="M12 15a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Z" />
+            <path d="M19 11a7 7 0 1 1-14 0M12 18v3" />
+          </svg>
+        </button>
         <button id="send-btn" type="submit">Gửi</button>
       </form>
     </section>
 
     <div id="quick-actions">
-      <button class="quick-btn" aria-label="Micro">
+      <button id="chat-shell-toggle-btn" class="quick-btn" type="button" aria-label="Ẩn hiện khung chat" title="Ẩn/hiện khung chat"
+        onclick="toggleChatShellVisibility()">
+        <span id="chat-shell-toggle-icon">▾</span>
+      </button>
+      <button id="voice-replay-btn" class="quick-btn" type="button" aria-label="Nghe Ami" title="Phát lại câu trả lời gần nhất của Ami"
+        onclick="handleVoiceReplay()">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
-          <path d="M12 15a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Z" />
-          <path d="M19 11a7 7 0 1 1-14 0M12 18v3" />
+          <path d="M14 5 8.5 9H5v6h3.5L14 19V5Z" />
+          <path d="M17.5 9.5a4 4 0 0 1 0 5" />
+          <path d="M19.8 7a7 7 0 0 1 0 10" />
         </svg>
       </button>
-      <button class="quick-btn" aria-label="Len tren">
+      <button id="scroll-top-btn" class="quick-btn" type="button" aria-label="Lên trên" title="Lên đầu cuộc trò chuyện"
+        onclick="scrollMessagesToTop()">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
           <path d="m7 14 5-5 5 5" />
         </svg>
@@ -891,905 +501,7 @@
   <script src="./public/libs/live2dcubismcore.min.js"></script>
   <script src="./public/libs/pixi-live2d-display-cubism4.min.js"></script>
 
-  <script>
-    let app;
-    let model;
-    let drawerOpen = true;
-    let currentDrawerPage = "home";
-    let dragData = null;
-    let currentConversationId = null;
-    let currentExchangeCount = 0;
-    let isSending = false;
-    let messages = [];
-    let conversations = [];
-
-    // RAG context (nhận từ React parent)
-    let amiToken = "";
-    let amiChatbots = [];       // [{id, name, source, quizTopic, prompt}, ...]
-    let amiSelectedSource = ""; // source của môn đang chọn
-    let amiSelectedName = "";   // tên môn đang chọn
-    let amiUserInitials = "?";  // initials của user hiện tại
-    let amiUserName = "Bạn";   // tên hiển thị của user
-    let amiUserId = "";
-    let amiApiBase = "";
-
-    // RAG URL luôn dùng origin của trang — iframe cùng origin với app chính
-    const RAG_ORIGIN = window.location.origin;
-
-    const MODEL_PATH = "./public/live2d-models/Ami/ptit_sdk.model3.json";
-    const API_BASE = localStorage.getItem("ami-api-base") || "";
-    const FALLBACK_WORKSPACE_ID = "550e8400-e29b-41d4-a716-446655440000";
-    const FALLBACK_USER_ID = "00000000-0000-4000-a000-000000000003";
-
-    function status(msg) {
-      document.getElementById("status").textContent = msg;
-      console.log(msg);
-    }
-
-    function resolveModelAsset(path) {
-      return new URL(path, new URL(MODEL_PATH, window.location.href)).href;
-    }
-
-    function getChatContext() {
-      try {
-        const raw = localStorage.getItem("ami-auth");
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          const userId = parsed?.state?.user?.id;
-          const workspaceId = parsed?.state?.user?.workspace_id;
-          if (userId && workspaceId) {
-            return { userId, workspaceId };
-          }
-        }
-      } catch { }
-
-      return {
-        userId: localStorage.getItem("ami-demo-user-id") || FALLBACK_USER_ID,
-        workspaceId: localStorage.getItem("ami-demo-workspace-id") || FALLBACK_WORKSPACE_ID
-      };
-    }
-
-    function buildApiUrl(path, params) {
-      const url = new URL(`${API_BASE}${path}`, window.location.origin);
-      if (params) {
-        Object.entries(params).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== "") {
-            url.searchParams.set(key, String(value));
-          }
-        });
-      }
-      return url.toString();
-    }
-
-    async function apiRequest(path, options = {}, params) {
-      const url = buildApiUrl(path, params);
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          ...(options.headers || {})
-        }
-      });
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.detail || error.message || `HTTP ${response.status}`);
-      }
-
-      return response.json();
-    }
-
-    function formatDisplayTime(value) {
-      if (!value) return "";
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return value;
-      const hh = String(date.getHours()).padStart(2, "0");
-      const mm = String(date.getMinutes()).padStart(2, "0");
-      const dd = String(date.getDate()).padStart(2, "0");
-      const mo = String(date.getMonth() + 1).padStart(2, "0");
-      return `${hh}:${mm} ${dd}-${mo}`;
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll("\"", "&quot;")
-        .replaceAll("'", "&#39;");
-    }
-
-    function setSendingState(next) {
-      isSending = next;
-      document.getElementById("send-btn").disabled = next;
-      document.getElementById("chat-input").disabled = next;
-    }
-
-    function renderMessages() {
-      const list = document.getElementById("message-list");
-      if (!messages.length) {
-        list.innerHTML = '<div class="empty-chat">Chọn môn học rồi hỏi Ami bất cứ câu gì nhé! 📖</div>';
-        return;
-      }
-
-      list.innerHTML = messages.map((msg) => {
-        const isUser = msg.role === "user";
-        const isPending = !!msg.pending;
-        const timeStr = escapeHtml(formatDisplayTime(msg.timestamp));
-        // Hỗ trợ **bold** markdown đơn giản
-        const contentHtml = escapeHtml(msg.content)
-          .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-          .replace(/\n/g, "<br>");
-
-        if (isUser) {
-          return `
-            <div class="chat-row user-row">
-              <div class="chat-bubble user-bubble ${isPending ? "is-pending" : ""}">
-                <span class="bubble-text">${contentHtml}</span>
-                <span class="bubble-time">${timeStr}</span>
-              </div>
-              <div class="chat-avatar user-avatar">${escapeHtml(amiUserInitials)}</div>
-            </div>`;
-        } else {
-          return `
-            <div class="chat-row ami-row">
-              <img class="ami-avatar-img" src="/mini/ami-avatar.png" alt="Ami" />
-              <div class="chat-bubble ami-bubble ${isPending ? "is-pending" : ""}">
-                <span class="bubble-sender">Ami</span>
-                <span class="bubble-text">${contentHtml}</span>
-                <span class="bubble-time">${timeStr}</span>
-              </div>
-            </div>`;
-        }
-      }).join("");
-      list.scrollTop = list.scrollHeight;
-    }
-
-    function renderConversationList() {
-      const list = document.getElementById("conversation-list");
-      if (!conversations.length) {
-        list.innerHTML = '<div class="mini-copy">Chưa có lịch sử chat.</div>';
-        return;
-      }
-
-      list.innerHTML = conversations.map((item) => `
-        <button class="conversation-card ${item.id === currentConversationId ? "is-active" : ""}" data-id="${item.id}">
-          <span class="conversation-title">${escapeHtml(item.title || "Cuộc trò chuyện mới")}</span>
-          <span class="conversation-time">${escapeHtml(formatDisplayTime(item.updated_at || item.created_at))}</span>
-          <span class="conversation-tools">
-            <span class="tool-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
-                <path d="m16 4 4 4M4 20l4.5-1 9-9-3.5-3.5-9 9L4 20Z"/>
-              </svg>
-            </span>
-            <span class="tool-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
-                <path d="M5 7h14M9 7V4h6v3m-7 4v6m4-6v6M7 7l1 12h8l1-12"/>
-              </svg>
-            </span>
-          </span>
-        </button>
-      `).join("");
-
-      list.querySelectorAll(".conversation-card").forEach((button) => {
-        button.addEventListener("click", () => loadConversation(button.dataset.id));
-      });
-    }
-
-    function hydrateMessages(detail) {
-      const nextMessages = [];
-      for (const exchange of detail.exchanges || []) {
-        nextMessages.push({
-          id: `${exchange.exchange_id}-user`,
-          role: "user",
-          content: exchange.user_input,
-          timestamp: exchange.created_at
-        });
-
-        if (exchange.agent_response) {
-          nextMessages.push({
-            id: `${exchange.exchange_id}-assistant`,
-            role: "assistant",
-            content: exchange.agent_response,
-            timestamp: exchange.completed_at || exchange.created_at
-          });
-        }
-      }
-      messages = nextMessages;
-      currentExchangeCount = detail.total_exchanges || 0;
-      renderMessages();
-    }
-
-    async function assetExists(path) {
-      try {
-        const res = await fetch(path, { method: "HEAD" });
-        return res.ok;
-      } catch {
-        try {
-          const res = await fetch(path, { method: "GET" });
-          return res.ok;
-        } catch {
-          return false;
-        }
-      }
-    }
-
-    function syncSidebarState() {
-      document.querySelector('[data-sidebar-action="drawer"]').classList.toggle("is-active", drawerOpen && currentDrawerPage === "home");
-      document.querySelector('[data-sidebar-action="history"]').classList.toggle("is-active", drawerOpen && currentDrawerPage === "home");
-      document.querySelector('[data-sidebar-action="expressions"]').classList.toggle("is-active", drawerOpen && currentDrawerPage === "expressions");
-      document.querySelector('[data-sidebar-action="profile"]').classList.toggle("is-active", drawerOpen && currentDrawerPage === "profile");
-      document.querySelector('[data-sidebar-action="settings"]').classList.toggle("is-active", drawerOpen && currentDrawerPage === "settings");
-    }
-
-    function toggleDrawer(force) {
-      drawerOpen = typeof force === "boolean" ? force : !drawerOpen;
-      document.getElementById("drawer").classList.toggle("is-open", drawerOpen);
-      syncSidebarState();
-    }
-
-    function openDrawerPage(page, forceOpen = false) {
-      currentDrawerPage = page;
-
-      document.querySelectorAll(".drawer-page").forEach((section) => {
-        section.classList.toggle("is-active", section.dataset.drawerPage === page);
-      });
-
-      if (forceOpen) {
-        toggleDrawer(true);
-      } else {
-        syncSidebarState();
-      }
-      syncSidebarState();
-    }
-
-    function focusHistory() {
-      openDrawerPage("home", true);
-      status("Đang xem lịch sử chat");
-    }
-
-    function newConversation() {
-      currentConversationId = null;
-      currentExchangeCount = 0;
-      messages = [];
-      renderMessages();
-      renderConversationList();
-      openDrawerPage("home", true);
-      status("Đã tạo chat mới");
-    }
-
-    function selectConversation(target, title, time) {
-      document.querySelectorAll(".conversation-card").forEach((item) => item.classList.remove("is-active"));
-      target.classList.add("is-active");
-      status(`${title}\n${time}`);
-    }
-
-    async function loadConversation(conversationId) {
-      if (!conversationId) return;
-      try {
-        const detail = await apiRequest(`/api/v1/conversations/${conversationId}`);
-        currentConversationId = detail.conversation_id;
-        hydrateMessages(detail);
-        renderConversationList();
-        status(detail.title || "Cuộc trò chuyện");
-      } catch (error) {
-        status(`Không tải được hội thoại:\n${error.message || error}`);
-      }
-    }
-
-    async function loadConversationHistory() {
-      const { userId, workspaceId } = getChatContext();
-      try {
-        const response = await apiRequest("/api/v1/conversations/history", {}, {
-          user_id: userId,
-          workspace_id: workspaceId
-        });
-        conversations = Array.isArray(response) ? response : (response.conversations || []);
-        renderConversationList();
-      } catch (error) {
-        conversations = [];
-        renderConversationList();
-        status(`Không tải được lịch sử chat:\n${error.message || error}`);
-      }
-    }
-
-    async function pollAssistantReply(conversationId, previousExchangeCount) {
-      const startedAt = Date.now();
-      const timeoutMs = 90000;
-
-      while (Date.now() - startedAt < timeoutMs) {
-        const detail = await apiRequest(`/api/v1/conversations/${conversationId}`);
-        const total = detail.total_exchanges || 0;
-        const exchanges = detail.exchanges || [];
-        const latest = exchanges[exchanges.length - 1];
-
-        if (total > previousExchangeCount && latest?.agent_response) {
-          currentConversationId = detail.conversation_id;
-          hydrateMessages(detail);
-          await loadConversationHistory();
-          return;
-        }
-
-        await new Promise((resolve) => window.setTimeout(resolve, 1200));
-      }
-
-      throw new Error("Quá thời gian chờ phản hồi từ Ami");
-    }
-
-    async function submitChatMessage(text) {
-      const content = text.trim();
-      if (!content || isSending) return;
-
-      // ── Mode RAG (có môn học được chọn) ──
-      if (amiSelectedSource && amiToken) {
-        setSendingState(true);
-        const tempUser = { id: `u-${Date.now()}`, role: "user", content, timestamp: new Date().toISOString() };
-        const tempAmi = { id: `a-${Date.now()}`, role: "assistant", content: "Ami đang suy nghĩ...", timestamp: new Date().toISOString(), pending: true };
-        messages = [...messages, tempUser, tempAmi];
-        renderMessages();
-
-        // Phát hành động suy nghĩ / đọc sách
-        playMotion("Reading");
-
-        try {
-          const time = amiUserId || new Date().toISOString();
-          const baseUrl = amiApiBase || RAG_ORIGIN;
-          const url = `${baseUrl}/auth_mini/mba/chat`;
-
-          const headers = new Headers({
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "69420"
-          });
-          if (amiToken) {
-            headers.append("Authorization", `Bearer ${amiToken}`);
-          }
-
-          const reqBody = {
-            userId: time,
-            text: content,
-            source: amiSelectedSource,
-            save: true
-          };
-
-          const res = await fetch(url, {
-            method: "POST",
-            headers,
-            body: JSON.stringify(reqBody)
-          });
-
-          let answer = "Ami không thể trả lời lúc này.";
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.text && data.text.response) {
-              answer = data.text.response;
-            } else if (data && data.answer && data.answer.response) {
-              answer = data.answer.response;
-            } else if (data && data.text && typeof data.text === "string") {
-              answer = data.text;
-            } else {
-              answer = data.response || data.result || JSON.stringify(data);
-            }
-          } else {
-            const err = await res.json().catch(() => ({}));
-            answer = err.detail || `Lỗi ${res.status}`;
-          }
-
-          messages = messages.map(m => m.pending ? { ...m, content: answer, pending: false } : m);
-          renderMessages();
-          status("Ami đã phản hồi");
-
-          if (res.ok) {
-            playMotion("Head_Nod");
-          } else {
-            playMotion("Head_Shake");
-          }
-
-          if (model && answer.length < 300) speakText(answer);
-        } catch (error) {
-          messages = messages.filter(m => !m.pending);
-          renderMessages();
-          status(`Gửi chat thất bại: ${error.message}`);
-        } finally {
-          setSendingState(false);
-        }
-        return;
-      }
-
-      // ── Mode mặc định (chưa chọn môn) ──
-      if (!amiSelectedSource) {
-        const hint = { id: `sys-${Date.now()}`, role: "assistant", content: "📚 Vui lòng chọn môn học trước! Nhấn nút sách 📖 ở sidebar hoặc nút \"Chọn môn\" ở trên.", timestamp: new Date().toISOString() };
-        messages = [...messages, { id: `u-${Date.now()}`, role: "user", content, timestamp: new Date().toISOString() }, hint];
-        renderMessages();
-        return;
-      }
-
-      // ── Fallback: API cũ ──
-      const { userId, workspaceId } = getChatContext();
-      setSendingState(true);
-      const tempUser = { id: `temp-user-${Date.now()}`, role: "user", content, timestamp: new Date().toISOString() };
-      const tempAssistant = { id: `temp-assistant-${Date.now()}`, role: "assistant", content: "Ami đang trả lời...", timestamp: new Date().toISOString(), pending: true };
-      messages = [...messages, tempUser, tempAssistant];
-      renderMessages();
-
-      try {
-        const previousExchangeCount = currentExchangeCount;
-        if (currentConversationId) {
-          await apiRequest(`/api/v1/conversations/${currentConversationId}/continue`, { method: "POST", body: JSON.stringify({ user_message: content, trace_id: crypto.randomUUID() }) });
-        } else {
-          const created = await apiRequest("/api/v1/conversations", { method: "POST", body: JSON.stringify({ workspace_id: workspaceId, user_id: userId, initial_message: content, trace_id: crypto.randomUUID() }) });
-          currentConversationId = created.conversation_id;
-        }
-        await pollAssistantReply(currentConversationId, previousExchangeCount);
-        status("Ami đã phản hồi");
-      } catch (error) {
-        messages = messages.filter(m => !m.pending);
-        renderMessages();
-        status(`Gửi chat thất bại:\n${error.message || error}`);
-      } finally {
-        setSendingState(false);
-      }
-    }
-
-    // Ami đọc câu trả lời (Web Speech API)
-    function speakText(text) {
-      // Tạm thời TẮT trình đọc giọng nói (text-to-speech) do giọng mặc định chưa tốt.
-      return;
-      /*
-      if (!window.speechSynthesis) return;
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.lang = "vi-VN";
-      utt.rate = 1.05;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utt);
-      */
-    }
-
-    // Render danh sách môn học vào trang subjects
-    function renderSubjectsList() {
-      const container = document.getElementById("subjects-list");
-      const empty = document.getElementById("subjects-empty");
-      if (!container) return;
-
-      if (!amiChatbots.length) {
-        if (empty) empty.style.display = "block";
-        if (empty) empty.textContent = amiToken
-          ? "Bạn chưa được phân công môn học nào."
-          : "Không thể tải danh sách môn.";
-        return;
-      }
-      if (empty) empty.style.display = "none";
-
-      // Xóa card cũ (giữ empty-msg)
-      container.querySelectorAll(".subject-card").forEach(el => el.remove());
-
-      amiChatbots.forEach(bot => {
-        const isActive = bot.source === amiSelectedSource;
-        const card = document.createElement("button");
-        card.className = "subject-card" + (isActive ? " is-active" : "");
-        card.dataset.source = bot.source;
-        card.innerHTML = `
-          <span class="subject-icon">📚</span>
-          <span class="subject-info">
-            <span class="subject-name">${escapeHtml(bot.name)}</span>
-            <span class="subject-code">${escapeHtml(bot.source)}</span>
-          </span>
-          ${isActive ? '<span class="subject-check">✓</span>' : ''}
-        `;
-        card.onclick = () => selectSubject(bot);
-        container.appendChild(card);
-      });
-    }
-
-    function selectSubject(bot) {
-      amiSelectedSource = bot.source;
-      amiSelectedName = bot.name;
-
-      // Cập nhật dot indicator trên sidebar
-      const dot = document.getElementById("sidebar-subject-dot");
-      if (dot) dot.style.display = "block";
-
-      // Cập nhật tiêu đề chat
-      const title = document.querySelector("[data-drawer-page='home'] .drawer-title");
-      if (title) title.textContent = bot.name;
-
-      // Chào đón môn mới
-      newConversation();
-      messages = [{
-        id: `sys-${Date.now()}`, role: "assistant",
-        content: `Xin chào! Tôi là Ami, trợ lý học tập môn **${bot.name}** (${bot.source}). Bạn có thể hỏi tôi bất kỳ câu hỏi nào liên quan đến môn học này nhé! 📖`,
-        timestamp: new Date().toISOString()
-      }];
-      renderMessages();
-
-      // Render lại danh sách để update active state
-      renderSubjectsList();
-
-      // Chuyển về trang chat
-      openDrawerPage("home", true);
-      status(`Môn: ${bot.name}`);
-    }
-
-    async function syncControlAvailability() {
-      if (!model?.internalModel?.settings) return;
-
-      const settings = model.internalModel.settings;
-      const motionNames = new Set(Object.keys(settings.motions || {}));
-      const expressionDefs = settings.expressions || [];
-      const expressionMap = new Map(expressionDefs.map((expr) => [expr.Name, expr]));
-
-      document.querySelectorAll("[data-motion]").forEach((button) => {
-        const enabled = motionNames.has(button.dataset.motion);
-        button.disabled = !enabled;
-        button.title = enabled ? "" : `Motion "${button.dataset.motion}" không tồn tại`;
-      });
-
-      await Promise.all(
-        [...document.querySelectorAll("[data-expression]")].map(async (button) => {
-          const name = button.dataset.expression;
-          const expr = expressionMap.get(name);
-          const enabled = !!expr && await assetExists(resolveModelAsset(expr.File));
-          button.disabled = !enabled;
-          button.title = enabled ? "" : `Expression "${name}" đang thiếu file`;
-        })
-      );
-    }
-
-    async function init() {
-      try {
-        status("Khởi tạo PIXI");
-
-        app = new PIXI.Application({
-          resizeTo: window,
-          backgroundAlpha: 0,
-          antialias: true
-        });
-
-        const canvas = app.view || app.canvas;
-        document.getElementById("app").appendChild(canvas);
-
-        status("Load model");
-
-        model = await PIXI.live2d.Live2DModel.from(MODEL_PATH);
-        app.stage.addChild(model);
-
-        if (model.anchor) {
-          model.anchor.set(0.5, 1);
-        }
-
-        fitModel();
-        await syncControlAvailability();
-        await loadConversationHistory();
-
-        model.eventMode = "static";
-        model.cursor = "pointer";
-        model.on("pointertap", () => playMotion("Checkin2"));
-        model.on("pointerdown", startDrag);
-        model.on("pointerup", endDrag);
-        model.on("pointerupoutside", endDrag);
-        model.on("pointermove", onDragMove);
-
-        status("Model Ami loaded");
-      } catch (e) {
-        console.error(e);
-        status("Lỗi load model:\n" + (e?.stack || e?.message || String(e)));
-      }
-    }
-
-    function fitModel() {
-      if (!model || !app) return;
-
-      model.scale.set(1);
-
-      const bounds = model.getLocalBounds();
-      const w = bounds.width;
-      const h = bounds.height;
-
-      if (!w || !h) {
-        console.log("Model bounds not ready:", bounds);
-        return;
-      }
-
-      const screenW = app.screen.width;
-      const screenH = app.screen.height;
-      const isMobile = screenW < 900;
-      const scaleX = (screenW * (isMobile ? 0.65 : 0.36)) / w;
-      const scaleY = (screenH * (isMobile ? 1.0 : 1.15)) / h;
-      const scale = Math.min(scaleX, scaleY);
-
-      model.scale.set(scale);
-      model.position.set(screenW * 0.5, screenH * (isMobile ? 1.31 : 1.32));
-    }
-
-    function startDrag(event) {
-      if (!model || !app) return;
-
-      const point = event.data.global;
-      dragData = {
-        pointerId: event.data.pointerId,
-        offsetX: model.x - point.x,
-        offsetY: model.y - point.y
-      };
-      model.cursor = "grabbing";
-    }
-
-    function endDrag(event) {
-      if (!dragData) return;
-      if (event?.data?.pointerId && event.data.pointerId !== dragData.pointerId) return;
-      dragData = null;
-      model.cursor = "pointer";
-    }
-
-    function onDragMove(event) {
-      if (!dragData || !model || !app) return;
-      if (event.data.pointerId !== dragData.pointerId) return;
-
-      const point = event.data.global;
-      const nextX = point.x + dragData.offsetX;
-      const nextY = point.y + dragData.offsetY;
-      const halfW = model.width / 2;
-      const modelH = model.height;
-      const minX = -halfW;
-      const maxX = app.screen.width + halfW;
-      const minY = modelH / 2;
-      const maxY = app.screen.height + modelH / 2;
-
-      model.position.set(
-        Math.min(Math.max(nextX, minX), maxX),
-        Math.min(Math.max(nextY, minY), maxY)
-      );
-    }
-
-    async function playMotion(group) {
-      if (!model) return;
-
-      try {
-        const ok = await model.motion(group, 0);
-        status(ok ? "Motion: " + group : `Motion "${group}" không chạy được`);
-      } catch (e) {
-        console.error(e);
-        status("Lỗi motion " + group + ":\n" + (e?.message || String(e)));
-      }
-    }
-
-    async function setExpression(name) {
-      if (!model) return;
-
-      try {
-        const ok = await model.expression(name);
-        status(ok ? "Expression: " + name : `Expression "${name}" không chạy được`);
-      } catch (e) {
-        console.error(e);
-        status("Lỗi expression " + name + ":\n" + (e?.message || String(e)));
-      }
-    }
-
-    window.addEventListener("resize", fitModel);
-
-    document.getElementById("chat-form").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const input = document.getElementById("chat-input");
-      const value = input.value;
-      if (!value.trim()) return;
-      input.value = "";
-      await submitChatMessage(value);
-    });
-
-    init();
-
-    // ── Nhận user data từ React parent qua postMessage ──
-    // Chuyển từ Western order (Bảo Lê Trần Quốc) → Vietnamese order (Lê Trần Quốc Bảo)
-    function toVietnameseOrder(name) {
-      if (!name) return name;
-      const parts = name.trim().split(/\s+/);
-      if (parts.length <= 1) return name;
-      return [...parts.slice(1), parts[0]].join(" ");
-    }
-
-    function getInitials(fullName, username) {
-      const name = toVietnameseOrder(fullName || username || "?").trim();
-      const parts = name.split(/\s+/);
-      if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-      return name.slice(0, 2).toUpperCase();
-    }
-
-    function applyUserSync(payload) {
-      if (!payload) return;
-      const displayName = toVietnameseOrder(payload.fullName || payload.username) || "Người dùng";
-      const initials = getInitials(payload.fullName, payload.username);
-      const username = payload.username || "";
-      const email = payload.email || "";
-      const roleMap = { admin: "Quản trị viên", teacher: "Giảng viên", user: "Học viên" };
-      const roleLabel = roleMap[payload.role] || payload.role || "Người dùng";
-
-      // Lưu để dùng trong renderMessages
-      amiUserInitials = initials;
-      amiUserName = displayName;
-      amiUserId = payload.username || "";
-
-      const badge = document.getElementById("sidebar-avatar-badge");
-      if (badge) badge.textContent = initials;
-      const nameEl = document.getElementById("sidebar-user-name");
-      if (nameEl) nameEl.textContent = displayName;
-      const fullNameEl = document.getElementById("profile-full-name");
-      if (fullNameEl) fullNameEl.textContent = displayName;
-      const usernameEl = document.getElementById("profile-username");
-      if (usernameEl) usernameEl.textContent = username ? `@${username}` : "";
-      const emailEl = document.getElementById("profile-email");
-      if (emailEl) emailEl.textContent = email;
-      const roleEl = document.getElementById("profile-role");
-      if (roleEl) {
-        roleEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.08);font-size:12px;">
-          <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>${roleLabel}</span>`;
-      }
-    }
-
-    function applyChatbotsSync(payload) {
-      if (!payload) return;
-      amiToken = payload.token || "";
-      amiApiBase = payload.apiBase || "";
-      amiChatbots = payload.chatbots || [];
-      renderSubjectsList();
-
-      if (amiChatbots.length === 1 && !amiSelectedSource) {
-        selectSubject(amiChatbots[0]);
-      }
-    }
-
-    window.addEventListener("message", (event) => {
-      if (!event.data) return;
-      if (event.data.type === "AMI_USER_SYNC") applyUserSync(event.data.payload);
-      if (event.data.type === "AMI_CHATBOTS_SYNC") applyChatbotsSync(event.data.payload);
-    });
-  </script>
-
-  <style>
-    /* Subject card styles */
-    .subject-card {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-main);
-      cursor: pointer;
-      text-align: left;
-      transition: background 140ms, border-color 140ms;
-      width: 100%;
-    }
-
-    .subject-card:hover {
-      background: rgba(255, 255, 255, 0.09);
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .subject-card.is-active {
-      background: rgba(99, 102, 241, 0.18);
-      border-color: rgba(99, 102, 241, 0.5);
-    }
-
-    .subject-icon {
-      font-size: 18px;
-      flex-shrink: 0;
-    }
-
-    .subject-info {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .subject-name {
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .subject-code {
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
-    .subject-check {
-      color: #22c55e;
-      font-size: 14px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    /* ── Chat bubble layout ── */
-    .chat-row {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      margin-bottom: 10px;
-      padding: 0 6px;
-    }
-
-    .ami-row {
-      flex-direction: row;
-    }
-
-    .user-row {
-      justify-content: flex-end;
-    }
-
-    .ami-avatar-img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1.5px solid rgba(255, 43, 120, 0.5);
-      flex-shrink: 0;
-    }
-
-    .chat-avatar.user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: #fff;
-      border: 1.5px solid rgba(99, 102, 241, 0.5);
-      flex-shrink: 0;
-    }
-
-    .chat-bubble {
-      max-width: 76%;
-      padding: 8px 12px;
-      border-radius: 16px;
-      font-size: 13px;
-      line-height: 1.6;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      word-break: break-word;
-    }
-
-    .ami-bubble {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-bottom-left-radius: 4px;
-      color: var(--text-main, #e8eaf6);
-    }
-
-    .user-bubble {
-      background: linear-gradient(135deg, #4f46e5, #6d28d9);
-      border: none;
-      border-bottom-right-radius: 4px;
-      color: #fff;
-      align-items: flex-end;
-    }
-
-    .chat-bubble.is-pending {
-      opacity: 0.6;
-    }
-
-    .bubble-sender {
-      font-size: 10px;
-      font-weight: 700;
-      color: #ff6b9d;
-      margin-bottom: 1px;
-    }
-
-    .bubble-text {
-      line-height: 1.6;
-    }
-
-    .bubble-time {
-      font-size: 10px;
-      opacity: 0.4;
-      margin-top: 2px;
-    }
-  </style>
+    <script src="./ami.js"></script>
 </body>
 
 </html>

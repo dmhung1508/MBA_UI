@@ -1,7 +1,8 @@
 import React from "react";
+import { resolveBaseUrl } from "../config/runtimeConfig";
 
 const API_CONNECT_SSO = import.meta.env.VITE_API_CONNECT_SSO
-const BASE_URL = import.meta.env.VITE_BASE_URL
+const BASE_URL = resolveBaseUrl();
 const MicrosoftLoginButton = () => {
   const redirect_uri = `${BASE_URL}/mini/access-auth`
 
