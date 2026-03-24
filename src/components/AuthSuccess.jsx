@@ -1,8 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { resolveApiBaseUrl, resolveBaseUrl } from "../config/runtimeConfig";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-const BASE_URL = import.meta.env.VITE_BASE_URL;
+const API_BASE_URL = resolveApiBaseUrl();
+const BASE_URL = resolveBaseUrl();
 const API_GET_TOKEN = import.meta.env.VITE_API_GET_TOKEN
 const AuthSuccess = () => {
   const location = useLocation();

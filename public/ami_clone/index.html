@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Ami Live2D Demo</title>
+    <link rel="stylesheet" href="./ami.css" />
+
+</head>
+
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <div class="sidebar-group">
+        <button class="side-icon is-active" data-sidebar-action="drawer" onclick="toggleDrawer()"
+          aria-label="Mo thanh ben">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+            <path d="M10 4v16m6-11-3 3 3 3" />
+          </svg>
+        </button>
+        <button class="side-icon" data-sidebar-action="new-chat" onclick="newConversation()" aria-label="Chat moi">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+        <button class="side-icon" data-sidebar-action="subjects" onclick="openDrawerPage('subjects', true)"
+          aria-label="Chon mon hoc" title="Chọn môn học" style="position:relative;">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+          <span id="sidebar-subject-dot"
+            style="display:none;position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#22c55e;"></span>
+        </button>
+        <button class="side-icon" data-sidebar-action="history" onclick="return handleAmiHistoryButtonClick(event)"
+          aria-label="Lich su chat" title="Lịch sử chat Ami">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+            <path d="M12 7v5l3 2" />
+            <path d="M12 3a9 9 0 1 1-9 9" />
+            <path d="M5 4v4H1" />
+          </svg>
+        </button>
+        <button class="side-icon" data-sidebar-action="debate" onclick="openDrawerPage('debate', true)"
+          aria-label="Thu thach Ami" title="Thử thách Ami">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+            <path d="M8 21h8M12 17v4M7 4h10c1.7 0 3 1.3 3 3v2c0 2.2-1.8 4-4 4h-8c-2.2 0-4-1.8-4-4V7c0-1.7 1.3-3 3-3Z" />
+          </svg>
+        </button>
+        <button class="side-icon" data-sidebar-action="leaderboard" onclick="openDrawerPage('leaderboard', true)"
+          aria-label="Bang xep hang" title="Bảng xếp hạng">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+            <path d="M8 21h8" />
+            <path d="M12 17v4" />
+            <path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" />
+            <path d="M5 6H4a2 2 0 0 0 0 4h2" />
+            <path d="M19 6h1a2 2 0 1 1 0 4h-2" />
+          </svg>
+        </button>
+
+      </div>
+
+      <div class="sidebar-group bottom">
+        <button class="side-icon" data-sidebar-action="expressions" onclick="openDrawerPage('expressions', true)"
+          aria-label="Bieu cam">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <circle cx="12" cy="12" r="8" />
+            <path d="M9 10h.01M15 10h.01M9 14c.8 1 1.8 1.5 3 1.5s2.2-.5 3-1.5" />
+          </svg>
+        </button>
+        <button class="side-icon" data-sidebar-action="profile" onclick="openDrawerPage('profile', true)"
+          aria-label="Avatar">
+          <span class="avatar-badge">?</span>
+        </button>
+        <button class="side-icon" data-sidebar-action="settings" onclick="openDrawerPage('settings', true)"
+          aria-label="Cai dat">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" />
+            <path
+              d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H20a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.6Z" />
+          </svg>
+        </button>
+      </div>
+    </aside>
+
+    <div id="drawer">
+      <div id="drawer-panel">
+        <section class="drawer-page is-active" data-drawer-page="home">
+          <div class="drawer-header">
+            <h2 class="drawer-title">Chatbot Ami</h2>
+            <button class="drawer-close" onclick="toggleDrawer()" aria-label="Dong drawer">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+                <path d="M14 9l-3 3 3 3M10 4v16" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="drawer-actions">
+            <button class="drawer-action" onclick="newConversation()">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <span>Chat mới</span>
+            </button>
+            <button class="drawer-action" onclick="openDrawerPage('subjects', true)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+              <span>Chọn môn</span>
+            </button>
+            <button class="drawer-action" onclick="openDrawerPage('debate', true)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                <path
+                  d="M8 21h8M12 17v4M7 4h10c1.7 0 3 1.3 3 3v2c0 2.2-1.8 4-4 4h-8c-2.2 0-4-1.8-4-4V7c0-1.7 1.3-3 3-3Z" />
+              </svg>
+              <span style="color:#fbbf24; font-weight:bold;">Tranh biện ngay</span>
+            </button>
+            <button class="drawer-action" onclick="openDrawerPage('leaderboard', true)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                <path d="M8 21h8" />
+                <path d="M12 17v4" />
+                <path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" />
+                <path d="M5 6H4a2 2 0 0 0 0 4h2" />
+                <path d="M19 6h1a2 2 0 1 1 0 4h-2" />
+              </svg>
+              <span>Xem bảng xếp hạng</span>
+            </button>
+          </div>
+
+
+
+          <div class="drawer-footer">
+            <a href="#" class="drawer-foot-item" onclick="openDrawerPage('expressions', true); return false;">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                <circle cx="12" cy="12" r="8" />
+                <path d="M9 10h.01M15 10h.01M9 14c.8 1 1.8 1.5 3 1.5s2.2-.5 3-1.5" />
+              </svg>
+              <span>Biểu cảm</span>
+            </a>
+            <a href="#" class="drawer-foot-item" onclick="openDrawerPage('profile', true); return false;">
+              <span class="avatar-badge" id="sidebar-avatar-badge">?</span>
+              <span id="sidebar-user-name">Đang tải...</span>
+            </a>
+            <a href="#" class="drawer-foot-item" onclick="openDrawerPage('settings', true); return false;">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" />
+                <path
+                  d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H20a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.6Z" />
+              </svg>
+              <span>Cài đặt</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="drawer-page" data-drawer-page="expressions">
+          <div class="drawer-header">
+            <h2 class="drawer-title">Biểu cảm</h2>
+            <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="expr-layout">
+            <section class="expr-section">
+              <p class="expr-label">Trang phục</p>
+              <div class="option-grid">
+                <button class="option-button" data-expression="Glasses Toggle"
+                  onclick="setExpression(this.dataset.expression)">Bỏ kính</button>
+                <button class="option-button" data-expression="Jacket Toggle"
+                  onclick="setExpression(this.dataset.expression)">Bỏ áo khoác</button>
+                <button class="option-button" data-expression="No_Jacket_Glasses"
+                  onclick="setExpression(this.dataset.expression)">Bỏ áo khoác và kính</button>
+                <button class="option-button" data-expression="Default"
+                  onclick="setExpression(this.dataset.expression)">Nguyên bản</button>
+              </div>
+            </section>
+
+            <section class="expr-section">
+              <p class="expr-label">Hành động</p>
+              <div class="option-grid">
+                <button class="option-button" data-motion="Heart" onclick="playMotion(this.dataset.motion)">Thả
+                  tim</button>
+                <button class="option-button" data-motion="Checkin1" onclick="playMotion(this.dataset.motion)">Chào
+                  #1</button>
+                <button class="option-button" data-motion="Checkin2" onclick="playMotion(this.dataset.motion)">Chào
+                  #2</button>
+                <button class="option-button" data-motion="Checkin3" onclick="playMotion(this.dataset.motion)">Tạo
+                  dáng</button>
+
+              </div>
+            </section>
+
+            <section class="expr-section">
+              <p class="expr-label">Biểu cảm</p>
+              <div class="option-grid">
+                <button class="option-button" data-expression="Happy"
+                  onclick="setExpression(this.dataset.expression)">Vui</button>
+                <button class="option-button" data-expression="Sad"
+                  onclick="setExpression(this.dataset.expression)">Buồn</button>
+                <button class="option-button" data-expression="Blush" onclick="setExpression(this.dataset.expression)">E
+                  thẹn</button>
+                <button class="option-button" data-expression="Excited"
+                  onclick="setExpression(this.dataset.expression)">Hào hứng</button>
+                <button class="option-button" data-expression="Angry"
+                  onclick="setExpression(this.dataset.expression)">Giận</button>
+                <button class="option-button" data-expression="Chong_Nanh"
+                  onclick="setExpression(this.dataset.expression)">Chống nạnh</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="drawer-page" data-drawer-page="profile">
+          <div class="drawer-header">
+            <h2 class="drawer-title">Tài khoản</h2>
+            <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
+          <div class="mini-copy" id="profile-page-content">
+            <p><strong id="profile-full-name">Đang tải...</strong></p>
+            <p id="profile-username" style="color: var(--text-soft); font-size:13px;"></p>
+            <p id="profile-email" style="color: var(--text-soft); font-size:13px;"></p>
+            <p id="profile-role" style="margin-top:12px;"></p>
+          </div>
+        </section>
+
+        <section class="drawer-page" data-drawer-page="settings">
+          <div class="drawer-header">
+            <h2 class="drawer-title">Cài đặt</h2>
+            <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
+          <div class="mini-copy">
+            <p style="text-align: center; color: var(--text-soft); padding-top: 20px;">
+              Tính năng đang trong quá trình phát triển
+            </p>
+          </div>
+        </section>
+
+        <!-- Trang chọn môn học -->
+        <section class="drawer-page" data-drawer-page="subjects">
+          <div class="drawer-header">
+            <h2 class="drawer-title">Chọn môn học</h2>
+            <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
+          <div class="drawer-scroll">
+            <div class="subject-hero-card">
+              <span class="panel-kicker">Chọn đúng môn để Ami học cùng bạn nhé</span>
+              <h3 class="panel-title">Chọn đúng môn để Ami học cùng bạn nhé</h3>
+              <p class="panel-copy">Sau khi chọn môn, Ami sẽ trả lời theo ngữ cảnh riêng của môn đó và mở luôn chế độ
+                học phù hợp cho bạn.</p>
+            </div>
+            <div id="subjects-list" class="subject-list">
+              <p class="panel-empty" id="subjects-empty">Đang tải danh sách môn...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Trang Thử thách Ami -->
+        <section class="drawer-page" data-drawer-page="debate">
+          <div class="drawer-header">
+            <h2 class="drawer-title" style="color: #fbbf24;">Thử thách Ami</h2>
+            <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
+          <div class="drawer-scroll">
+            <div class="debate-panel">
+              <span class="panel-kicker panel-kicker--warm">Đấu trí học thuật</span>
+              <h3 class="panel-title">Ami sẽ đưa thử thách, phản biện lại câu trả lời của bạn và chấm điểm cuối cùng</h3>
+              <p class="panel-copy" id="debate-subject-copy">Hãy chọn môn học trước khi bắt đầu để Ami đưa thử thách đúng tài
+                liệu và chấm sát hơn.</p>
+              <div class="debate-time-box">
+                <p class="expr-label">Thời gian cho mỗi lượt phản biện</p>
+                <div class="option-grid debate-time-grid">
+                  <button class="option-button debate-time-option" type="button" data-debate-time-option="2m"
+                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">2 phút</button>
+                  <button class="option-button debate-time-option" type="button" data-debate-time-option="3m"
+                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">3 phút</button>
+                  <button class="option-button debate-time-option" type="button" data-debate-time-option="5m"
+                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">5 phút</button>
+                  <button class="option-button debate-time-option" type="button" data-debate-time-option="unlimited"
+                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">Không giới hạn</button>
+                </div>
+                <p class="panel-copy debate-time-copy" id="debate-time-bonus-copy">
+                  Hoàn thành đủ 3 lượt, không lượt nào dưới 50 điểm và không vượt mốc để nhận thưởng thời gian.
+                </p>
+              </div>
+              <div class="study-actions">
+                <button class="hero-btn hero-btn--warm" type="button" onclick="startDebate()">Bắt đầu thử thách</button>
+                <button class="hero-btn hero-btn--ghost" type="button" onclick="openDrawerPage('leaderboard', true)">Xem bảng xếp hạng</button>
+                <button class="hero-btn hero-btn--ghost" type="button" onclick="cancelDebate()">Dừng thử thách Ami</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-page" data-drawer-page="history">
+          <div class="drawer-header history-drawer-header">
+            <h2 class="drawer-title">Lịch sử chat Ami</h2>
+            <div class="history-drawer-actions">
+              <button class="history-new-session-btn" type="button" onclick="newConversation()" aria-label="Tạo session mới" title="Tạo session mới">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke="currentColor">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </button>
+              <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="drawer-scroll history-drawer-scroll">
+            <div id="ami-history-list" class="ami-session-list ami-session-list--compact">
+              <p class="panel-empty">Ami đang tải lịch sử chat...</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-page" data-drawer-page="leaderboard">
+          <div class="drawer-header">
+            <h2 class="drawer-title">Bảng xếp hạng</h2>
+            <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
+          <div class="drawer-scroll">
+            <div class="leaderboard-hero-card">
+              <span class="panel-kicker">Bảng vàng Ami</span>
+              <h3 class="panel-title">Theo dõi thứ hạng theo từng môn học</h3>
+              <p class="panel-copy" id="leaderboard-copy">Chọn môn học để xem top người học có điểm thử thách cao nhất.</p>
+            </div>
+            <div id="leaderboard-page-list" class="leaderboard-list">
+              <p class="panel-empty">Vui lòng chọn môn học để xem bảng xếp hạng.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <button id="drawer-backdrop" type="button" aria-label="Dong drawer" onclick="toggleDrawer(false)"></button>
+
+    <div id="status" aria-live="polite"></div>
+    <div id="chat-hint">Chọn môn học để bắt đầu cùng Ami</div>
+
+    <section id="chat-shell">
+      <div id="chat-shell-header" class="chat-shell-header" onpointerdown="startChatShellDrag(event)">
+        <div class="chat-shell-presence">
+          <span class="chat-shell-dot"></span>
+          <span id="chat-shell-status">Sẵn sàng</span>
+        </div>
+        <div class="chat-shell-meta">
+          <strong id="chat-shell-title">Học cùng Ami</strong>
+          <span id="chat-shell-subtitle">Chọn môn học để bắt đầu</span>
+        </div>
+        <div class="chat-shell-controls">
+          <button id="chat-shell-collapse-btn" class="shell-action-btn" type="button"
+            aria-label="An phan mon hoc" title="Ẩn/hiện phần môn học"
+            onclick="toggleShellPanels(); event.stopPropagation();" onpointerdown="event.stopPropagation()">
+            <span id="chat-shell-collapse-icon">▴</span>
+          </button>
+          <button id="chat-shell-minimize-btn" class="shell-action-btn" type="button"
+            aria-label="An hien khung chat" title="Ẩn/hiện khung chat"
+            onclick="toggleChatShellVisibility(); event.stopPropagation();" onpointerdown="event.stopPropagation()">
+            <span id="chat-shell-minimize-icon">▾</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="chat-shell-top" class="chat-shell-top">
+        <div id="study-panel" class="study-panel">
+          <div class="panel-frame-head">
+            <span class="panel-kicker">Học cùng Ami</span>
+            <button class="panel-close-btn" type="button" aria-label="Dong hoc cung Ami" title="Đóng"
+              onclick="closeStudyPanel(); event.stopPropagation();" onpointerdown="event.stopPropagation()">
+              ×
+            </button>
+          </div>
+          <div class="study-copy">
+            <h3 class="panel-title" id="study-title">Chọn đúng môn để Ami học cùng bạn nhé</h3>
+            <p class="panel-copy" id="study-description">Ami là sinh viên PTIT đồng hành cùng bạn. Chọn môn trước để Ami trả
+              lời đúng ngữ cảnh và mở luôn chế độ học phù hợp.</p>
+          </div>
+          <div class="study-actions">
+            <button class="hero-btn hero-btn--primary" type="button" onclick="openDrawerPage('subjects', true)">Chọn môn học</button>
+            <button class="hero-btn hero-btn--ghost" type="button" onclick="openDrawerPage('leaderboard', true)">Bảng xếp hạng</button>
+          </div>
+        </div>
+
+        <div id="subject-inline-picker" class="subject-inline-picker">
+          <div class="subject-inline-head">
+            <span>Danh sách môn học của bạn</span>
+            <div class="subject-inline-actions">
+              <button class="link-btn" type="button" onclick="openDrawerPage('subjects', true)">Xem đầy đủ</button>
+              <button class="panel-close-btn" type="button" aria-label="Dong danh sach mon hoc" title="Đóng"
+                onclick="closeSubjectPanel(); event.stopPropagation();" onpointerdown="event.stopPropagation()">
+                ×
+              </button>
+            </div>
+          </div>
+          <div id="subject-inline-empty" class="panel-empty">Đang tải danh sách môn...</div>
+          <div id="subject-inline-list" class="subject-inline-list"></div>
+          <div id="subject-inline-more" class="subject-inline-more" hidden></div>
+        </div>
+      </div>
+      <div id="debate-header" class="debate-header">
+        <div class="debate-heading">
+          <span class="debate-badge">Thử thách Ami</span>
+          <span id="debate-time-note" class="debate-meta">Chọn mốc thời gian trước khi bắt đầu</span>
+        </div>
+        <div class="debate-pill-group">
+          <span id="debate-turn-indicator" class="debate-turn-pill">Lượt 1/3</span>
+          <span id="debate-timer-indicator" class="debate-time-pill">∞</span>
+        </div>
+      </div>
+      <div id="message-list">
+        <div class="empty-chat">Chọn môn học rồi hỏi Ami bất cứ câu gì nhé! 📖</div>
+      </div>
+      <form id="chat-form">
+        <div id="voice-recorder-shell" class="voice-recorder-shell" hidden>
+          <button id="voice-record-cancel-btn" class="voice-recorder-cancel" type="button" aria-label="Hủy ghi âm"
+            title="Hủy ghi âm" onclick="cancelVoiceRecording()">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9">
+              <path d="M6 6l12 12" />
+              <path d="M18 6 6 18" />
+            </svg>
+          </button>
+          <div class="voice-recorder-track">
+            <button id="voice-record-stop-btn" class="voice-recorder-stop" type="button" aria-label="Dừng ghi âm"
+              title="Dừng ghi âm và chép lời" onclick="finishVoiceRecording()">
+              <span></span>
+            </button>
+            <div class="voice-recorder-copy">
+              <span id="voice-record-title" class="voice-recorder-title">Ami đang nghe bạn nói</span>
+              <span id="voice-record-subtitle" class="voice-recorder-subtitle">Nhấn nút vuông để chốt ghi âm và chép lời</span>
+              <div class="voice-recorder-wave" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            <span id="voice-record-timer" class="voice-recorder-timer">0:00</span>
+          </div>
+        </div>
+        <input id="chat-input" type="text" autocomplete="off" placeholder="Nhắn Ami..." />
+        <button id="voice-record-btn" class="composer-icon-btn" type="button" aria-label="Ghi âm"
+          title="Bấm để nói với Ami" onclick="toggleVoiceRecording()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <path d="M12 15a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Z" />
+            <path d="M19 11a7 7 0 1 1-14 0M12 18v3" />
+          </svg>
+        </button>
+        <button id="send-btn" type="submit">Gửi</button>
+      </form>
+    </section>
+
+    <div id="quick-actions">
+      <button id="chat-shell-toggle-btn" class="quick-btn" type="button" aria-label="Ẩn hiện khung chat" title="Ẩn/hiện khung chat"
+        onclick="toggleChatShellVisibility()">
+        <span id="chat-shell-toggle-icon">▾</span>
+      </button>
+      <button id="voice-replay-btn" class="quick-btn" type="button" aria-label="Nghe Ami" title="Phát lại câu trả lời gần nhất của Ami"
+        onclick="handleVoiceReplay()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+          <path d="M14 5 8.5 9H5v6h3.5L14 19V5Z" />
+          <path d="M17.5 9.5a4 4 0 0 1 0 5" />
+          <path d="M19.8 7a7 7 0 0 1 0 10" />
+        </svg>
+      </button>
+      <button id="scroll-top-btn" class="quick-btn" type="button" aria-label="Lên trên" title="Lên đầu cuộc trò chuyện"
+        onclick="scrollMessagesToTop()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+          <path d="m7 14 5-5 5 5" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="./public/libs/pixi.min.js"></script>
+  <script src="./public/libs/live2dcubismcore.min.js"></script>
+  <script src="./public/libs/pixi-live2d-display-cubism4.min.js"></script>
+
+    <script src="./ami.js"></script>
+</body>
+
+</html>

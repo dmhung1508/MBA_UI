@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { API_ENDPOINTS } from './api';
+import { resolveApiBaseUrl } from './runtimeConfig';
 
 // Create axios instance
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: resolveApiBaseUrl(),
   withCredentials: false, // Important: Send cookies with requests
   headers: {
     'Content-Type': 'application/json',
@@ -13,6 +14,7 @@ const axiosInstance = axios.create({
 // Track if we're currently refreshing to prevent multiple refresh calls
 let isRefreshing = false;
 let failedQueue = [];
+const apiBaseUrl = resolveApiBaseUrl();
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
@@ -71,7 +73,7 @@ axiosInstance.interceptors.response.use(
       try {
         // Call refresh endpoint
         const response = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/auth_mini/refresh`,
+          `${apiBaseUrl}/auth_mini/refresh`,
           {},
           {
             withCredentials: true, // Send refresh token cookie
