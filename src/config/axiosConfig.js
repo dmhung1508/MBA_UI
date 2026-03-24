@@ -4,7 +4,7 @@ import { API_ENDPOINTS } from './api';
 // Create axios instance
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true, // Important: Send cookies with requests
+  withCredentials: false, // Important: Send cookies with requests
   headers: {
     'Content-Type': 'application/json',
   },

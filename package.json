@@ -20,6 +20,7 @@
     "daisyui": "^2.50.0",
     "date-fns": "^4.1.0",
     "jwt-decode": "^4.0.0",
+    "katex": "^0.16.41",
     "plyr": "^3.7.8",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.5",
@@ -39,6 +40,9 @@
     "react-window": "^2.2.3",
     "recharts": "^3.7.0",
     "regenerator-runtime": "^0.14.1",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "tailwind-scrollbar": "^3.0.5",
     "uuidv4": "^6.2.13"
   },

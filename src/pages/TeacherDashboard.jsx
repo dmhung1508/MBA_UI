@@ -320,14 +320,14 @@ const TeacherDashboard = () => {
                         <h4 className="font-medium text-gray-900">{topicName}</h4>
                         <div className="flex space-x-2">
                           <a
-                            href={`/mini/questions`}
+                            href={`/mini/questions?source=${encodeURIComponent(topicCode)}`}
                             className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-100"
                             title="Quản lý câu hỏi"
                           >
                             <FaQuestionCircle className="w-4 h-4" />
                           </a>
                           <a
-                            href={`/mini/sources`}
+                            href={`/mini/sources?source=${encodeURIComponent(topicCode)}`}
                             className="text-green-600 hover:text-green-800 p-2 rounded hover:bg-green-100"
                             title="Quản lý file"
                           >

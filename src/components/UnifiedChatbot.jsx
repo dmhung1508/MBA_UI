@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from "
 import { FaMicrophone, FaPaperPlane, FaQuestionCircle, FaVolumeMute, FaVolumeUp, FaHistory, FaTrash } from "react-icons/fa";
 import { v4 as uuidv4 } from 'uuid';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { API_ENDPOINTS } from '../config/api';
 import QuizPopup from './QuizPopup';
 import { jwtDecode } from 'jwt-decode';
@@ -32,6 +35,7 @@ const UnifiedChatbot = ({
   const chatHistoryRef = useRef(null);
   const speechRecognition = useRef(null);
   const inactivityTimerRef = useRef(null);
+  const textareaRef = useRef(null);
 
   // Các tin nhắn loading thú vị (memoized)
   const loadingMessages = useMemo(() => [
@@ -414,6 +418,13 @@ const UnifiedChatbot = ({
     setMessages([]);
   }, [chatbotConfig.source]);
 
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }, [inputMessage]);
+
   // Effect để thay đổi loading message theo thời gian
   useEffect(() => {
     let interval;
@@ -475,7 +486,37 @@ const UnifiedChatbot = ({
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-xs lg:max-w-md xl:max-w-lg ${message.sender === "user" ? "bg-blue-600 text-white" : "bg-white text-gray-800"} rounded-lg p-3 ${message.sender === "user" ? "rounded-br-none" : "rounded-bl-none"} shadow-md break-words ${message.historyId ? "opacity-90 border-l-4 border-gray-300" : ""}`}>
-              <ReactMarkdown className="text-sm whitespace-normal mb-1">{message.text}</ReactMarkdown>
+              <ReactMarkdown
+                className="text-sm whitespace-normal mb-1"
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                  h1: ({node, ...props}) => <h1 className="text-base font-bold mt-2 mb-1" {...props} />,
+                  h2: ({node, ...props}) => <h2 className="text-sm font-bold mt-2 mb-1" {...props} />,
+                  h3: ({node, ...props}) => <h3 className="text-sm font-semibold mt-1 mb-1" {...props} />,
+                  p: ({node, ...props}) => <p className="mb-1 last:mb-0 leading-relaxed" {...props} />,
+                  ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-1 space-y-0.5" {...props} />,
+                  ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-1 space-y-0.5" {...props} />,
+                  li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
+                  strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
+                  em: ({node, ...props}) => <em className="italic" {...props} />,
+                  pre: ({node, ...props}) => <pre className="bg-gray-900 text-gray-100 rounded p-3 my-2 overflow-x-auto text-xs font-mono" {...props} />,
+                  code: ({node, className, children, ...props}) => {
+                    const isBlock = /language-(\w+)/.test(className || '');
+                    return isBlock
+                      ? <code className={`${className} text-xs font-mono`} {...props}>{children}</code>
+                      : <code className="bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-xs font-mono" {...props}>{children}</code>;
+                  },
+                  blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-3 italic text-gray-500 my-1" {...props} />,
+                  a: ({node, ...props}) => <a className="text-blue-500 underline hover:text-blue-700" target="_blank" rel="noopener noreferrer" {...props} />,
+                  hr: ({node, ...props}) => <hr className="my-2 border-gray-300" {...props} />,
+                  table: ({node, ...props}) => <div className="overflow-x-auto my-2"><table className="border-collapse text-xs w-full" {...props} /></div>,
+                  thead: ({node, ...props}) => <thead className="bg-gray-50" {...props} />,
+                  th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 font-semibold text-left" {...props} />,
+                  td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
+                  tr: ({node, ...props}) => <tr className="even:bg-gray-50" {...props} />,
+                }}
+              >{message.text}</ReactMarkdown>
               <div className="flex justify-between items-center mt-2 text-xs">
                 <p className={`${message.sender === "user" ? "text-blue-200" : "text-gray-500"}`}>
                   {message.historyId && <span className="text-xs opacity-70">📜 </span>}
@@ -544,12 +585,14 @@ const UnifiedChatbot = ({
       <div className="bg-white border-t border-gray-200 p-4">
         <div className="flex items-center space-x-2">
           <textarea
+            ref={textareaRef}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Nhập tin nhắn của bạn…"
-            className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto"
             rows="1"
+            style={{ minHeight: '40px', maxHeight: '160px' }}
           />
           <button
             onClick={handleOpenQuiz}
