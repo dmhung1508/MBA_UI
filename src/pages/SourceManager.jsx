@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import FileManager from '../components/FileManager';
@@ -20,6 +20,7 @@ const SourceManager = () => {
   const [assignedTopics, setAssignedTopics] = useState([]);
   
   const navigate = useNavigate();
+  const location = useLocation();
 
   const colors = {
     primary: '#dc2626',
@@ -61,9 +62,13 @@ const SourceManager = () => {
         const data = await response.json();
         const chatbots = data.chatbots || [];
         setAvailableChatbots(chatbots);
-        
-        // Auto-select first chatbot
-        if (chatbots.length > 0) {
+
+        const params = new URLSearchParams(location.search);
+        const sourceParam = params.get('source');
+        const match = chatbots.find(cb => cb.source === sourceParam);
+        if (match) {
+          setSelectedChatbot(match.source);
+        } else if (chatbots.length > 0) {
           setSelectedChatbot(chatbots[0].source);
         }
       }
@@ -120,7 +125,12 @@ const SourceManager = () => {
           );
           
           setAvailableChatbots(filteredChatbots);
-          if (filteredChatbots.length > 0) {
+          const params = new URLSearchParams(location.search);
+          const sourceParam = params.get('source');
+          const match = filteredChatbots.find(cb => cb.source === sourceParam);
+          if (match) {
+            setSelectedChatbot(match.source);
+          } else if (filteredChatbots.length > 0) {
             setSelectedChatbot(filteredChatbots[0].source);
           }
         }

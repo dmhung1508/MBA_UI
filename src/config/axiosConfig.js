@@ -5,7 +5,7 @@ import { resolveApiBaseUrl } from './runtimeConfig';
 // Create axios instance
 const axiosInstance = axios.create({
   baseURL: resolveApiBaseUrl(),
-  withCredentials: true, // Important: Send cookies with requests
+  withCredentials: false, // Important: Send cookies with requests
   headers: {
     'Content-Type': 'application/json',
   },
