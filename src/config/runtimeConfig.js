@@ -64,6 +64,16 @@ export function resolveApiBaseUrl() {
     return configuredBase;
   }
 
+  // If the configured URL points to an external (non-local) host, always use it
+  if (configuredBase) {
+    try {
+      const configuredHostname = new URL(configuredBase).hostname;
+      if (!isLocalLikeHost(configuredHostname)) {
+        return configuredBase;
+      }
+    } catch {}
+  }
+
   const { protocol, hostname } = window.location;
   if (!isLocalLikeHost(hostname)) {
     return configuredBase;
