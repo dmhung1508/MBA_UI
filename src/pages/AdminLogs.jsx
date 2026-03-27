@@ -35,6 +35,7 @@ const AdminLogs = () => {
     username: '',
     role: '',
     action: '',
+    name: '',
     resource_type: '',
     from_date: '',
     to_date: ''
@@ -98,6 +99,7 @@ const AdminLogs = () => {
       if (filters.username) params.append('username', filters.username);
       if (filters.role) params.append('role', filters.role);
       if (filters.action) params.append('action', filters.action);
+      if (filters.name) params.append('name', filters.name);
       if (filters.resource_type) params.append('resource_type', filters.resource_type);
       if (filters.from_date) params.append('from_date', filters.from_date);
       if (filters.to_date) params.append('to_date', filters.to_date);
@@ -191,6 +193,7 @@ const AdminLogs = () => {
       username: '',
       role: '',
       action: '',
+      name: '',
       resource_type: '',
       from_date: '',
       to_date: ''
@@ -326,8 +329,9 @@ const AdminLogs = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Hàng 1: Username (2 cols) | Role | Action */}
+                  <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
                       <FaUser className="w-3 h-3 inline-block align-middle mr-2" />
                       Username
@@ -337,7 +341,7 @@ const AdminLogs = () => {
                       value={filters.username}
                       onChange={(e) => handleFilterChange('username', e.target.value)}
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-                      placeholder="Nhập username"
+                      placeholder="Nhập username..."
                     />
                   </div>
 
@@ -354,6 +358,7 @@ const AdminLogs = () => {
                       <option value="">Tất cả</option>
                       <option value="admin">Admin</option>
                       <option value="teacher">Teacher</option>
+                      <option value="user">User</option>
                     </select>
                   </div>
 
@@ -368,11 +373,29 @@ const AdminLogs = () => {
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                     >
                       <option value="">Tất cả</option>
+                      <option value="Ami">Ami</option>
                       <option value="rag_query">RAG Query</option>
                       <option value="CREATE">CREATE</option>
                       <option value="UPDATE">UPDATE</option>
                       <option value="DELETE">DELETE</option>
                       <option value="VIEW">VIEW</option>
+                    </select>
+                  </div>
+
+                  {/* Hàng 2: Name | Resource Type | Từ ngày | Đến ngày */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <FaTag className="w-3 h-3 inline-block align-middle mr-2" />
+                      Name
+                    </label>
+                    <select
+                      value={filters.name}
+                      onChange={(e) => handleFilterChange('name', e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="">Tất cả</option>
+                      <option value="Ami">Ami</option>
+                      <option value="rag_query">RAG Query</option>
                     </select>
                   </div>
 
