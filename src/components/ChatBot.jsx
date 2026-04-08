@@ -5,6 +5,8 @@ import UnifiedChatbot from "./UnifiedChatbot";
 import { ResizableBox } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { API_ENDPOINTS } from '../config/api';
+import Navbar from '../pages/Navbar';
+import Footer from '../pages/Footer';
 
 const ChatUI = () => {
   const [chatbots, setChatbots] = useState([]);
@@ -17,6 +19,7 @@ const ChatUI = () => {
   const [selectedSources, setSelectedSources] = useState([]);
   const [currentView, setCurrentView] = useState("chat");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const speechSynthesis = window.speechSynthesis;
 
@@ -73,6 +76,8 @@ const ChatUI = () => {
             { id: 1, text: "Rất vui được gặp bạn, mình là LISA, trợ lí AI. Mình có thể giúp gì cho bạn không?", sender: "bot", timestamp: new Date().toLocaleTimeString(), sources: [] }
           ]
         });
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
@@ -156,11 +161,28 @@ const ChatUI = () => {
       .toLowerCase();
   };
 
-  // Show loading if chatbots haven't loaded yet
-  if (chatbots.length === 0 || !currentChat) {
+  // Show loading spinner while fetching
+  if (isInitialLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
+
+  // Show empty state if account has no chatbots assigned
+  if (chatbots.length === 0 || !currentChat) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-red-100 to-pink-100">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center pt-16">
+          <div className="bg-white rounded-xl shadow-md p-8 max-w-sm text-center">
+            <div className="text-5xl mb-4">📚</div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Chưa có môn học nào</h2>
+            <p className="text-gray-500 text-sm">Tài khoản của bạn chưa được phân công môn học. Vui lòng liên hệ giáo viên hoặc quản trị viên.</p>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }

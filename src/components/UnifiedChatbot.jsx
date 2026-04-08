@@ -11,6 +11,30 @@ import { jwtDecode } from 'jwt-decode';
 
 const timestamp = `${Date.now()}-${uuidv4()}`;
 
+// Convert các delimiter LaTeX không chuẩn sang $...$ / $$...$$ để remark-math nhận được
+const preprocessMath = (text) => {
+  if (!text) return text;
+
+  // \[...\] → $$...$$ (display/block math)
+  text = text.replace(/\\\[([\s\S]*?)\\\]/g, (_, m) => `\n$$\n${m.trim()}\n$$\n`);
+
+  // \(...\) → $...$ (inline math)
+  text = text.replace(/\\\(([\s\S]*?)\\\)/g, (_, m) => `$${m}$`);
+
+  // Bare [ ... ] trên dòng riêng có chứa lệnh LaTeX → $$...$$
+  text = text.replace(/^[ \t]*\[([^\[\]\n]*\\[a-zA-Z][^\[\]\n]*)\][ \t]*$/gm, (_, m) => `$$${m.trim()}$$`);
+
+  // Bare ( ... ) inline có chứa lệnh LaTeX (vd: \times, \sigma) → $...$
+  text = text.replace(/(?<![a-zA-Z\d])\(([^()]*(?:\([^()]*\)[^()]*)*)\)(?![a-zA-Z\d])/g, (match, inner) => {
+    if (/\\[a-zA-Z]/.test(inner)) {
+      return `$${inner.trim()}$`;
+    }
+    return match;
+  });
+
+  return text;
+};
+
 const UnifiedChatbot = ({
   chatbotConfig, // { id, name, source, quizTopic, avatar }
   isSpeakerActive,
@@ -451,6 +475,14 @@ const UnifiedChatbot = ({
           0%, 100% { opacity: 0.5; }
           50% { opacity: 1; }
         }
+
+        .katex-display {
+          max-width: 100%;
+        }
+
+        .katex {
+          font-size: 1em;
+        }
       `}</style>
       <div ref={chatHistoryRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {isLoadingHistory && (
@@ -485,7 +517,7 @@ const UnifiedChatbot = ({
         )}
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-xs lg:max-w-md xl:max-w-lg ${message.sender === "user" ? "bg-blue-600 text-white" : "bg-white text-gray-800"} rounded-lg p-3 ${message.sender === "user" ? "rounded-br-none" : "rounded-bl-none"} shadow-md break-words ${message.historyId ? "opacity-90 border-l-4 border-gray-300" : ""}`}>
+            <div className={`${message.sender === "user" ? "max-w-xs lg:max-w-md xl:max-w-lg" : "max-w-[90%]"} ${message.sender === "user" ? "bg-blue-600 text-white" : "bg-white text-gray-800"} rounded-lg p-3 ${message.sender === "user" ? "rounded-br-none" : "rounded-bl-none"} shadow-md break-words ${message.historyId ? "opacity-90 border-l-4 border-gray-300" : ""}`}>
               <ReactMarkdown
                 className="text-sm whitespace-normal mb-1"
                 remarkPlugins={[remarkGfm, remarkMath]}
@@ -516,7 +548,7 @@ const UnifiedChatbot = ({
                   td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
                   tr: ({node, ...props}) => <tr className="even:bg-gray-50" {...props} />,
                 }}
-              >{message.text}</ReactMarkdown>
+              >{preprocessMath(message.text)}</ReactMarkdown>
               <div className="flex justify-between items-center mt-2 text-xs">
                 <p className={`${message.sender === "user" ? "text-blue-200" : "text-gray-500"}`}>
                   {message.historyId && <span className="text-xs opacity-70">📜 </span>}
