@@ -25,7 +25,7 @@ import {
 } from 'react-icons/fa';
 
 // Memoized BulkQuestionItem component for better performance
-const BulkQuestionItem = memo(({ question, questionIndex, onUpdate, onUpdateText, onRemove, canRemove }) => {
+const BulkQuestionItem = memo(({ question, questionIndex, onUpdate, onUpdateText, onUpdateChapter, onRemove, canRemove }) => {
   return (
     <div className="border border-gray-200 rounded-lg p-4 mb-4">
       <div className="flex justify-between items-center mb-3">
@@ -42,6 +42,29 @@ const BulkQuestionItem = memo(({ question, questionIndex, onUpdate, onUpdateText
       </div>
 
       <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Chương
+          </label>
+          <select
+            value={question.chapter || ''}
+            onChange={(e) => onUpdateChapter(questionIndex, e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            <option value="">Chọn chương</option>
+            {question.chapter && !CHAPTER_OPTIONS.includes(question.chapter) && (
+              <option value={question.chapter}>
+                {formatChapterLabel(question.chapter)} (giữ giá trị cũ)
+              </option>
+            )}
+            {CHAPTER_OPTIONS.map((chapter) => (
+              <option key={chapter} value={chapter}>
+                {formatChapterLabel(chapter)}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Nội dung câu hỏi
@@ -97,6 +120,27 @@ import imgStep2 from '../assets/2.png';
 import imgStep3 from '../assets/3.png';
 import imgStep4 from '../assets/4.png';
 
+const createEmptyChoices = () => ([
+  { text: '', is_correct: true },
+  { text: '', is_correct: false },
+  { text: '', is_correct: false },
+  { text: '', is_correct: false }
+]);
+
+const CHAPTER_OPTIONS = Array.from({ length: 30 }, (_, index) => String(index + 1));
+
+const formatChapterLabel = (chapter) => {
+  const value = String(chapter || '').trim();
+  if (!value) return '';
+  return /^\d+$/.test(value) ? `Chương ${value}` : value;
+};
+
+const createEmptyQuestionForm = () => ({
+  question_text: '',
+  chapter: '',
+  choices: createEmptyChoices()
+});
+
 const QuestionManager = () => {
   const [questions, setQuestions] = useState([]);
   const [availableChatbots, setAvailableChatbots] = useState([]);
@@ -139,28 +183,10 @@ const QuestionManager = () => {
   });
 
   // Form data for single question
-  const [questionForm, setQuestionForm] = useState({
-    question_text: '',
-    choices: [
-      { text: '', is_correct: true },
-      { text: '', is_correct: false },
-      { text: '', is_correct: false },
-      { text: '', is_correct: false }
-    ]
-  });
+  const [questionForm, setQuestionForm] = useState(createEmptyQuestionForm);
 
   // Form data for bulk questions
-  const [bulkQuestions, setBulkQuestions] = useState([
-    {
-      question_text: '',
-      choices: [
-        { text: '', is_correct: true },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false }
-      ]
-    }
-  ]);
+  const [bulkQuestions, setBulkQuestions] = useState([createEmptyQuestionForm()]);
 
   // Excel upload
   const [excelFile, setExcelFile] = useState(null);
@@ -179,7 +205,7 @@ const QuestionManager = () => {
   useEffect(() => {
     const role = localStorage.getItem('user_role');
     if (role !== 'admin' && role !== 'teacher') {
-      navigate('/mini/');
+      navigate('/', { replace: true });
       return;
     }
     setUserRole(role);
@@ -415,7 +441,8 @@ const QuestionManager = () => {
         headers: getAuthHeaders(),
         body: JSON.stringify({
           topic: selectedTopic,
-          ...questionForm
+          ...questionForm,
+          chapter: questionForm.chapter.trim()
         })
       });
 
@@ -450,7 +477,10 @@ const QuestionManager = () => {
         headers: getAuthHeaders(),
         body: JSON.stringify({
           topic: selectedTopic,
-          questions: bulkQuestions
+          questions: bulkQuestions.map((question) => ({
+            ...question,
+            chapter: (question.chapter || '').trim()
+          }))
         })
       });
 
@@ -487,7 +517,10 @@ const QuestionManager = () => {
         {
           method: 'PUT',
           headers: getAuthHeaders(),
-          body: JSON.stringify(questionForm)
+          body: JSON.stringify({
+            ...questionForm,
+            chapter: questionForm.chapter.trim()
+          })
         }
       );
 
@@ -612,29 +645,13 @@ const QuestionManager = () => {
 
   const openCreateModal = () => {
     setModalMode('create');
-    setQuestionForm({
-      question_text: '',
-      choices: [
-        { text: '', is_correct: true },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false }
-      ]
-    });
+    setQuestionForm(createEmptyQuestionForm());
     setShowModal(true);
   };
 
   const openBulkCreateModal = () => {
     setModalMode('bulk-create');
-    setBulkQuestions([{
-      question_text: '',
-      choices: [
-        { text: '', is_correct: true },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false }
-      ]
-    }]);
+    setBulkQuestions([createEmptyQuestionForm()]);
     setShowModal(true);
   };
 
@@ -667,6 +684,7 @@ const QuestionManager = () => {
 
     setQuestionForm({
       question_text: question.question,
+      chapter: question.chapter || '',
       choices: choices
     });
     setShowModal(true);
@@ -687,24 +705,8 @@ const QuestionManager = () => {
   const closeModal = () => {
     setShowModal(false);
     setSelectedQuestion(null);
-    setQuestionForm({
-      question_text: '',
-      choices: [
-        { text: '', is_correct: true },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false }
-      ]
-    });
-    setBulkQuestions([{
-      question_text: '',
-      choices: [
-        { text: '', is_correct: true },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false }
-      ]
-    }]);
+    setQuestionForm(createEmptyQuestionForm());
+    setBulkQuestions([createEmptyQuestionForm()]);
     setExcelFile(null);
   };
 
@@ -775,16 +777,16 @@ const QuestionManager = () => {
     });
   }, []);
 
+  const updateBulkQuestionChapter = useCallback((questionIndex, chapter) => {
+    setBulkQuestions(prev => {
+      const newBulkQuestions = [...prev];
+      newBulkQuestions[questionIndex].chapter = chapter;
+      return newBulkQuestions;
+    });
+  }, []);
+
   const addBulkQuestion = useCallback(() => {
-    setBulkQuestions(prev => [...prev, {
-      question_text: '',
-      choices: [
-        { text: '', is_correct: true },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false },
-        { text: '', is_correct: false }
-      ]
-    }]);
+    setBulkQuestions(prev => [...prev, createEmptyQuestionForm()]);
   }, []);
 
   const removeBulkQuestion = useCallback((index) => {
@@ -998,6 +1000,7 @@ const QuestionManager = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chương</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Câu hỏi</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lựa chọn</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đáp án đúng</th>
@@ -1015,6 +1018,15 @@ const QuestionManager = () => {
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {searchMode ? (searchPagination.offset + index + 1) : (pagination.offset + index + 1)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {question.chapter ? (
+                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
+                            {formatChapterLabel(question.chapter)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 italic">Chưa gán</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
                         <div className="truncate" title={question.question}>
@@ -1243,6 +1255,7 @@ const QuestionManager = () => {
                       <p className="text-gray-600 mb-3">Điền nội dung câu hỏi và câu trả lời vào file mẫu theo đúng cấu trúc sau:</p>
                       <ul className="list-disc list-inside mb-4 space-y-1 bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm">
                         <li><code className="bg-gray-200 px-1 rounded font-bold">question</code>: Nội dung câu hỏi (Bắt buộc)</li>
+                        <li><code className="bg-gray-200 px-1 rounded font-bold">chapter</code>: Số chương của câu hỏi, ví dụ 1, 2, 3... (Tùy chọn)</li>
                         <li><code className="bg-gray-200 px-1 rounded font-bold">choice_a</code>: Lựa chọn A (Bắt buộc)</li>
                         <li><code className="bg-gray-200 px-1 rounded font-bold">choice_b</code>: Lựa chọn B (Bắt buộc)</li>
                         <li><code className="bg-gray-200 px-1 rounded font-bold">choice_c</code>: Lựa chọn C (Tùy chọn)</li>
@@ -1250,6 +1263,9 @@ const QuestionManager = () => {
                         <li><code className="bg-gray-200 px-1 rounded font-bold">correct_answer</code>: Đáp án đúng (nhập A, B, C hoặc D)</li>
                       </ul>
                       <img src={imgStep3} alt="Bước 3" className="rounded-lg shadow-md border border-gray-200 max-w-full h-auto" />
+                      <p className="text-xs text-gray-500 italic mt-3">
+                        Có thể thêm thủ công cột <code>chapter</code> vào file mẫu nếu muốn gán chương cho câu hỏi.
+                      </p>
                     </div>
 
                     {/* Step 4 */}
@@ -1298,6 +1314,7 @@ const QuestionManager = () => {
                           </div>
                           <ul className="list-disc list-inside mt-1 space-y-1 bg-gray-50 p-3 rounded-md border border-gray-200">
                             <li><code>question</code>: Nội dung câu hỏi (Bắt buộc)</li>
+                            <li><code>chapter</code>: Số chương của câu hỏi, ví dụ 1, 2, 3... (Tùy chọn)</li>
                             <li><code>choice_a</code>: Lựa chọn A (Bắt buộc)</li>
                             <li><code>choice_b</code>: Lựa chọn B (Bắt buộc)</li>
                             <li><code>choice_c</code>: Lựa chọn C (Tùy chọn)</li>
@@ -1305,7 +1322,7 @@ const QuestionManager = () => {
                             <li><code>correct_answer</code>: Đáp án đúng (nhập A, B, C hoặc D)</li>
                           </ul>
                           <p className="mt-2 text-xs text-gray-500 italic">
-                            * Vui lòng sử dụng file mẫu để đảm bảo định dạng đúng.
+                            * Vui lòng sử dụng file mẫu để đảm bảo định dạng đúng. Nếu cần phân chương, có thể thêm thủ công cột <code>chapter</code>.
                           </p>
                         </div>
                       </div>
@@ -1341,6 +1358,7 @@ const QuestionManager = () => {
                             questionIndex={questionIndex}
                             onUpdate={updateBulkQuestionChoice}
                             onUpdateText={updateBulkQuestionText}
+                            onUpdateChapter={updateBulkQuestionChapter}
                             onRemove={removeBulkQuestion}
                             canRemove={bulkQuestions.length > 1}
                           />
@@ -1357,6 +1375,29 @@ const QuestionManager = () => {
                       </div>
                     ) : (
                       <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Chương
+                          </label>
+                          <select
+                            value={questionForm.chapter}
+                            onChange={(e) => setQuestionForm(prev => ({ ...prev, chapter: e.target.value }))}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                          >
+                            <option value="">Chọn chương</option>
+                            {questionForm.chapter && !CHAPTER_OPTIONS.includes(questionForm.chapter) && (
+                              <option value={questionForm.chapter}>
+                                {formatChapterLabel(questionForm.chapter)} (giữ giá trị cũ)
+                              </option>
+                            )}
+                            {CHAPTER_OPTIONS.map((chapter) => (
+                              <option key={chapter} value={chapter}>
+                                {formatChapterLabel(chapter)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Nội dung câu hỏi

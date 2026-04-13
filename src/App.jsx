@@ -191,6 +191,7 @@ function App() {
               }
             />
             <Route path="/access-auth" element={<AuthSuccess />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/mini"
               element={
@@ -322,6 +323,7 @@ function App() {
               }
             />
             <Route path="/access-auth" element={<AuthSuccess />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
 
@@ -345,7 +347,7 @@ function App() {
 // PrivateRoute component to protect authenticated routes
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('access_token');
-  return token ? children : <Navigate to="/mini/login" />;
+  return token ? children : <Navigate to="/login" replace />;
 }
 
 export default App;
