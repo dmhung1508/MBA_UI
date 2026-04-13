@@ -21,6 +21,10 @@ const UnifiedChatbot = ({
   const [isVoiceInputActive, setIsVoiceInputActive] = useState(false);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [apiUrl, setApiUrl] = useState("");
+  const [showChapterSelector, setShowChapterSelector] = useState(false);
+  const [availableChapters, setAvailableChapters] = useState([]);
+  const [selectedChapters, setSelectedChapters] = useState([]);
+  const [isLoadingChapters, setIsLoadingChapters] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -203,15 +207,69 @@ const UnifiedChatbot = ({
     }
   }, [username, chatbotConfig.source, showToastNotification]);
 
-  // Modify handleOpenQuiz
-  const handleOpenQuiz = useCallback(() => {
-    setIsQuizOpen(true);
+  const openQuizPractice = useCallback((chapters = []) => {
     if (inactivityTimerRef.current) {
       clearTimeout(inactivityTimerRef.current);
       inactivityTimerRef.current = null;
     }
-    setApiUrl(API_ENDPOINTS.RANDOM_QUESTIONS(chatbotConfig.quizTopic));
+    setApiUrl(API_ENDPOINTS.RANDOM_QUESTIONS(chatbotConfig.quizTopic, chapters));
+    setIsQuizOpen(true);
   }, [chatbotConfig.quizTopic]);
+
+  const handleToggleChapter = useCallback((chapterValue) => {
+    setSelectedChapters((prev) => (
+      prev.includes(chapterValue)
+        ? prev.filter((value) => value !== chapterValue)
+        : [...prev, chapterValue]
+    ));
+  }, []);
+
+  const handleSelectAllChapters = useCallback(() => {
+    setSelectedChapters(availableChapters.map((chapter) => chapter.value));
+  }, [availableChapters]);
+
+  const handleStartQuizWithSelectedChapters = useCallback(() => {
+    if (selectedChapters.length === 0) {
+      showToastNotification("Vui lòng chọn ít nhất một chương để luyện tập.", "error");
+      return;
+    }
+
+    setShowChapterSelector(false);
+    openQuizPractice(selectedChapters);
+  }, [openQuizPractice, selectedChapters, showToastNotification]);
+
+  const handleOpenQuiz = useCallback(async () => {
+    if (!chatbotConfig.quizTopic || chatbotConfig.quizTopic === "tonghop") {
+      openQuizPractice();
+      return;
+    }
+
+    setIsLoadingChapters(true);
+    try {
+      const response = await fetch(API_ENDPOINTS.QUIZ_CHAPTERS(chatbotConfig.quizTopic));
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Không thể tải danh sách chương.");
+      }
+
+      const chapters = data.chapters || [];
+      if (chapters.length === 0) {
+        openQuizPractice();
+        return;
+      }
+
+      setAvailableChapters(chapters);
+      setSelectedChapters(chapters.map((chapter) => chapter.value));
+      setShowChapterSelector(true);
+    } catch (error) {
+      console.error("Error loading quiz chapters:", error);
+      showToastNotification("Không thể tải danh sách chương. Hệ thống sẽ mở toàn bộ câu hỏi của môn này.", "error");
+      openQuizPractice();
+    } finally {
+      setIsLoadingChapters(false);
+    }
+  }, [chatbotConfig.quizTopic, openQuizPractice, showToastNotification]);
 
   const handleExplanationRequest = useCallback(async (explanationData) => {
     const dataToSend = { ...explanationData, source: chatbotConfig.source };
@@ -553,10 +611,11 @@ const UnifiedChatbot = ({
           />
           <button
             onClick={handleOpenQuiz}
-            className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 focus:outline-none flex items-center space-x-2"
+            disabled={isLoadingChapters}
+            className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 focus:outline-none flex items-center space-x-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <FaQuestionCircle className="w-5 h-5" />
-            <span>Luyện tập</span>
+            <span>{isLoadingChapters ? "Đang tải..." : "Luyện tập"}</span>
           </button>
           <button
             onClick={clearChatHistory}
@@ -587,6 +646,76 @@ const UnifiedChatbot = ({
           apiUrl={apiUrl}
           onExplanationRequest={handleExplanationRequest}
         />
+      )}
+
+      {showChapterSelector && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 mx-4 max-w-lg w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Chọn chương luyện tập
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Chọn một hoặc nhiều chương trắc nghiệm để hệ thống lấy câu hỏi luyện tập.
+            </p>
+
+            <div className="max-h-72 overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
+              {availableChapters.map((chapter) => {
+                const checked = selectedChapters.includes(chapter.value);
+                return (
+                  <label
+                    key={chapter.value}
+                    className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => handleToggleChapter(chapter.value)}
+                        className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-800">{chapter.label}</span>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {chapter.count} câu
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center justify-between mt-4 text-sm">
+              <button
+                type="button"
+                onClick={() => setSelectedChapters([])}
+                className="text-gray-600 hover:text-gray-800"
+              >
+                Bỏ chọn hết
+              </button>
+              <button
+                type="button"
+                onClick={handleSelectAllChapters}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Chọn tất cả
+              </button>
+            </div>
+
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={() => setShowChapterSelector(false)}
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleStartQuizWithSelectedChapters}
+                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700"
+              >
+                Bắt đầu luyện tập
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Modal xác nhận xóa lịch sử */}

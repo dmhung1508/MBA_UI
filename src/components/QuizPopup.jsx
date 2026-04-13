@@ -162,6 +162,7 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
   const [answers, setAnswers] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
   const [wrongIndexes, setWrongIndexes] = useState([]);
   const [currentWrongIndex, setCurrentWrongIndex] = useState(0);
   const [showVideoPanel, setShowVideoPanel] = useState(false);
@@ -173,29 +174,49 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
   const videoPath = 'public/video/quiz_clean.mp4';
 
   useEffect(() => {
+    setQuestions([]);
+    setAnswers({});
+    setIsSubmitted(false);
+    setWrongIndexes([]);
+    setCurrentWrongIndex(0);
+    setShowVideoPanel(false);
+    setShowVideo(false);
+    setIsVideoLoading(false);
+    setFetchError("");
     setIsLoading(true);
     fetch(apiUrl)
-      .then(res => res.json())
-      .then(data => {
-        if (data?.questions) {
-          // Transform API format to component format
-          const transformedQuestions = data.questions.map(q => {
-            // Convert choices array to answers array with A, B, C, D labels
-            const answers = q.choices.map((choice, index) => ({
-              answer: `${String.fromCharCode(65 + index)}. ${choice}`,
-              isCorrectAnswer: choice === q.correct_answer ? "true" : "false"
-            }));
+      .then(async (res) => {
+        const data = await res.json();
 
-            return {
-              question: q.question,
-              answers: answers
-            };
-          });
-
-          setQuestions(transformedQuestions);
+        if (!res.ok) {
+          throw new Error(data?.detail || 'Không thể tải bộ câu hỏi.');
         }
+
+        return data;
       })
-      .catch(err => console.error('Lỗi tải câu hỏi:', err))
+      .then(data => {
+        if (!Array.isArray(data?.questions) || data.questions.length === 0) {
+          throw new Error('Không có câu hỏi phù hợp với lựa chọn hiện tại.');
+        }
+
+        const transformedQuestions = data.questions.map(q => {
+          const answers = q.choices.map((choice, index) => ({
+            answer: `${String.fromCharCode(65 + index)}. ${choice}`,
+            isCorrectAnswer: choice === q.correct_answer ? "true" : "false"
+          }));
+
+          return {
+            question: q.question,
+            answers: answers
+          };
+        });
+
+        setQuestions(transformedQuestions);
+      })
+      .catch(err => {
+        console.error('Lỗi tải câu hỏi:', err);
+        setFetchError(err.message || 'Không thể tải câu hỏi.');
+      })
       .finally(() => setIsLoading(false));
   }, [apiUrl]);
 
@@ -251,6 +272,11 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
   };
 
   const handleSubmit = () => {
+    if (questions.length === 0) {
+      toast.error('Không có câu hỏi để nộp bài.');
+      return;
+    }
+
     setIsSubmitted(true);
     toast.success('✅ Bài đã được nộp!');
 
@@ -372,6 +398,11 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
 
         {isLoading ? (
           <p>Đang tải câu hỏi...</p>
+        ) : fetchError ? (
+          <div className="border border-red-200 bg-red-50 text-red-700 rounded-lg p-4">
+            <p className="font-medium mb-2">Không thể bắt đầu bài luyện tập</p>
+            <p className="text-sm">{fetchError}</p>
+          </div>
         ) : (
           questions.map((q, idx) => {
             // Safety check: ensure answers exists and is an array
@@ -436,7 +467,14 @@ const QuizPopup = ({ isOpen, onClose, apiUrl, onRequestExplanation }) => {
         )}
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-4">
-          {!isSubmitted ? (
+          {fetchError ? (
+            <button
+              onClick={onClose}
+              className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
+            >
+              Đóng
+            </button>
+          ) : !isSubmitted ? (
             <button
               onClick={handleSubmit}
               className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
