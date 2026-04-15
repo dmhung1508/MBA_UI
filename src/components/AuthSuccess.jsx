@@ -86,7 +86,7 @@ const AuthSuccess = () => {
         }
 
         const expirationTime =
-          Date.now() + 365 * 24 * 60 * 60 * 1000; 
+          Date.now() + 30 * 60 * 1000;
         localStorage.setItem("access_token", access_token);
         localStorage.setItem("token_type", token_type || "bearer");
         localStorage.setItem("user_role", user_role || "USER");

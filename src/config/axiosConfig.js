@@ -85,8 +85,8 @@ axiosInstance.interceptors.response.use(
         // Update access token in localStorage
         localStorage.setItem('access_token', access_token);
 
-        // Update token expiration (3 minutes from now)
-        const expirationTime = new Date().getTime() + (3 * 60 * 1000);
+        // Update token expiration (30 minutes from now)
+        const expirationTime = new Date().getTime() + (30 * 60 * 1000);
         localStorage.setItem('token_expiration', expirationTime.toString());
 
         // Process queued requests with new token

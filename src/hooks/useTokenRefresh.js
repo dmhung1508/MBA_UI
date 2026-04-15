@@ -70,7 +70,7 @@ export const useTokenRefresh = () => {
 
       // Update token and expiration
       localStorage.setItem('access_token', access_token);
-      const newExpiration = Date.now() + (3 * 60 * 1000); // 3 minutes
+      const newExpiration = Date.now() + (30 * 60 * 1000); // 30 minutes
       localStorage.setItem('token_expiration', newExpiration.toString());
     } catch (error) {
       console.error('Failed to refresh token:', error);
