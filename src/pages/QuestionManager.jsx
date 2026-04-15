@@ -1031,17 +1031,17 @@ const QuestionManager = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {(searchMode ? searchResults : questions).map((question, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
+                    <tr
+                      key={index}
+                      onClick={() => openEditModal(question, getQuestionActionIndex(question, index))}
+                      className="cursor-pointer hover:bg-gray-50"
+                      title="Bấm vào câu hỏi để chỉnh sửa"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {searchMode ? (searchPagination.offset + index + 1) : (pagination.offset + index + 1)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(question, getQuestionActionIndex(question, index))}
-                          className="group inline-flex items-center rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                          title="Bấm để chỉnh sửa chương của câu hỏi"
-                        >
+                        <span className="group inline-flex items-center rounded">
                           {question.chapter ? (
                             <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium transition-colors group-hover:bg-blue-200">
                               {formatChapterLabel(question.chapter)}
@@ -1051,7 +1051,7 @@ const QuestionManager = () => {
                               Chưa gán
                             </span>
                           )}
-                        </button>
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
                         <div className="truncate" title={question.question}>
@@ -1087,7 +1087,10 @@ const QuestionManager = () => {
                           </td>
                         </>
                       )}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <div className="flex space-x-2">
                           <button
                             onClick={() => openEditModal(question, getQuestionActionIndex(question, index))}
