@@ -141,10 +141,17 @@ const createEmptyQuestionForm = () => ({
   choices: createEmptyChoices()
 });
 
+const createTopicOption = (source, name, id = source) => ({
+  id: id || source,
+  name: name || source,
+  source
+});
+
 const QuestionManager = () => {
   const [questions, setQuestions] = useState([]);
   const [availableChatbots, setAvailableChatbots] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState('');
+  const [bootstrapping, setBootstrapping] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -239,75 +246,76 @@ const QuestionManager = () => {
     };
   };
 
+  const applyTopicOptions = useCallback((topicOptions) => {
+    setAvailableChatbots(topicOptions);
+    setSelectedTopic((currentTopic) => {
+      if (currentTopic && topicOptions.some((topic) => topic.source === currentTopic)) {
+        return currentTopic;
+      }
+
+      return topicOptions[0]?.source || '';
+    });
+  }, []);
+
   const fetchChatbots = async () => {
+    setBootstrapping(true);
     try {
-      const accessToken = localStorage.getItem('access_token');
-      const response = await fetch(API_ENDPOINTS.CHATBOTS,
-        {
-          method: 'GET',
-          headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          }
-        }
-      );
+      const response = await fetch(API_ENDPOINTS.ADMIN_QUIZ_TOPICS, {
+        headers: getAuthHeaders()
+      });
+
       if (response.ok) {
         const data = await response.json();
-        const chatbots = data.chatbots || [];
-        setAvailableChatbots(chatbots);
-        if (chatbots.length > 0) {
-          setSelectedTopic(chatbots[0].source);
-        }
+        const topics = (data.quiz_topics || []).map((topic) => (
+          createTopicOption(topic.quizTopic, topic.chatbot_name, topic.quizTopic)
+        ));
+        applyTopicOptions(topics);
       }
     } catch (err) {
       console.error('Error fetching chatbots:', err);
+    } finally {
+      setBootstrapping(false);
     }
   };
 
   const fetchTeacherTopics = async () => {
+    setBootstrapping(true);
     try {
-      // First get teacher's assigned topics
-      const teacherResponse = await fetch(API_ENDPOINTS.TEACHER_MY_TOPICS, {
-        headers: getAuthHeaders()
-      });
+      const [teacherResponse, topicsResponse] = await Promise.all([
+        fetch(API_ENDPOINTS.TEACHER_MY_TOPICS, {
+          headers: getAuthHeaders()
+        }),
+        fetch(API_ENDPOINTS.ADMIN_QUIZ_TOPICS, {
+          headers: getAuthHeaders()
+        })
+      ]);
 
       if (teacherResponse.ok) {
         const teacherData = await teacherResponse.json();
         const topics = teacherData.assigned_topics || [];
         setAssignedTopics(topics);
 
-        // Then get all chatbots and filter by assigned topics
-        const accessToken = localStorage.getItem('access_token');
-        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS,
-          {
-            method: 'GET',
-            headers: {
-              'accept': 'application/json',
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`
-            }
-          }
-        );
-        if (chatbotsResponse.ok) {
-          const chatbotsData = await chatbotsResponse.json();
-          const allChatbots = chatbotsData.chatbots || [];
-
-          // Filter chatbots to only show assigned topics
-          const filteredChatbots = allChatbots.filter(chatbot =>
-            topics.includes(chatbot.source)
+        if (topicsResponse.ok) {
+          const topicsData = await topicsResponse.json();
+          const topicNameMap = new Map(
+            (topicsData.quiz_topics || []).map((topic) => [topic.quizTopic, topic.chatbot_name || topic.quizTopic])
           );
 
-          setAvailableChatbots(filteredChatbots);
-          if (filteredChatbots.length > 0) {
-            setSelectedTopic(filteredChatbots[0].source);
-          }
+          applyTopicOptions(
+            topics.map((topic) => createTopicOption(topic, topicNameMap.get(topic), topic))
+          );
+        } else {
+          applyTopicOptions(
+            topics.map((topic) => createTopicOption(topic, topic, topic))
+          );
         }
       } else {
         throw new Error('Không thể tải assigned topics');
       }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setBootstrapping(false);
     }
   };
 
@@ -739,6 +747,14 @@ const QuestionManager = () => {
     setPagination(prev => ({ ...prev, offset: newOffset }));
   };
 
+  const getQuestionActionIndex = useCallback((question, index) => {
+    if (searchMode) {
+      return question.topic_index ?? 0;
+    }
+
+    return pagination.offset + index;
+  }, [pagination.offset, searchMode]);
+
   const updateQuestionChoice = useCallback((choiceIndex, field, value) => {
     setQuestionForm(prev => {
       const newChoices = [...prev.choices];
@@ -798,7 +814,7 @@ const QuestionManager = () => {
     });
   }, []);
 
-  if (loading && questions.length === 0) {
+  if ((bootstrapping || loading) && questions.length === 0 && !searchMode) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
@@ -1020,13 +1036,22 @@ const QuestionManager = () => {
                         {searchMode ? (searchPagination.offset + index + 1) : (pagination.offset + index + 1)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {question.chapter ? (
-                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
-                            {formatChapterLabel(question.chapter)}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 italic">Chưa gán</span>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(question, getQuestionActionIndex(question, index))}
+                          className="group inline-flex items-center rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          title="Bấm để chỉnh sửa chương của câu hỏi"
+                        >
+                          {question.chapter ? (
+                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium transition-colors group-hover:bg-blue-200">
+                              {formatChapterLabel(question.chapter)}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 italic transition-colors group-hover:text-blue-600">
+                              Chưa gán
+                            </span>
+                          )}
+                        </button>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
                         <div className="truncate" title={question.question}>
@@ -1065,14 +1090,14 @@ const QuestionManager = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => openEditModal(question, searchMode ? (question.topic_index || 0) : (pagination.offset + index))}
+                            onClick={() => openEditModal(question, getQuestionActionIndex(question, index))}
                             className="text-blue-600 hover:text-blue-900 p-2 rounded hover:bg-blue-100"
                             title="Chỉnh sửa"
                           >
                             <FaEdit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => openDeleteModal(question, searchMode ? (question.topic_index || 0) : (pagination.offset + index))}
+                            onClick={() => openDeleteModal(question, getQuestionActionIndex(question, index))}
                             className="text-red-600 hover:text-red-900 p-2 rounded hover:bg-red-100"
                             title="Xóa"
                           >
