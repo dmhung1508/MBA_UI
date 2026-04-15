@@ -55,6 +55,7 @@ export const API_ENDPOINTS = {
   // Admin - Chatbots
   ADMIN_CHATBOTS: `${AUTH_MINI_BASE}/admin/chatbots`,
   ADMIN_CHATBOT_BY_ID: (id) => `${AUTH_MINI_BASE}/admin/chatbots/${id}`,
+  ADMIN_QUIZ_TOPICS: `${AUTH_MINI_BASE}/admin/quiz-topics`,
 
   // Admin - Questions
   ADMIN_QUESTIONS: (topic) => `${AUTH_MINI_BASE}/admin/questions/${topic}`,
