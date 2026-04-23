@@ -91,6 +91,7 @@ const AuthSuccess = () => {
         localStorage.setItem("token_type", token_type || "bearer");
         localStorage.setItem("user_role", user_role || "USER");
         localStorage.setItem("token_expiration", expirationTime.toString());
+        sessionStorage.setItem("check_rating", "true");
         window.history.replaceState({}, document.title, "/auth/success");
         setSuccessMessage("Đăng nhập thành công!");
         setLoading(false);
