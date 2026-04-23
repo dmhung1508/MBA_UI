@@ -65,6 +65,11 @@ export const API_ENDPOINTS = {
   // Admin - Logs
   ADMIN_LOGS: `${AUTH_MINI_BASE}/admin/logs`,
 
+  // Ratings / Feedback
+  RATING_SUBMIT: `${AUTH_MINI_BASE}/ratings`,
+  RATING_CHECK: `${AUTH_MINI_BASE}/ratings/check`,
+  ADMIN_RATINGS: `${AUTH_MINI_BASE}/admin/ratings`,
+
   // Teacher
   TEACHER_MY_TOPICS: `${AUTH_MINI_BASE}/teacher/my-topics`,
 

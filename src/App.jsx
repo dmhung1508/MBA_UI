@@ -16,19 +16,39 @@ import UserManager from "./pages/UserManager";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import MessageManager from "./pages/MessageManager";
 import AdminLogs from "./pages/AdminLogs";
+import AdminRatings from "./pages/AdminRatings";
+import RatingPopup from "./components/RatingPopup";
 // import FAQPage from "./pages/FAQPage"
 // import IssuePage from "./pages/IssuePage";
 import { BrowserRouter, Routes, Route, Link, Navigate  } from "react-router-dom";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { API_ENDPOINTS } from './config/api';
 
 function App() {
   useEffect(() => {}, []);
   const [currentPage, SetCurrentPage] = useState("Home");
+  const [showRatingPopup, setShowRatingPopup] = useState(false);
+
+  useEffect(() => {
+    const shouldCheck = sessionStorage.getItem('check_rating');
+    if (!shouldCheck) return;
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    sessionStorage.removeItem('check_rating');
+    fetch(API_ENDPOINTS.RATING_CHECK, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => { if (!data.has_rated) setShowRatingPopup(true); })
+      .catch(() => {});
+  }, []);
+
   return (
     <BrowserRouter basename="/mini"> {/* Thêm basename vào đây */}
       <div className="App">
+        {showRatingPopup && <RatingPopup onClose={() => setShowRatingPopup(false)} />}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/mini" 
@@ -120,13 +140,21 @@ function App() {
               </PrivateRoute>
             } 
           />
-          <Route 
-            path="/logs" 
+          <Route
+            path="/logs"
             element={
               <PrivateRoute>
                 <AdminLogs />
               </PrivateRoute>
-            } 
+            }
+          />
+          <Route
+            path="/ratings"
+            element={
+              <PrivateRoute>
+                <AdminRatings />
+              </PrivateRoute>
+            }
           />
         </Routes>
         
