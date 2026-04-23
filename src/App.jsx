@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useTokenRefresh } from './hooks/useTokenRefresh';
+import RatingPopup from "./components/RatingPopup";
+import { API_ENDPOINTS } from "./config/api";
 
 // Eager load critical pages (HomePage and LoginPage)
 import HomePage from "./pages/HomePage";
@@ -35,8 +37,6 @@ const AdminTickets = lazy(() => import("./pages/AdminTickets"));
 
 // Rating System
 const AdminRatings = lazy(() => import("./pages/AdminRatings"));
-import RatingPopup from "./components/RatingPopup";
-import { API_ENDPOINTS } from "./config/api";
 
 // Loading fallback component
 const LoadingFallback = () => (
