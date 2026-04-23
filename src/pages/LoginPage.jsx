@@ -50,10 +50,10 @@ const Login = () => {
             localStorage.setItem('user_role', user_role);
             localStorage.setItem('token_expiration', expirationTime.toString());
             setSuccessMessage('Đăng nhập thành công!');
-            // Optionally, redirect to a protected route
+            sessionStorage.setItem('check_rating', 'true');
             setTimeout(() => {
                 window.location.href = '/mini/';
-            }, 2000); // Ensure this route exists in your React Router setup
+            }, 2000);
         } catch (err) {
             setError(err.message);
             console.error('Login error:', err);

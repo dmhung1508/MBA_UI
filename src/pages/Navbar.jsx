@@ -301,6 +301,13 @@ const Navbar = () => {
                           >
                             <FaChartBar className="mr-2 text-sm inline" /> Thống kê Giáo viên
                           </a>
+                          <a
+                            href="/mini/ratings"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                            onClick={() => setIsAdminDropdownOpen(false)}
+                          >
+                            <FaStar className="mr-2 text-sm inline" /> Quản lý Đánh giá
+                          </a>
                         </div>
                       </div>
                     )}
@@ -563,6 +570,14 @@ const Navbar = () => {
                           >
                             <FaChartBar className="mr-3 text-sm" />
                             Thống kê Giáo viên
+                          </a>
+                          <a
+                            href="/mini/ratings"
+                            className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            <FaStar className="mr-3 text-sm" />
+                            Quản lý Đánh giá
                           </a>
                         </>
                       )}

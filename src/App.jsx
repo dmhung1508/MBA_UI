@@ -33,6 +33,11 @@ const StudyWithAmi = lazy(() => import('./pages/StudyWithAmi'));
 const MyTickets = lazy(() => import("./pages/MyTickets"));
 const AdminTickets = lazy(() => import("./pages/AdminTickets"));
 
+// Rating System
+const AdminRatings = lazy(() => import("./pages/AdminRatings"));
+import RatingPopup from "./components/RatingPopup";
+import { API_ENDPOINTS } from "./config/api";
+
 // Loading fallback component
 const LoadingFallback = () => (
   <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
@@ -43,13 +48,29 @@ const LoadingFallback = () => (
 function App() {
   useEffect(() => { }, []);
   const [currentPage, SetCurrentPage] = useState("Home");
+  const [showRatingPopup, setShowRatingPopup] = useState(false);
 
   // Monitor user activity and refresh token proactively
   useTokenRefresh();
 
+  useEffect(() => {
+    const shouldCheck = sessionStorage.getItem('check_rating');
+    if (!shouldCheck) return;
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    sessionStorage.removeItem('check_rating');
+    fetch(API_ENDPOINTS.RATING_CHECK, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => { if (!data.has_rated) setShowRatingPopup(true); })
+      .catch(() => {});
+  }, []);
+
   return (
     <BrowserRouter basename="/mini" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}> {/* Thêm basename vào đây */}
       <div className="App">
+        {showRatingPopup && <RatingPopup onClose={() => setShowRatingPopup(false)} />}
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -187,6 +208,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <StudyWithAmi />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/ratings"
+              element={
+                <PrivateRoute>
+                  <AdminRatings />
                 </PrivateRoute>
               }
             />

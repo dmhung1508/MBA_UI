@@ -131,6 +131,11 @@ export const API_ENDPOINTS = {
   ADMIN_TICKET_UPDATE: (ticketId) => `${AUTH_MINI_BASE}/admin/tickets/${ticketId}`,
   ADMIN_TICKET_DELETE: (ticketId) => `${AUTH_MINI_BASE}/admin/tickets/${ticketId}`,
   ADMIN_TICKET_STATS: `${AUTH_MINI_BASE}/admin/tickets/stats`,
+
+  // Ratings / Feedback
+  RATING_SUBMIT: `${AUTH_MINI_BASE}/ratings`,
+  RATING_CHECK: `${AUTH_MINI_BASE}/ratings/check`,
+  ADMIN_RATINGS: `${AUTH_MINI_BASE}/admin/ratings`,
 };
 
 export default API_BASE_URL;
