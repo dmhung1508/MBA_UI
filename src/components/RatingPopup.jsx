@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaStar, FaTimes, FaPaperPlane } from 'react-icons/fa';
+import { FaStar, FaPaperPlane } from 'react-icons/fa';
 import { API_ENDPOINTS } from '../config/api';
 import { toast } from 'react-toastify';
 
@@ -98,23 +98,15 @@ const RatingPopup = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      {/* Backdrop - không cho đóng khi click ngoài */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={(e) => e.stopPropagation()} />
 
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-red-600 to-red-700 rounded-t-2xl">
-          <div>
-            <h2 className="text-xl font-bold text-white">Đánh giá hệ thống MBA Chatbot</h2>
-            <p className="text-red-100 text-sm mt-0.5">Phản hồi của bạn giúp chúng tôi cải thiện hệ thống tốt hơn</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/20 transition-colors"
-          >
-            <FaTimes size={20} />
-          </button>
+        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-red-600 to-red-700 rounded-t-2xl">
+          <h2 className="text-xl font-bold text-white">Đánh giá hệ thống MBA Chatbot</h2>
+          <p className="text-red-100 text-sm mt-0.5">Phản hồi của bạn giúp chúng tôi cải thiện hệ thống tốt hơn</p>
         </div>
 
         {/* Body */}
@@ -169,13 +161,7 @@ const RatingPopup = ({ onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-5 border-t border-gray-100 flex items-center justify-between gap-3 bg-gray-50 rounded-b-2xl">
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            Để sau
-          </button>
+        <div className="p-5 border-t border-gray-100 flex items-center justify-end bg-gray-50 rounded-b-2xl">
           <button
             onClick={handleSubmit}
             disabled={submitting || !allAnswered}

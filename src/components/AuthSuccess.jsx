@@ -97,7 +97,7 @@ const AuthSuccess = () => {
         setLoading(false);
 
         setTimeout(() => {
-          navigate("/");
+          window.location.href = "/mini/";
         }, 800);
       } catch (error) {
         console.error("Unexpected error in auth flow:", error);
