@@ -10,11 +10,11 @@ import {
   FaTrash,
   FaSave,
   FaTimes,
-  FaEye,
   FaExclamationTriangle,
-  FaUpload,
-  FaDatabase,
-  FaFile
+  FaSyncAlt,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaSpinner
 } from 'react-icons/fa';
 
 const AdminDashboard = () => {
@@ -28,6 +28,12 @@ const AdminDashboard = () => {
   const [formData, setFormData] = useState({
     name: '',
     prompt: ''
+  });
+  const [analyticsTopics, setAnalyticsTopics] = useState([]);
+  const [analyticsStatusByTopic, setAnalyticsStatusByTopic] = useState({});
+  const [bulkUpdateState, setBulkUpdateState] = useState({
+    ranking: { running: false, total: 0, completed: 0, success: 0, failed: 0, currentTopic: '' },
+    clusters: { running: false, total: 0, completed: 0, success: 0, failed: 0, currentTopic: '' }
   });
   
   // States for avatar upload
@@ -70,8 +76,38 @@ const AdminDashboard = () => {
           }
         }
       );
-      const data = await response.json();
-      setChatbots(data.chatbots || []);
+      if (!response.ok) {
+        throw new Error(await getApiError(response, 'Không thể tải danh sách chatbot'));
+      }
+      const data = (await parseJsonSafe(response)) || {};
+      const chatbotList = data.chatbots || [];
+      setChatbots(chatbotList);
+      const topicsRaw = chatbotList
+        .map((item) => {
+          const code = String(item?.source || item?.quizTopic || '').trim();
+          const name = String(item?.name || code).trim();
+          if (!code) return null;
+          return { code, name };
+        })
+        .filter(Boolean);
+      const topics = Array.from(new Map(topicsRaw.map((item) => [item.code, item])).values());
+      setAnalyticsTopics(topics);
+      setAnalyticsStatusByTopic((prev) => {
+        const next = { ...prev };
+        topics.forEach((topic) => {
+          if (!next[topic.code]) {
+            next[topic.code] = {
+              ranking: 'idle',
+              clusters: 'idle',
+              rankingMessage: '',
+              clustersMessage: '',
+              rankingUpdatedAt: null,
+              clustersUpdatedAt: null
+            };
+          }
+        });
+        return next;
+      });
     } catch (err) {
       setError('Không thể tải danh sách chatbot');
     } finally {
@@ -137,7 +173,7 @@ const AdminDashboard = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = (await parseJsonSafe(response)) || {};
         throw new Error(errorData.detail || 'Không thể tạo chatbot');
       }
 
@@ -174,7 +210,7 @@ const AdminDashboard = () => {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
+          const errorData = (await parseJsonSafe(response)) || {};
           throw new Error(errorData.detail || 'Không thể cập nhật chatbot');
         }
       } else {
@@ -195,7 +231,7 @@ const AdminDashboard = () => {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
+          const errorData = (await parseJsonSafe(response)) || {};
           throw new Error(errorData.detail || 'Không thể cập nhật chatbot');
         }
       }
@@ -216,7 +252,7 @@ const AdminDashboard = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = (await parseJsonSafe(response)) || {};
         throw new Error(errorData.detail || 'Không thể xóa chatbot');
       }
 
@@ -276,6 +312,198 @@ const AdminDashboard = () => {
   const clearMessages = () => {
     setError('');
     setSuccess('');
+  };
+
+  const parseJsonSafe = async (response) => {
+    try {
+      const text = await response.text();
+      if (!text) return null;
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  };
+
+  const getApiError = async (response, fallbackMessage) => {
+    const data = await parseJsonSafe(response);
+    return data?.detail || data?.message || fallbackMessage;
+  };
+
+  const updateTopicStatus = (topicCode, type, patch) => {
+    setAnalyticsStatusByTopic((prev) => {
+      const current = prev[topicCode] || {
+        ranking: 'idle',
+        clusters: 'idle',
+        rankingMessage: '',
+        clustersMessage: '',
+        rankingUpdatedAt: null,
+        clustersUpdatedAt: null
+      };
+      return {
+        ...prev,
+        [topicCode]: {
+          ...current,
+          ...patch,
+          [type]: patch[type] || current[type]
+        }
+      };
+    });
+  };
+
+  const refreshTopicAnalytics = async (topicCode, type) => {
+    const token = localStorage.getItem('access_token');
+    const endpoint =
+      type === 'ranking'
+        ? API_ENDPOINTS.TEACHER_STUDENT_RANKING(topicCode, true)
+        : API_ENDPOINTS.TEACHER_QUESTION_CLUSTERS(topicCode, true);
+
+    updateTopicStatus(topicCode, type, {
+      [type]: 'running',
+      [`${type}Message`]: 'Đang cập nhật...'
+    });
+
+    const response = await fetch(endpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      const msg = await getApiError(
+        response,
+        type === 'ranking'
+          ? 'Không thể cập nhật xếp hạng sinh viên'
+          : 'Không thể cập nhật cụm câu hỏi'
+      );
+      updateTopicStatus(topicCode, type, {
+        [type]: 'error',
+        [`${type}Message`]: msg
+      });
+      return false;
+    }
+
+    const payload = await parseJsonSafe(response);
+    const updatedAt = payload?.updated_at || new Date().toISOString();
+
+    updateTopicStatus(topicCode, type, {
+      [type]: 'success',
+      [`${type}Message`]: 'Đã cập nhật',
+      [`${type}UpdatedAt`]: updatedAt
+    });
+    return true;
+  };
+
+  const runBulkRefresh = async (type) => {
+    if (!analyticsTopics.length) {
+      setError('Chưa có môn học nào để cập nhật.');
+      return;
+    }
+    const stateKey = type === 'ranking' ? 'ranking' : 'clusters';
+    setBulkUpdateState((prev) => ({
+      ...prev,
+      [stateKey]: {
+        running: true,
+        total: analyticsTopics.length,
+        completed: 0,
+        success: 0,
+        failed: 0,
+        currentTopic: ''
+      }
+    }));
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (let i = 0; i < analyticsTopics.length; i += 1) {
+      const topic = analyticsTopics[i];
+      setBulkUpdateState((prev) => ({
+        ...prev,
+        [stateKey]: {
+          ...prev[stateKey],
+          currentTopic: topic.code
+        }
+      }));
+
+      const ok = await refreshTopicAnalytics(topic.code, type);
+      if (ok) successCount += 1;
+      else failedCount += 1;
+
+      setBulkUpdateState((prev) => ({
+        ...prev,
+        [stateKey]: {
+          ...prev[stateKey],
+          completed: i + 1,
+          success: successCount,
+          failed: failedCount
+        }
+      }));
+    }
+
+    setBulkUpdateState((prev) => ({
+      ...prev,
+      [stateKey]: {
+        ...prev[stateKey],
+        running: false,
+        currentTopic: ''
+      }
+    }));
+
+    if (failedCount > 0) {
+      setError(
+        `Hoàn tất cập nhật ${type === 'ranking' ? 'xếp hạng' : 'cụm câu hỏi'}: ${successCount} thành công, ${failedCount} lỗi.`
+      );
+    } else {
+      setSuccess(
+        `Đã cập nhật xong ${type === 'ranking' ? 'xếp hạng sinh viên' : 'cụm câu hỏi'} cho toàn bộ môn học.`
+      );
+    }
+  };
+
+  const renderStatusBadge = (status, message) => {
+    if (status === 'running') {
+      return (
+        <span className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+          <FaSpinner className="mr-1 animate-spin" />
+          {message || 'Đang cập nhật'}
+        </span>
+      );
+    }
+    if (status === 'success') {
+      return (
+        <span className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+          <FaCheckCircle className="mr-1" />
+          {message || 'Đã cập nhật'}
+        </span>
+      );
+    }
+    if (status === 'error') {
+      return (
+        <span className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">
+          <FaTimesCircle className="mr-1" />
+          {message || 'Lỗi cập nhật'}
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+        Chưa cập nhật
+      </span>
+    );
+  };
+
+  const formatUpdatedAt = (rawValue) => {
+    if (!rawValue) return '';
+    const dt = new Date(rawValue);
+    if (Number.isNaN(dt.getTime())) return '';
+    return dt.toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
   };
 
 
@@ -349,7 +577,7 @@ const AdminDashboard = () => {
 
       <div className="container mx-auto px-4 py-8 flex-1">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div id="student-analytics-management" className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
@@ -367,6 +595,135 @@ const AdminDashboard = () => {
             </button>
           </div>
           
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">Quản lý phân tích sinh viên</h2>
+              <p className="text-sm text-gray-600">
+                Cập nhật dữ liệu phân tích theo từng môn hoặc toàn bộ môn học.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => runBulkRefresh('ranking')}
+                disabled={bulkUpdateState.ranking.running || bulkUpdateState.clusters.running}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-semibold py-2 px-4 rounded-lg flex items-center"
+              >
+                {bulkUpdateState.ranking.running ? (
+                  <FaSpinner className="mr-2 animate-spin" />
+                ) : (
+                  <FaSyncAlt className="mr-2" />
+                )}
+                Cập nhật xếp hạng sinh viên
+              </button>
+              <button
+                onClick={() => runBulkRefresh('clusters')}
+                disabled={bulkUpdateState.ranking.running || bulkUpdateState.clusters.running}
+                className="bg-teal-600 hover:bg-teal-700 disabled:bg-teal-300 text-white font-semibold py-2 px-4 rounded-lg flex items-center"
+              >
+                {bulkUpdateState.clusters.running ? (
+                  <FaSpinner className="mr-2 animate-spin" />
+                ) : (
+                  <FaSyncAlt className="mr-2" />
+                )}
+                Cập nhật cụm câu hỏi
+              </button>
+            </div>
+          </div>
+
+          {(bulkUpdateState.ranking.running || bulkUpdateState.clusters.running) && (
+            <div className="space-y-2 mb-4">
+              {['ranking', 'clusters'].map((kind) => {
+                const state = bulkUpdateState[kind];
+                if (!state.running) return null;
+                const percent = state.total > 0 ? Math.round((state.completed / state.total) * 100) : 0;
+                return (
+                  <div key={kind} className="border rounded-lg p-3 bg-gray-50">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="font-medium text-gray-700">
+                        {kind === 'ranking' ? 'Xếp hạng sinh viên' : 'Cụm câu hỏi'}: {state.completed}/{state.total}
+                      </span>
+                      <span className="text-gray-600">{percent}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-2 bg-indigo-500" style={{ width: `${percent}%` }} />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Đang xử lý môn: <strong>{state.currentTopic || '...'}</strong>
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left bg-gray-50">
+                  <th className="px-4 py-2">Môn học</th>
+                  <th className="px-4 py-2">Xếp hạng sinh viên</th>
+                  <th className="px-4 py-2">Cụm câu hỏi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analyticsTopics.map((topic) => {
+                  const status = analyticsStatusByTopic[topic.code] || {};
+                  return (
+                    <tr key={topic.code} className="border-t">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-gray-800">{topic.code}</div>
+                        <div className="text-xs text-gray-500">{topic.name}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {renderStatusBadge(status.ranking, status.rankingMessage)}
+                          <button
+                            onClick={() => refreshTopicAnalytics(topic.code, 'ranking')}
+                            disabled={status.ranking === 'running' || bulkUpdateState.ranking.running || bulkUpdateState.clusters.running}
+                            className="text-xs bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-2 py-1 rounded"
+                          >
+                            Cập nhật môn này
+                          </button>
+                        </div>
+                        {status.rankingUpdatedAt && (
+                          <div className="text-[11px] text-gray-500 mt-1">
+                            Cập nhật lúc: {formatUpdatedAt(status.rankingUpdatedAt)}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {renderStatusBadge(status.clusters, status.clustersMessage)}
+                          <button
+                            onClick={() => refreshTopicAnalytics(topic.code, 'clusters')}
+                            disabled={status.clusters === 'running' || bulkUpdateState.ranking.running || bulkUpdateState.clusters.running}
+                            className="text-xs bg-teal-600 hover:bg-teal-700 disabled:bg-teal-300 text-white px-2 py-1 rounded"
+                          >
+                            Cập nhật môn này
+                          </button>
+                        </div>
+                        {status.clustersUpdatedAt && (
+                          <div className="text-[11px] text-gray-500 mt-1">
+                            Cập nhật lúc: {formatUpdatedAt(status.clustersUpdatedAt)}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {analyticsTopics.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="px-4 py-6 text-center text-gray-500">
+                      Chưa có môn học để cập nhật phân tích.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Messages */}
@@ -388,12 +745,15 @@ const AdminDashboard = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avatar</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã môn</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prompt</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {chatbots.map((chatbot) => (
+                {chatbots.map((chatbot) => {
+                  const topicCode = chatbot.source || chatbot.quizTopic || '';
+                  return (
                   <tr key={chatbot.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {chatbot.id}
@@ -413,6 +773,9 @@ const AdminDashboard = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {chatbot.name}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {topicCode || '-'}
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
                       <div className="truncate" title={chatbot.prompt}>
                         {chatbot.prompt ? chatbot.prompt.substring(0, 80) + (chatbot.prompt.length > 80 ? '...' : '') : 'Chưa có prompt'}
@@ -420,6 +783,22 @@ const AdminDashboard = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
+                        <button
+                          onClick={() => refreshTopicAnalytics(topicCode, 'ranking')}
+                          disabled={!topicCode || bulkUpdateState.ranking.running || bulkUpdateState.clusters.running}
+                          className="text-indigo-600 hover:text-indigo-900 p-2 rounded hover:bg-indigo-100 disabled:text-indigo-300 disabled:hover:bg-transparent"
+                          title="Cập nhật xếp hạng sinh viên môn này"
+                        >
+                          <FaSyncAlt className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => refreshTopicAnalytics(topicCode, 'clusters')}
+                          disabled={!topicCode || bulkUpdateState.ranking.running || bulkUpdateState.clusters.running}
+                          className="text-teal-600 hover:text-teal-900 p-2 rounded hover:bg-teal-100 disabled:text-teal-300 disabled:hover:bg-transparent"
+                          title="Cập nhật cụm câu hỏi môn này"
+                        >
+                          <FaSyncAlt className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => openEditModal(chatbot)}
                           className="text-blue-600 hover:text-blue-900 p-2 rounded hover:bg-blue-100"
@@ -437,7 +816,7 @@ const AdminDashboard = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>

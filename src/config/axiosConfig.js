@@ -16,6 +16,14 @@ let isRefreshing = false;
 let failedQueue = [];
 const apiBaseUrl = resolveApiBaseUrl();
 
+const clearAuthAndRedirect = () => {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('token_type');
+  localStorage.removeItem('user_role');
+  localStorage.removeItem('token_expiration');
+  window.location.href = '/mini/login';
+};
+
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
     if (error) {
@@ -71,12 +79,20 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        const currentToken = localStorage.getItem('access_token');
+        if (!currentToken) {
+          throw new Error('Missing access token');
+        }
+
         // Call refresh endpoint
         const response = await axios.post(
           `${apiBaseUrl}/auth_mini/refresh`,
           {},
           {
             withCredentials: true, // Send refresh token cookie
+            headers: {
+              Authorization: `Bearer ${currentToken}`,
+            },
           }
         );
 
@@ -99,15 +115,7 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         // Refresh failed - clear auth data and redirect to login
         processQueue(refreshError, null);
-
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('token_type');
-        localStorage.removeItem('user_role');
-        localStorage.removeItem('token_expiration');
-
-        // Redirect to login
-        window.location.href = '/mini/login';
-
+        clearAuthAndRedirect();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

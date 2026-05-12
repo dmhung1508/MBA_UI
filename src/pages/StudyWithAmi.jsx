@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { resolveApiBaseUrl } from "../config/runtimeConfig";
 
 // KHÔNG dùng Navbar chính - trang này có thanh header riêng để tránh chồng chéo
@@ -39,7 +39,10 @@ const StudyWithAmi = () => {
     const [chatbots, setChatbots] = useState([]);
     const [currentUserProfile, setCurrentUserProfile] = useState(null);
 
-    const AMI_URL = "/mini/ami_clone/index.html";
+    const AMI_URL = useMemo(
+        () => `/mini/ami_clone/index.html?v=20260511-1-${Date.now()}`,
+        []
+    );
     const AMI_AVATAR = "/mini/ami-avatar.png";
     const HEADER_H = 48;
     const amiApiBase = resolveAmiApiBase();

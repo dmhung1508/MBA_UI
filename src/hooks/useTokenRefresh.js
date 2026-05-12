@@ -12,12 +12,9 @@ import { resolveApiBaseUrl } from '../config/runtimeConfig';
  * - TH4: Auto-logout after 4 minutes of inactivity
  */
 export const useTokenRefresh = () => {
-  const lastActivityRef = useRef(Date.now());
   const checkIntervalRef = useRef(null);
   const isRefreshingRef = useRef(false);
 
-  const RECENTLY_ACTIVE_THRESHOLD = 30000; // 30 seconds
-  const INACTIVITY_TIMEOUT = 240000; // 4 minutes
   const CHECK_INTERVAL = 5000; // Check every 5 seconds
   const apiBaseUrl = resolveApiBaseUrl();
 
@@ -59,11 +56,18 @@ export const useTokenRefresh = () => {
 
     try {
       isRefreshingRef.current = true;
+      const currentToken = localStorage.getItem('access_token');
+      if (!currentToken) return;
 
       const response = await axios.post(
         `${apiBaseUrl}/auth_mini/refresh`,
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${currentToken}`,
+          },
+        }
       );
 
       const { access_token } = response.data;
@@ -85,7 +89,7 @@ export const useTokenRefresh = () => {
   };
 
   /**
-   * Periodic check for token refresh and inactivity logout
+   * Periodic check for token refresh
    * Runs every 5 seconds to ensure we don't miss the refresh window
    */
   const periodicCheck = () => {
@@ -99,30 +103,14 @@ export const useTokenRefresh = () => {
 
     const now = Date.now();
     const expiresAt = parseInt(tokenExpiration);
-    const lastActivity = lastActivityRef.current;
-    const timeSinceActivity = now - lastActivity;
-    const wasRecentlyActive = timeSinceActivity < RECENTLY_ACTIVE_THRESHOLD;
 
-    // TH4: Check for 4 minutes of inactivity → Force logout
-    if (timeSinceActivity >= INACTIVITY_TIMEOUT) {
-      forceLogout();
-      return;
-    }
-
-    // TH2: Check if token expired/expiring AND user was recently active
+    // Refresh token if expired/expiring soon
     const tokenExpired = now >= expiresAt;
     const tokenExpiresSoon = (expiresAt - now) < 10000; // Less than 10 seconds left
 
-    if (wasRecentlyActive && (tokenExpired || tokenExpiresSoon)) {
+    if (tokenExpired || tokenExpiresSoon) {
       refreshToken();
     }
-  };
-
-  /**
-   * Update last activity timestamp on user interaction
-   */
-  const handleActivity = () => {
-    lastActivityRef.current = Date.now();
   };
 
   useEffect(() => {
@@ -130,22 +118,11 @@ export const useTokenRefresh = () => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    // Activity event listeners - update lastActivity timestamp
-    const events = ['scroll', 'mousemove', 'keydown', 'click', 'touchstart'];
-
-    events.forEach(event => {
-      window.addEventListener(event, handleActivity, { passive: true });
-    });
-
     // Start periodic check every 5 seconds
     checkIntervalRef.current = setInterval(periodicCheck, CHECK_INTERVAL);
 
     // Cleanup
     return () => {
-      events.forEach(event => {
-        window.removeEventListener(event, handleActivity);
-      });
-
       if (checkIntervalRef.current) {
         clearInterval(checkIntervalRef.current);
       }

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Ami Live2D Demo</title>
-    <link rel="stylesheet" href="./ami.css" />
+    <link rel="stylesheet" href="./ami.css?v=20260511-1" />
 
 </head>
 
@@ -42,7 +42,7 @@
           </svg>
         </button>
         <button class="side-icon" data-sidebar-action="debate" onclick="openDrawerPage('debate', true)"
-          aria-label="Thu thach Ami" title="Thử thách Ami">
+          aria-label="Tro choi cung Ami" title="Trò chơi cùng Ami">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
             <path d="M8 21h8M12 17v4M7 4h10c1.7 0 3 1.3 3 3v2c0 2.2-1.8 4-4 4h-8c-2.2 0-4-1.8-4-4V7c0-1.7 1.3-3 3-3Z" />
           </svg>
@@ -115,7 +115,7 @@
                 <path
                   d="M8 21h8M12 17v4M7 4h10c1.7 0 3 1.3 3 3v2c0 2.2-1.8 4-4 4h-8c-2.2 0-4-1.8-4-4V7c0-1.7 1.3-3 3-3Z" />
               </svg>
-              <span style="color:#fbbf24; font-weight:bold;">Tranh biện ngay</span>
+              <span style="color:#fbbf24; font-weight:bold;">Trò chơi cùng Ami</span>
             </button>
             <button class="drawer-action" onclick="openDrawerPage('leaderboard', true)">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
@@ -241,9 +241,29 @@
             </button>
           </div>
           <div class="mini-copy">
-            <p style="text-align: center; color: var(--text-soft); padding-top: 20px;">
-              Tính năng đang trong quá trình phát triển
-            </p>
+            <section class="expr-section">
+              <p class="expr-label">Phong cách Ami</p>
+              <p class="panel-copy" style="margin-bottom:10px;">
+                Chọn cách Ami nói chuyện với bạn. Nội dung học vẫn bám môn, chỉ thay đổi giọng điệu.
+              </p>
+              <div class="option-grid ami-style-grid">
+                <button class="option-button ami-style-option" data-ami-style-option="gentle" onclick="setAmiStyleMode(this.dataset.amiStyleOption)">
+                  Ami dịu dàng
+                </button>
+                <button class="option-button ami-style-option" data-ami-style-option="playful" onclick="setAmiStyleMode(this.dataset.amiStyleOption)">
+                  Ami ngổ ngáo 
+                </button>
+                <button class="option-button ami-style-option" data-ami-style-option="strict" onclick="setAmiStyleMode(this.dataset.amiStyleOption)">
+                  Ami nóng tính áp lực
+                </button>
+                <button class="option-button ami-style-option" data-ami-style-option="ceo" onclick="setAmiStyleMode(this.dataset.amiStyleOption)">
+                  Ami tổng tài bá đạo
+                </button>
+              </div>
+              <p class="panel-copy ami-style-note" id="ami-style-note">
+                Đang dùng: Ami dịu dàng.
+              </p>
+            </section>
           </div>
         </section>
 
@@ -270,10 +290,10 @@
           </div>
         </section>
 
-        <!-- Trang Thử thách Ami -->
+        <!-- Trang Trò chơi cùng Ami -->
         <section class="drawer-page" data-drawer-page="debate">
           <div class="drawer-header">
-            <h2 class="drawer-title" style="color: #fbbf24;">Thử thách Ami</h2>
+            <h2 class="drawer-title" style="color: #fbbf24;">Trò chơi cùng Ami</h2>
             <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
                 <path d="m15 18-6-6 6-6" />
@@ -281,31 +301,48 @@
             </button>
           </div>
           <div class="drawer-scroll">
-            <div class="debate-panel">
-              <span class="panel-kicker panel-kicker--warm">Đấu trí học thuật</span>
-              <h3 class="panel-title">Ami sẽ đưa thử thách, phản biện lại câu trả lời của bạn và chấm điểm cuối cùng</h3>
-              <p class="panel-copy" id="debate-subject-copy">Hãy chọn môn học trước khi bắt đầu để Ami đưa thử thách đúng tài
-                liệu và chấm sát hơn.</p>
-              <div class="debate-time-box">
-                <p class="expr-label">Thời gian cho mỗi lượt phản biện</p>
-                <div class="option-grid debate-time-grid">
-                  <button class="option-button debate-time-option" type="button" data-debate-time-option="2m"
-                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">2 phút</button>
-                  <button class="option-button debate-time-option" type="button" data-debate-time-option="3m"
-                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">3 phút</button>
-                  <button class="option-button debate-time-option" type="button" data-debate-time-option="5m"
-                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">5 phút</button>
-                  <button class="option-button debate-time-option" type="button" data-debate-time-option="unlimited"
-                    onclick="setDebateTimeOption(this.dataset.debateTimeOption)">Không giới hạn</button>
+            <div class="game-mode-layout">
+              <div class="debate-panel game-mode-card game-mode-card--active">
+                <span class="panel-kicker panel-kicker--warm">Chế độ 1 · Có sẵn</span>
+                <h3 class="panel-title">Phản biện nhanh</h3>
+                <p class="panel-copy" id="debate-subject-copy">Hãy chọn môn học trước khi bắt đầu để Ami đưa thử thách đúng tài liệu và chấm sát hơn.</p>
+                <div class="debate-time-box">
+                  <p class="expr-label">Thời gian cho mỗi lượt phản biện</p>
+                  <div class="option-grid debate-time-grid">
+                    <button class="option-button debate-time-option" type="button" data-debate-time-option="2m"
+                      onclick="setDebateTimeOption(this.dataset.debateTimeOption)">2 phút</button>
+                    <button class="option-button debate-time-option" type="button" data-debate-time-option="3m"
+                      onclick="setDebateTimeOption(this.dataset.debateTimeOption)">3 phút</button>
+                    <button class="option-button debate-time-option" type="button" data-debate-time-option="5m"
+                      onclick="setDebateTimeOption(this.dataset.debateTimeOption)">5 phút</button>
+                    <button class="option-button debate-time-option" type="button" data-debate-time-option="unlimited"
+                      onclick="setDebateTimeOption(this.dataset.debateTimeOption)">Không giới hạn</button>
+                  </div>
+                  <p class="panel-copy debate-time-copy" id="debate-time-bonus-copy">
+                    Hoàn thành đủ 3 lượt, không lượt nào dưới 50 điểm và không vượt mốc để nhận thưởng thời gian.
+                  </p>
+                  <div id="debate-live-timer-box" class="debate-live-timer-box">
+                    <p class="debate-live-timer-label">Đếm ngược mỗi lượt</p>
+                    <p id="debate-live-countdown" class="debate-live-countdown">∞</p>
+                    <p id="debate-live-state" class="debate-live-state">Sẵn sàng bắt đầu</p>
+                  </div>
                 </div>
-                <p class="panel-copy debate-time-copy" id="debate-time-bonus-copy">
-                  Hoàn thành đủ 3 lượt, không lượt nào dưới 50 điểm và không vượt mốc để nhận thưởng thời gian.
-                </p>
+                <div class="study-actions">
+                  <button class="hero-btn hero-btn--warm" type="button" onclick="startDebate()">Bắt đầu phản biện nhanh</button>
+                  <button class="hero-btn hero-btn--ghost" type="button" onclick="openDrawerPage('leaderboard', true)">Xem bảng xếp hạng</button>
+                  <button class="hero-btn hero-btn--ghost" type="button" onclick="cancelDebate()">Dừng phiên hiện tại</button>
+                </div>
               </div>
-              <div class="study-actions">
-                <button class="hero-btn hero-btn--warm" type="button" onclick="startDebate()">Bắt đầu thử thách</button>
-                <button class="hero-btn hero-btn--ghost" type="button" onclick="openDrawerPage('leaderboard', true)">Xem bảng xếp hạng</button>
-                <button class="hero-btn hero-btn--ghost" type="button" onclick="cancelDebate()">Dừng thử thách Ami</button>
+
+              <div class="debate-panel game-mode-card game-mode-card--coming">
+                <span class="panel-kicker">Chế độ 2 · Sắp ra mắt</span>
+                <h3 class="panel-title">Tranh biện đến cùng</h3>
+                <p class="panel-copy">Ami sẽ đi sâu nhiều vòng, bám luận điểm đến cùng, theo dõi điểm mạnh/điểm yếu lập luận của bạn theo từng bước.</p>
+                <div class="coming-soon-box">
+                  <p class="coming-soon-title">Sắp mở trong bản cập nhật tiếp theo</p>
+                  <p class="coming-soon-copy">Bạn có thể dùng <strong>Phản biện nhanh</strong> ngay bây giờ để luyện phản xạ và tốc độ lập luận.</p>
+                </div>
+                <button class="hero-btn hero-btn--ghost is-disabled" type="button" disabled>Sắp ra mắt</button>
               </div>
             </div>
           </div>
@@ -318,6 +355,14 @@
               <button class="history-new-session-btn" type="button" onclick="newConversation()" aria-label="Tạo session mới" title="Tạo session mới">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke="currentColor">
                   <path d="M12 5v14M5 12h14" />
+                </svg>
+              </button>
+              <button class="history-new-session-btn history-delete-btn" type="button" onclick="clearAmiChatHistory()" aria-label="Xóa lịch sử chat Ami" title="Xóa lịch sử chat Ami">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke="currentColor">
+                  <path d="M4 7h16" />
+                  <path d="M9 7V5h6v2" />
+                  <path d="M7 7l1 12h8l1-12" />
+                  <path d="M10 11v5M14 11v5" />
                 </svg>
               </button>
               <button class="drawer-close" onclick="openDrawerPage('home', true)" aria-label="Ve trang chat">
@@ -373,6 +418,7 @@
           <span id="chat-shell-subtitle">Chọn môn học để bắt đầu</span>
         </div>
         <div class="chat-shell-controls">
+          <span id="chat-shell-debate-countdown" class="chat-shell-debate-countdown">⏱ 00:00</span>
           <button id="chat-shell-collapse-btn" class="shell-action-btn" type="button"
             aria-label="An phan mon hoc" title="Ẩn/hiện phần môn học"
             onclick="toggleShellPanels(); event.stopPropagation();" onpointerdown="event.stopPropagation()">
@@ -382,6 +428,34 @@
             aria-label="An hien khung chat" title="Ẩn/hiện khung chat"
             onclick="toggleChatShellVisibility(); event.stopPropagation();" onpointerdown="event.stopPropagation()">
             <span id="chat-shell-minimize-icon">▾</span>
+          </button>
+        </div>
+      </div>
+      <div id="chat-shell-style-bar" class="chat-shell-style-bar">
+        <div class="chat-shell-style-head">
+          <strong>Phong cách Ami</strong>
+          <span>Chọn tính cách của Ami khi đồng hành cùng bạn</span>
+        </div>
+        <div class="chat-shell-style-cards">
+          <button class="chat-style-card" data-ami-style-card="gentle" onclick="setAmiStyleMode(this.dataset.amiStyleCard, { showStatus: false })">
+            <span class="chat-style-card-icon">😇</span>
+            <span class="chat-style-card-title">Dịu dàng</span>
+            <span class="chat-style-card-desc">Ấm áp, kiên nhẫn, giải thích từng bước</span>
+          </button>
+          <button class="chat-style-card" data-ami-style-card="playful" onclick="setAmiStyleMode(this.dataset.amiStyleCard, { showStatus: false })">
+            <span class="chat-style-card-icon">😎</span>
+            <span class="chat-style-card-title">Ngổ ngáo</span>
+            <span class="chat-style-card-desc">Cộc lốc, cà khịa nhẹ, dùng icon đúng chất</span>
+          </button>
+          <button class="chat-style-card" data-ami-style-card="strict" onclick="setAmiStyleMode(this.dataset.amiStyleCard, { showStatus: false })">
+            <span class="chat-style-card-icon">🔥</span>
+            <span class="chat-style-card-title">Nóng tính áp lực</span>
+            <span class="chat-style-card-desc">Khó tính, ép lập luận, icon pressure/combat</span>
+          </button>
+          <button class="chat-style-card" data-ami-style-card="ceo" onclick="setAmiStyleMode(this.dataset.amiStyleCard, { showStatus: false })">
+            <span class="chat-style-card-icon">👑</span>
+            <span class="chat-style-card-title">Tổng tài bá đạo</span>
+            <span class="chat-style-card-desc">Lạnh lùng command, vibe đại tiểu thư tổng tài</span>
           </button>
         </div>
       </div>
@@ -424,7 +498,7 @@
       </div>
       <div id="debate-header" class="debate-header">
         <div class="debate-heading">
-          <span class="debate-badge">Thử thách Ami</span>
+          <span class="debate-badge">Phản biện nhanh</span>
           <span id="debate-time-note" class="debate-meta">Chọn mốc thời gian trước khi bắt đầu</span>
         </div>
         <div class="debate-pill-group">
@@ -501,7 +575,7 @@
   <script src="./public/libs/live2dcubismcore.min.js"></script>
   <script src="./public/libs/pixi-live2d-display-cubism4.min.js"></script>
 
-    <script src="./ami.js"></script>
+    <script src="./ami.js?v=20260511-1"></script>
 </body>
 
 </html>

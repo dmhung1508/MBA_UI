@@ -253,6 +253,13 @@ const Navbar = () => {
                             <FaUserShield className="mr-2 text-sm inline" /> Quản lý Chatbot
                           </a>
                           <a
+                            href="/mini/admin#student-analytics-management"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                            onClick={() => setIsAdminDropdownOpen(false)}
+                          >
+                            <FaChartBar className="mr-2 text-sm inline" /> Quản lý phân tích sinh viên
+                          </a>
+                          <a
                             href="/mini/sources"
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
@@ -514,6 +521,14 @@ const Navbar = () => {
                           >
                             <FaUserShield className="mr-3 text-sm" />
                             Quản lý Chatbot
+                          </a>
+                          <a
+                            href="/mini/admin#student-analytics-management"
+                            className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            <FaChartBar className="mr-3 text-sm" />
+                            Quản lý phân tích sinh viên
                           </a>
                           <a
                             href="/mini/sources"

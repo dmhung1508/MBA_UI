@@ -14,7 +14,8 @@ import {
   FaExclamationTriangle,
   FaEdit,
   FaComments,
-  FaClipboardList
+  FaClipboardList,
+  FaChartPie
 } from 'react-icons/fa';
 
 const TeacherDashboard = () => {
@@ -265,6 +266,17 @@ const TeacherDashboard = () => {
                 <FaComments className="w-8 h-8 text-cyan-600 mb-2 mx-auto" />
                 <h4 className="font-medium text-gray-900">Đánh Giá Vấn Đáp</h4>
                 <p className="text-sm text-gray-600">Xem và chấm điểm câu trả lời</p>
+              </div>
+            </a>
+
+            <a
+              href="/mini/teacher-analytics"
+              className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-pink-300"
+            >
+              <div className="text-center">
+                <FaChartPie className="w-8 h-8 text-pink-600 mb-2 mx-auto" />
+                <h4 className="font-medium text-gray-900">Phân tích sinh viên</h4>
+                <p className="text-sm text-gray-600">Xem xếp hạng và gom cụm câu hỏi</p>
               </div>
             </a>
 

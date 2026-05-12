@@ -41,6 +41,15 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
   }, [source]);
 
   const fetchFileMetadata = async () => {
+    const sid = (source && String(source).trim()) || '';
+    if (!sid) {
+      setLoading(false);
+      setError('');
+      setMetadata({ files: [], total_files: 0 });
+      setFiles([]);
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
@@ -49,12 +58,29 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
         'accept': 'application/json'
       });
 
-      const response = await fetch(API_ENDPOINTS.FILE_METADATA(source), {
+      const response = await fetch(API_ENDPOINTS.FILE_METADATA(sid), {
         method: 'GET',
         headers: headers
       });
 
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch {
+        payload = null;
+      }
+
       if (!response.ok) {
+        const detail = payload?.detail || payload?.message || '';
+
+        if (response.status === 401 || detail.includes('Could not validate credentials')) {
+          setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+          setMetadata({ files: [], total_files: 0 });
+          setFiles([]);
+          setLoading(false);
+          return;
+        }
+
         // Nếu lỗi 404, chỉ để trống danh sách file (chưa có file)
         if (response.status === 404) {
           setMetadata({ files: [], total_files: 0 });
@@ -63,30 +89,26 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
           return;
         }
 
-        // Parse error message để kiểm tra lỗi thư mục không tồn tại
-        try {
-          const errorData = await response.json();
-          if (errorData.detail && errorData.detail.includes('không tồn tại')) {
-            // Thư mục chưa được tạo, không hiển thị lỗi
-            setMetadata({ files: [], total_files: 0 });
-            setFiles([]);
-            setLoading(false);
-            return;
-          }
-        } catch (e) {
-          // Ignore JSON parse errors
+        if (detail && detail.includes('không tồn tại')) {
+          // Thư mục chưa được tạo, không hiển thị lỗi
+          setMetadata({ files: [], total_files: 0 });
+          setFiles([]);
+          setLoading(false);
+          return;
         }
 
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(detail || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = payload || {};
+      if (!data?.metadata || !Array.isArray(data.metadata.files)) {
+        throw new Error('Dữ liệu metadata không hợp lệ từ máy chủ');
+      }
       setMetadata(data.metadata);
       setFiles(data.metadata.files || []);
     } catch (err) {
       console.error('Error fetching metadata:', err);
-
-      // Không hiển thị lỗi, chỉ để trống danh sách file (hiển thị "Chưa có file nào")
+      setError(err.message || 'Không thể tải metadata file');
       setMetadata({ files: [], total_files: 0 });
       setFiles([]);
     } finally {
@@ -273,8 +295,13 @@ Có thể do:
   };
 
   const handleUploadSuccess = () => {
-    fetchFileMetadata();
     setShowUploader(false);
+    fetchFileMetadata();
+    // Upload đi qua RabbitMQ: MBA API xử lý sau vài giây — làm mới thêm vài lần
+    const delays = [2000, 5000, 12000];
+    delays.forEach((ms) => {
+      setTimeout(() => fetchFileMetadata(), ms);
+    });
   };
 
   const deleteFile = async (filename) => {

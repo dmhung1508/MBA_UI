@@ -17,7 +17,9 @@ export default defineConfig(({ mode }) => {
         port: 24679,
         host: 'localhost'
       },
-      allowedHosts: ['mba.ptit.edu.vn', 'mini.dinhmanhhung.net'],
+      // Allow serving behind arbitrary reverse-proxy domains.
+      // This prevents host-header blocks when running through custom domains.
+      allowedHosts: true,
       // Local dev proxy: route same-origin requests to backend services.
       proxy: {
         '/auth_mini': {

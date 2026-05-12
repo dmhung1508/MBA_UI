@@ -78,6 +78,11 @@ export const API_ENDPOINTS = {
   TEACHER_QUIZ_HISTORY: `${AUTH_MINI_BASE}/teacher/quiz-history`,
   TEACHER_ACTIVITY_STATS: `${AUTH_MINI_BASE}/admin/teacher-stats`,
   TEACHER_ACTIVITY_STATS_EXPORT: `${AUTH_MINI_BASE}/admin/teacher-stats/export`,
+  
+  // Analytics
+  TEACHER_STUDENT_RANKING: (topic, forceRefresh = false) => `${AUTH_MINI_BASE}/teacher/analytics/student-ranking?topic=${encodeURIComponent(topic)}${forceRefresh ? '&force_refresh=true' : ''}`,
+  TEACHER_USER_QUESTIONS: (username, topic) => `${AUTH_MINI_BASE}/teacher/analytics/user-questions?username=${encodeURIComponent(username)}&topic=${encodeURIComponent(topic)}`,
+  TEACHER_QUESTION_CLUSTERS: (topic, forceRefresh = false) => `${AUTH_MINI_BASE}/teacher/analytics/question-clusters?topic=${encodeURIComponent(topic)}${forceRefresh ? '&force_refresh=true' : ''}`,
 
   // AI Q&A (Vấn đáp với AI)
   AI_QA_RANDOM_QUESTION: (topic) => `${AUTH_MINI_BASE}/ai-qa/random-question?topic=${topic}`,

@@ -13,6 +13,16 @@ const Login = () => {
     const navigate = useNavigate(); // Hook for navigation
     const [successMessage, setSuccessMessage] = useState('');
 
+    const parseJsonSafe = async (response) => {
+        try {
+            const text = await response.text();
+            if (!text) return null;
+            return JSON.parse(text);
+        } catch {
+            return null;
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(''); // Reset error state
@@ -34,12 +44,15 @@ const Login = () => {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Login failed');
+                const errorData = await parseJsonSafe(response);
+                throw new Error(errorData?.detail || errorData?.message || 'Đăng nhập thất bại');
             }
 
-            const data = await response.json();
+            const data = (await parseJsonSafe(response)) || {};
             const { access_token, token_type, user_role } = data;
+            if (!access_token || !token_type) {
+                throw new Error('Phản hồi đăng nhập không hợp lệ từ máy chủ');
+            }
 
             // Tính thời gian hết hạn: 30 phút (access token lifetime)
             const expirationTime = new Date().getTime() + (30 * 60 * 1000); // 30 minutes in milliseconds

@@ -24,6 +24,7 @@ const UserManager = lazy(() => import("./pages/UserManager"));
 const TeacherDashboard = lazy(() => import("./pages/TeacherDashboard"));
 const TeacherQuizHistory = lazy(() => import("./pages/TeacherQuizHistory"));
 const TeacherStats = lazy(() => import("./pages/TeacherStats"));
+const TeacherAnalytics = lazy(() => import("./pages/TeacherAnalytics"));
 const MessageManager = lazy(() => import("./pages/MessageManager"));
 const AdminLogs = lazy(() => import("./pages/AdminLogs"));
 const AuthSuccess = lazy(() => import('./components/AuthSuccess.jsx'));
@@ -160,6 +161,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <TeacherDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/teacher-analytics"
+              element={
+                <PrivateRoute>
+                  <TeacherAnalytics />
                 </PrivateRoute>
               }
             />
@@ -308,6 +317,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <TeacherDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/teacher-analytics"
+              element={
+                <PrivateRoute>
+                  <TeacherAnalytics />
                 </PrivateRoute>
               }
             />

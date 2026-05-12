@@ -631,12 +631,22 @@ const QuestionManager = () => {
         body: formData
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Không thể upload file Excel');
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch {
+        payload = null;
       }
 
-      const result = await response.json();
+      if (!response.ok) {
+        const detail = payload?.detail || payload?.message || '';
+        if (response.status === 401 || detail.includes('Could not validate credentials')) {
+          throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        }
+        throw new Error(detail || 'Không thể upload file Excel');
+      }
+
+      const result = payload || {};
       toast.success(`✅ Đã upload thành công ${result.created_count || 'nhiều'} câu hỏi từ Excel!`, { position: 'top-right' });
 
       // Refresh appropriate data based on current mode

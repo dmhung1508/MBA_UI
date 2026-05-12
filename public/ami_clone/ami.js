@@ -83,6 +83,20 @@
     let amiCurrentSessionId = "";
     let amiHistoryLoading = false;
     let amiHistoryBootstrapped = false;
+    const AMI_STYLE_STORAGE_KEY = "ami-style-mode";
+    const AMI_STYLE_LABELS = {
+      gentle: "Ami dịu dàng",
+      playful: "Ami ngổ ngáo mày-tao",
+      strict: "Ami nóng tính áp lực",
+      ceo: "Ami tổng tài bá đạo"
+    };
+    const AMI_STYLE_NOTES = {
+      gentle: "Dịu dàng: ấm áp, kiên nhẫn, giải thích rõ từng bước.",
+      playful: "Ngổ ngáo: xưng hô mày-tao, cộc lốc, cà khịa nhẹ và dùng icon đúng chất.",
+      strict: "Nóng tính: khó tính, tạo pressure, ép reasoning và dùng icon theo cấp độ.",
+      ceo: "Tổng tài: lạnh lùng command, áp đảo nhẹ, vibe đại tiểu thư tổng tài."
+    };
+    let amiStyleMode = "gentle";
     let chatShellPanelsCollapsed = false;
     let chatShellMinimized = false;
     let chatShellHidden = false;
@@ -104,7 +118,59 @@
     let fitModelTimeout = 0;
 
     function isCompactViewport() {
-      return window.innerWidth <= 900;
+      return window.innerWidth <= 640;
+    }
+
+    function normalizeAmiStyleMode(value) {
+      const mode = String(value || "").trim().toLowerCase();
+      return Object.prototype.hasOwnProperty.call(AMI_STYLE_LABELS, mode) ? mode : "gentle";
+    }
+
+    function getAmiStyleLabel(mode = amiStyleMode) {
+      const normalized = normalizeAmiStyleMode(mode);
+      return AMI_STYLE_LABELS[normalized] || AMI_STYLE_LABELS.gentle;
+    }
+
+    function getAmiStyleNote(mode = amiStyleMode) {
+      const normalized = normalizeAmiStyleMode(mode);
+      return AMI_STYLE_NOTES[normalized] || AMI_STYLE_NOTES.gentle;
+    }
+
+    function updateAmiStyleUi() {
+      document.querySelectorAll("[data-ami-style-option]").forEach((button) => {
+        const active = normalizeAmiStyleMode(button.dataset.amiStyleOption) === amiStyleMode;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+
+      document.querySelectorAll("[data-ami-style-card], [data-ami-style-chip]").forEach((button) => {
+        const styleValue = button.dataset.amiStyleCard || button.dataset.amiStyleChip;
+        const active = normalizeAmiStyleMode(styleValue) === amiStyleMode;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+
+      const note = document.getElementById("ami-style-note");
+      if (note) {
+        note.textContent = getAmiStyleNote();
+      }
+    }
+
+    function setAmiStyleMode(mode, options = {}) {
+      const { showStatus = true, resetSessionOnChange = false } = options;
+      const previousMode = amiStyleMode;
+      amiStyleMode = normalizeAmiStyleMode(mode);
+      localStorage.setItem(AMI_STYLE_STORAGE_KEY, amiStyleMode);
+      updateAmiStyleUi();
+      const changed = previousMode !== amiStyleMode;
+      if (changed && resetSessionOnChange && (messages.length > 0 || amiCurrentSessionId)) {
+        newConversation();
+      }
+      if (showStatus) {
+        status(changed
+          ? `Đã chuyển phong cách sang: ${getAmiStyleLabel()}.`
+          : `Đã chuyển phong cách sang: ${getAmiStyleLabel()}`);
+      }
     }
 
     function sanitizeStatusMessage(msg) {
@@ -385,6 +451,10 @@
     function updateDebateTimerDisplay() {
       const timerEl = document.getElementById("debate-timer-indicator");
       const noteEl = document.getElementById("debate-time-note");
+      const liveTimerEl = document.getElementById("debate-live-countdown");
+      const liveStateEl = document.getElementById("debate-live-state");
+      const liveBoxEl = document.getElementById("debate-live-timer-box");
+      const shellCountdownEl = document.getElementById("chat-shell-debate-countdown");
       const config = getDebateTimeConfig();
 
       if (noteEl) {
@@ -399,26 +469,53 @@
         }
       }
 
-      if (!timerEl) return;
-
-      timerEl.classList.toggle("is-expired", Boolean(debateTimerExpired));
-      if (config.seconds <= 0) {
-        timerEl.textContent = "∞";
-        return;
-      }
-
-      if (!isDebateMode && debateTurnRemainingSeconds <= 0) {
-        timerEl.textContent = formatCountdown(config.seconds);
-        return;
-      }
-
-      timerEl.textContent = formatCountdown(
+      const displayText = config.seconds <= 0
+        ? "∞"
+        : formatCountdown(
         debateTimerExpired
           ? 0
           : Number.isFinite(debateTurnRemainingSeconds)
             ? debateTurnRemainingSeconds
             : config.seconds
       );
+
+      if (timerEl) {
+        timerEl.classList.toggle("is-expired", Boolean(debateTimerExpired));
+        timerEl.textContent = (!isDebateMode && debateTurnRemainingSeconds <= 0 && config.seconds > 0)
+          ? formatCountdown(config.seconds)
+          : displayText;
+      }
+
+      if (liveTimerEl) {
+        liveTimerEl.textContent = (!isDebateMode && debateTurnRemainingSeconds <= 0 && config.seconds > 0)
+          ? formatCountdown(config.seconds)
+          : displayText;
+      }
+
+      if (liveStateEl) {
+        if (isDebateMode) {
+          liveStateEl.textContent = debateTimerExpired
+            ? "Đã hết giờ lượt hiện tại"
+            : `Đang chạy lượt ${Math.max(debateTurn, 1)}/${MAX_DEBATE_TURN}`;
+        } else {
+          liveStateEl.textContent = config.seconds > 0
+            ? `Sẵn sàng • mốc ${config.label} mỗi lượt`
+            : "Sẵn sàng • không giới hạn thời gian";
+        }
+      }
+
+      if (liveBoxEl) {
+        liveBoxEl.classList.toggle("is-running", Boolean(isDebateMode && !debateTimerExpired));
+        liveBoxEl.classList.toggle("is-expired", Boolean(debateTimerExpired));
+      }
+
+      if (shellCountdownEl) {
+        const idleDisplay = config.seconds > 0 ? formatCountdown(config.seconds) : "∞";
+        shellCountdownEl.hidden = false;
+        shellCountdownEl.textContent = `⏱ ${isDebateMode ? displayText : idleDisplay}`;
+        shellCountdownEl.classList.toggle("is-expired", Boolean(isDebateMode && debateTimerExpired));
+        shellCountdownEl.classList.toggle("is-idle", !isDebateMode);
+      }
     }
 
     function updateDebateTimeSelector() {
@@ -813,6 +910,29 @@
       shell.style.maxHeight = "";
     }
 
+    function enforceChatShellPresetSize() {
+      const shell = document.getElementById("chat-shell");
+      if (!shell) return;
+
+      if (isCompactViewport()) {
+        shell.classList.remove("is-floating");
+        shell.style.setProperty("left", "0", "important");
+        shell.style.setProperty("right", "0", "important");
+        shell.style.setProperty("top", "0", "important");
+        shell.style.setProperty("bottom", "0", "important");
+        shell.style.setProperty("width", "auto", "important");
+        shell.style.setProperty("height", "auto", "important");
+      } else {
+        shell.classList.remove("is-floating");
+        shell.style.setProperty("left", "auto", "important");
+        shell.style.setProperty("right", "0", "important");
+        shell.style.setProperty("top", "0", "important");
+        shell.style.setProperty("bottom", "0", "important");
+        shell.style.setProperty("width", "48vw", "important");
+        shell.style.setProperty("height", "auto", "important");
+      }
+    }
+
     function startChatShellDrag(event) {
       if (isCompactViewport() || chatShellMinimized) return;
       const shell = document.getElementById("chat-shell");
@@ -898,6 +1018,17 @@
       }
 
       return `<div class="empty-chat">Bạn đang học môn <strong>${escapeHtml(amiSelectedName || amiSelectedSource)}</strong>. Cứ hỏi Ami bất kỳ điều gì liên quan đến môn này nhé.</div>`;
+    }
+
+    function stripStyleDirective(rawText) {
+      const raw = String(rawText || "");
+      if (!raw) return "";
+      const marker = "[Câu hỏi của người học]";
+      if (raw.includes(marker)) {
+        const tail = raw.split(marker).slice(-1)[0].trim();
+        return tail || raw.trim();
+      }
+      return raw.replace(/^\s*\[Phong cách phản hồi\][\s\S]*?\n{2,}/i, "").trim();
     }
 
     function persistSelectedSubject() {
@@ -1051,7 +1182,7 @@
     function buildMessagesFromAmiHistory(chatHistory) {
       const nextMessages = [];
       for (const entry of chatHistory || []) {
-        const userContent = String(entry?.message || "").trim();
+        const userContent = stripStyleDirective(String(entry?.message || "").trim());
         const assistantContent = String(entry?.response || "").trim();
         const timestamp = entry?.timestamp || entry?.created_at || new Date().toISOString();
 
@@ -1255,7 +1386,10 @@
       return amiChatSessions;
     }
 
-    function resetDebateStateForSession() {
+    function resetDebateStateForSession(force = false) {
+      if (isDebateMode && !force) {
+        return;
+      }
       isDebateMode = false;
       debateTurn = 0;
       debateUserHistory = [];
@@ -1273,12 +1407,18 @@
     async function loadAmiChatSession(sessionId, { openHome = true, silent = false } = {}) {
       const normalizedSessionId = String(sessionId || "").trim();
       if (!normalizedSessionId || !amiToken) return;
+      if (isDebateMode) {
+        if (!silent) {
+          status("Đang trong phiên Phản biện nhanh, hãy dừng phiên trước khi mở lịch sử chat.", "error");
+        }
+        return;
+      }
 
       stopAssistantSpeech();
 
       try {
         const data = await callAmiMbaApi(`/ami/chat_history/session/${encodeURIComponent(normalizedSessionId)}`);
-        resetDebateStateForSession();
+        resetDebateStateForSession(true);
         currentConversationId = null;
         currentExchangeCount = 0;
         setAmiCurrentSession(data.session_id || normalizedSessionId);
@@ -1341,7 +1481,7 @@
       if (amiSelectedSource) {
         if (studyTitle) studyTitle.textContent = `${amiSelectedName} (${amiSelectedSource})`;
         if (studyDescription) {
-          studyDescription.textContent = `Ami đang đồng hành cùng bạn ở môn ${amiSelectedName}. Bạn có thể hỏi bài bình thường hoặc mở Thử thách Ami để luyện phản xạ.`;
+          studyDescription.textContent = `Ami đang đồng hành cùng bạn ở môn ${amiSelectedName}. Bạn có thể hỏi bài bình thường hoặc mở Trò chơi cùng Ami để luyện phản xạ.`;
         }
         if (studyPanel) studyPanel.classList.add("is-selected");
         if (debateCopy) {
@@ -1387,8 +1527,9 @@
         const isUser = msg.role === "user";
         const isPending = !!msg.pending;
         const timeStr = escapeHtml(formatDisplayTime(msg.timestamp));
+        const visibleContent = isUser ? stripStyleDirective(msg.content) : msg.content;
         // Hỗ trợ **bold** markdown đơn giản
-        const contentHtml = escapeHtml(msg.content)
+        const contentHtml = escapeHtml(visibleContent)
           .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
           .replace(/\n/g, "<br>");
 
@@ -1430,7 +1571,7 @@
         nextMessages.push({
           id: `${exchange.exchange_id}-user`,
           role: "user",
-          content: exchange.user_input,
+          content: stripStyleDirective(exchange.user_input),
           timestamp: exchange.created_at
         });
 
@@ -1508,7 +1649,7 @@
     }
 
     function newConversation() {
-      resetDebateStateForSession();
+      resetDebateStateForSession(true);
       currentConversationId = null;
       currentExchangeCount = 0;
       messages = [];
@@ -1519,6 +1660,69 @@
       toggleChatShellVisibility(true);
       openDrawerPage("home", true);
       status("Đã tạo session chat mới");
+    }
+
+    async function clearAmiChatHistory() {
+      if (isDebateMode) {
+        status("Hãy dừng phiên Phản biện nhanh trước khi xóa lịch sử chat.", "error");
+        return;
+      }
+      if (!amiToken) {
+        status("Bạn cần đăng nhập để xóa lịch sử chat.", "error");
+        return;
+      }
+
+      const userCandidates = getAmiUserIdCandidates();
+      if (!userCandidates.length) {
+        status("Ami chưa xác định được tài khoản để xóa lịch sử chat.", "error");
+        return;
+      }
+
+      const confirmText = "Bạn chắc chắn muốn xóa toàn bộ lịch sử chat Ami?";
+      if (!window.confirm(confirmText)) return;
+
+      stopAssistantSpeech();
+      try {
+        let result = null;
+        let lastError = null;
+        for (const candidate of userCandidates) {
+          try {
+            result = await callAmiMbaApi(`/ami/chat_history/${encodeURIComponent(candidate)}`, {
+              method: "DELETE"
+            });
+            if (Number(result?.deleted_count || 0) > 0) {
+              persistAmiHistoryUserId(candidate);
+              if (!amiUserId) amiUserId = candidate;
+              break;
+            }
+          } catch (err) {
+            lastError = err;
+          }
+        }
+        if (!result && lastError) throw lastError;
+        if (!result) result = { deleted_count: 0 };
+
+        amiChatSessions = [];
+        setAmiCurrentSession("");
+        currentConversationId = null;
+        currentExchangeCount = 0;
+        messages = [];
+        ensureAmiCurrentSession(true);
+        renderAmiChatSessions();
+        renderMessages();
+        updateShellHeader();
+        refreshComposerState();
+
+        const deletedCount = Number(result?.deleted_count || 0);
+        status(
+          deletedCount > 0
+            ? `Đã xóa ${deletedCount} tin nhắn lịch sử chat Ami.`
+            : "Không tìm thấy lịch sử chat để xóa."
+        );
+      } catch (error) {
+        console.error(error);
+        status("Ami chưa xóa được lịch sử chat lúc này.", "error");
+      }
     }
 
     async function pollAssistantReply(conversationId, previousExchangeCount) {
@@ -1546,7 +1750,7 @@
     }
 
     async function submitChatMessage(text) {
-      const content = text.trim();
+      const content = stripStyleDirective(text).trim();
       if (!content || isSending) return;
 
       stopAssistantSpeech();
@@ -1582,9 +1786,12 @@
             save: true,
             mode: "ami_study",
             sessionId,
+            style_mode: amiStyleMode,
             metadata: {
               subject_name: amiSelectedName,
-              user_name: amiUserName
+              user_name: amiUserName,
+              style_mode: amiStyleMode,
+              style_label: getAmiStyleLabel()
             }
           };
 
@@ -1913,7 +2120,8 @@
       const time = Number(amiSpeechAudio.currentTime) || 0;
       const primaryBeat = Math.abs(Math.sin(time * 10.6));
       const secondaryBeat = Math.abs(Math.sin(time * 18.4 + 0.9));
-      return clampUnit(0.34 + primaryBeat * 0.5 + secondaryBeat * 0.26);
+      const fallback = clampUnit(primaryBeat * 0.16 + secondaryBeat * 0.1);
+      return fallback < 0.06 ? 0 : fallback;
     }
 
     function getSpeechLipSyncParameterIndex(coreModel, id) {
@@ -2005,7 +2213,7 @@
           return;
         }
 
-        const forcedFloor = amiVoiceSpeaking ? 0.62 : amiVoiceLoading ? 0.18 : 0;
+        const forcedFloor = amiVoiceSpeaking ? 0.04 : amiVoiceLoading ? 0.02 : 0;
         const forcedLevel = Math.max(updateSpeechLipSync(), forcedFloor);
         amiSpeechLipSyncLevel = forcedLevel;
         applySpeechLipSyncToCoreModel(forcedLevel);
@@ -2032,9 +2240,6 @@
 
       lipSyncIds.forEach((id) => {
         applied = setSpeechLipSyncParameter(coreModel, id, nextLevel) || applied;
-        try {
-          coreModel.addParameterValueById(id, nextLevel * 0.12, 0.2);
-        } catch { }
       });
 
       applied = setSpeechLipSyncParameter(coreModel, "ParamMouthOpenY", nextLevel) || applied;
@@ -2046,6 +2251,7 @@
       if (!coreModel) return 0;
 
       let target = 0;
+      let hasAnalyserSignal = false;
       if (amiSpeechAnalyserNode && amiSpeechLipSyncData && amiVoiceSpeaking && amiSpeechAudio && !amiSpeechAudio.paused) {
         try {
           amiSpeechAnalyserNode.getByteTimeDomainData(amiSpeechLipSyncData);
@@ -2055,8 +2261,11 @@
             energy += sample * sample;
           }
           const rms = Math.sqrt(energy / amiSpeechLipSyncData.length);
-          target = clampUnit((rms - 0.002) * 40);
-          if (target < 0.08) {
+          // Noise gate + scale lại để miệng không bị há liên tục ở đoạn gần-im lặng.
+          const noiseGate = 0.02;
+          target = clampUnit((rms - noiseGate) * 18);
+          hasAnalyserSignal = true;
+          if (target < 0.03) {
             target = 0;
           }
         } catch {
@@ -2064,11 +2273,13 @@
         }
       }
 
-      if (amiVoiceSpeaking) {
-        target = Math.max(target, getFallbackSpeechLipSyncLevel(), 0.58);
+      if (amiVoiceSpeaking && !hasAnalyserSignal) {
+        target = Math.max(target, getFallbackSpeechLipSyncLevel());
       }
 
-      const smoothing = target > amiSpeechLipSyncLevel ? 0.92 : 0.56;
+      target = Math.min(target, 0.68);
+
+      const smoothing = target > amiSpeechLipSyncLevel ? 0.55 : 0.18;
       amiSpeechLipSyncLevel += (target - amiSpeechLipSyncLevel) * smoothing;
       if (!amiVoiceSpeaking && amiSpeechLipSyncLevel < 0.015) {
         amiSpeechLipSyncLevel = 0;
@@ -2092,7 +2303,7 @@
           const result = originalInternalUpdate(...args);
           if (isSpeechLipSyncActive()) {
             ensureSpeechLipSyncLoop();
-            amiSpeechLipSyncLevel = Math.max(updateSpeechLipSync(), amiVoiceSpeaking ? 0.62 : 0);
+            amiSpeechLipSyncLevel = updateSpeechLipSync();
           }
           return result;
         };
@@ -2103,9 +2314,9 @@
           const result = originalMotionManagerUpdate(...args);
           if (isSpeechLipSyncActive()) {
             ensureSpeechLipSyncLoop();
-            const forcedLevel = Math.max(updateSpeechLipSync(), amiVoiceSpeaking ? 0.68 : 0.16);
-            amiSpeechLipSyncLevel = forcedLevel;
-            applySpeechLipSyncToCoreModel(forcedLevel);
+            const level = updateSpeechLipSync();
+            amiSpeechLipSyncLevel = level;
+            applySpeechLipSyncToCoreModel(level);
           }
           return result;
         };
@@ -2117,9 +2328,9 @@
           const shouldForceLipSync = isSpeechLipSyncActive();
           if (shouldForceLipSync) {
             ensureSpeechLipSyncLoop();
-            const forcedLevel = Math.max(updateSpeechLipSync(), amiVoiceSpeaking ? 0.72 : 0.18);
-            amiSpeechLipSyncLevel = forcedLevel;
-            if (applySpeechLipSyncToCoreModel(forcedLevel)) {
+            const level = updateSpeechLipSync();
+            amiSpeechLipSyncLevel = level;
+            if (applySpeechLipSyncToCoreModel(level)) {
               try {
                 coreModel.update();
               } catch { }
@@ -2134,9 +2345,9 @@
       if (app?.ticker && !amiSpeechLipSyncTickerAttached) {
         app.ticker.add(() => {
           if (!isSpeechLipSyncActive()) return;
-          const forcedLevel = Math.max(updateSpeechLipSync(), amiVoiceSpeaking ? 0.7 : 0.16);
-          amiSpeechLipSyncLevel = forcedLevel;
-          applySpeechLipSyncToCoreModel(forcedLevel);
+          const level = updateSpeechLipSync();
+          amiSpeechLipSyncLevel = level;
+          applySpeechLipSyncToCoreModel(level);
         });
         amiSpeechLipSyncTickerAttached = true;
       }
@@ -2220,7 +2431,7 @@
         amiSpeechAudio.preload = "auto";
         amiSpeechAudio.onplaying = () => {
           amiVoiceSpeaking = true;
-          amiSpeechLipSyncLevel = Math.max(amiSpeechLipSyncLevel, 0.72);
+          amiSpeechLipSyncLevel = Math.max(amiSpeechLipSyncLevel, 0.08);
           ensureSpeechLipSyncLoop();
           updateSpeechLipSync();
           updateVoiceButtons();
@@ -2234,7 +2445,7 @@
           stopAssistantSpeech();
         };
         await prepareSpeechLipSync(amiSpeechAudio);
-        amiSpeechLipSyncLevel = 0.72;
+        amiSpeechLipSyncLevel = 0.08;
         amiVoiceSpeaking = true;
         ensureSpeechLipSyncLoop();
         updateSpeechLipSync();
@@ -2840,6 +3051,7 @@
     window.addEventListener("resize", () => {
       stopChatShellDrag();
       resetChatShellPosition();
+      enforceChatShellPresetSize();
       toggleDrawer(drawerOpen);
       updateChatHint();
       renderSubjectsList();
@@ -2867,8 +3079,12 @@
 
     updateStudyPanel();
     refreshComposerState();
+    // Ensure shell always re-reads latest CSS size after deployments.
+    resetChatShellPosition();
+    enforceChatShellPresetSize();
     applyChatShellState();
     updateVoiceButtons();
+    setAmiStyleMode(localStorage.getItem(AMI_STYLE_STORAGE_KEY) || "gentle", { showStatus: false, resetSessionOnChange: false });
     setDebateTimeOption("unlimited");
     init();
 
@@ -3047,7 +3263,7 @@
 
       if (wasDebating) {
         newConversation();
-        status("Ami đã tắt Thử thách Ami.");
+        status("Ami đã tắt chế độ Phản biện nhanh.");
       }
 
       if (isCompactViewport()) {
@@ -3059,10 +3275,13 @@
 
     async function startDebate() {
       if (!amiSelectedSource) {
-        status("Chọn môn học trước khi bắt đầu Thử thách Ami nhé.", "error");
+        status("Chọn môn học trước khi bắt đầu Phản biện nhanh nhé.", "error");
         openDrawerPage('subjects', true);
         return;
       }
+
+      // Tạo session mới trước, sau đó mới bật debate mode để tránh bị reset timer/header
+      newConversation();
 
       isDebateMode = true;
       debateTurn = 1;
@@ -3083,7 +3302,6 @@
       updateShellHeader();
       refreshComposerState();
 
-      newConversation();
       messages = [];
       renderMessages();
       if (isCompactViewport()) {
@@ -3106,7 +3324,8 @@
             source: amiSelectedSource,
             subjectName: amiSelectedName,
             userName: amiUserName,
-            timeOption: debateTimeOption
+            timeOption: debateTimeOption,
+            styleMode: amiStyleMode
           }
         }, 1);
 
@@ -3121,14 +3340,20 @@
           timestamp: new Date().toISOString()
         }];
         renderMessages();
+        // Đảm bảo luôn ở mode tranh biện trước khi bật đếm ngược
+        isDebateMode = true;
+        document.getElementById("debate-header").style.display = "flex";
+        updateChatHint();
+        updateShellHeader();
+        refreshComposerState();
         if (!preparedSpeech?.audioBlob) {
           playMotion("Chong_Nanh");
         }
         startDebateTurnTimer();
         status(
           timeConfig.seconds > 0
-            ? `Ami đã mở Thử thách Ami. Mốc bạn chọn là ${timeConfig.label}.`
-            : "Ami đã mở Thử thách Ami."
+            ? `Ami đã mở Phản biện nhanh. Mốc bạn chọn là ${timeConfig.label}.`
+            : "Ami đã mở Phản biện nhanh."
         );
         await playPreparedSpeech(preparedSpeech, { silent: true });
       } catch (error) {
@@ -3143,6 +3368,12 @@
           timestamp: new Date().toISOString()
         }];
         renderMessages();
+        // Đảm bảo luôn ở mode tranh biện trước khi bật đếm ngược
+        isDebateMode = true;
+        document.getElementById("debate-header").style.display = "flex";
+        updateChatHint();
+        updateShellHeader();
+        refreshComposerState();
         if (!preparedSpeech?.audioBlob) {
           playMotion("Chong_Nanh");
         }
@@ -3219,7 +3450,8 @@
               turnScores: debateTurnScores,
               timeOption: debateTimeOption,
               turnDurations: pendingTurnDurations,
-              timedOutTurns: pendingTimedOutTurns
+              timedOutTurns: pendingTimedOutTurns,
+              styleMode: amiStyleMode
             }
           }, 1);
 
@@ -3258,7 +3490,7 @@ ${overallSummary}`, { silent: true });
           if (!preparedSpeech?.audioBlob) {
             playMotion((Number(data.base_score ?? data.score) || 0) >= 75 ? "Happy" : "Angry");
           }
-          status("Ami đã chấm xong toàn bộ Thử thách Ami");
+          status("Ami đã chấm xong toàn bộ vòng Phản biện nhanh");
           await playPreparedSpeech(preparedSpeech, { silent: true });
           await renderLeaderboard();
         } catch (err) {
@@ -3297,7 +3529,8 @@ ${overallSummary}`, { silent: true });
             questionHistory: debateQuestionHistory,
             currentQuestion: debateCurrentQuestion,
             subjectName: amiSelectedName,
-            userName: amiUserName
+            userName: amiUserName,
+            styleMode: amiStyleMode
           }
         }, 1);
 
@@ -3369,7 +3602,8 @@ ${nextQuestion}`, { silent: true });
         toggleVoiceRecording,
         handleVoiceReplay,
         scrollMessagesToTop,
-        handleAmiHistoryButtonClick
+        handleAmiHistoryButtonClick,
+        clearAmiChatHistory
       });
     }
 
