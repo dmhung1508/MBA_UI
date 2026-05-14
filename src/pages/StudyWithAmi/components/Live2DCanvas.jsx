@@ -46,7 +46,6 @@ const Live2DCanvas = forwardRef(function Live2DCanvas(_props, ref) {
       <div
         ref={containerRef}
         className="absolute inset-0 z-[1]"
-        style={{ visibility: ready ? "visible" : "hidden" }}
       />
     </>
   );

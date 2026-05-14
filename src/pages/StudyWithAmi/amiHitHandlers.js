@@ -38,11 +38,13 @@ export function setupHitHandlers(model, view, onActivity) {
   }
 
   const onPointerDown = (e) => {
-    model.tap(e.clientX, e.clientY)
+    const rect = view.getBoundingClientRect()
+    model.tap(e.clientX - rect.left, e.clientY - rect.top)
   }
 
   const onPointerMove = (e) => {
-    const hitAreas = model.hitTest?.(e.clientX, e.clientY) ?? []
+    const rect = view.getBoundingClientRect()
+    const hitAreas = model.hitTest?.(e.clientX - rect.left, e.clientY - rect.top) ?? []
     const isOnHitArea = triggersHitMotion(hitAreas)
     view.style.cursor = isOnHitArea ? 'pointer' : ''
   }
