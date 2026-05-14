@@ -10,8 +10,14 @@
 
     // Khai báo state cho luồng Debate
     let isDebateMode = false;
+    let debateMode = "quick";
     let debateTurn = 0;
     const MAX_DEBATE_TURN = 3;
+    const ENDLESS_DEBATE_API_MAX_TURN = 999;
+    const DEBATE_MODE_LABELS = {
+      quick: "Phản biện nhanh",
+      endless: "Tranh biện đến cùng"
+    };
     let debateUserHistory = [];
     let debateQuestionHistory = [];
     let debateCurrentQuestion = "";
@@ -171,6 +177,27 @@
           ? `Đã chuyển phong cách sang: ${getAmiStyleLabel()}.`
           : `Đã chuyển phong cách sang: ${getAmiStyleLabel()}`);
       }
+    }
+
+    function normalizeDebateMode(mode) {
+      return String(mode || "").trim().toLowerCase() === "endless" ? "endless" : "quick";
+    }
+
+    function getDebateModeLabel(mode = debateMode) {
+      const normalized = normalizeDebateMode(mode);
+      return DEBATE_MODE_LABELS[normalized] || DEBATE_MODE_LABELS.quick;
+    }
+
+    function getDebateTurnLimitLabel(mode = debateMode) {
+      return normalizeDebateMode(mode) === "endless" ? "∞" : String(MAX_DEBATE_TURN);
+    }
+
+    function getDebateApiMaxTurn(mode = debateMode) {
+      return normalizeDebateMode(mode) === "endless" ? ENDLESS_DEBATE_API_MAX_TURN : MAX_DEBATE_TURN;
+    }
+
+    function getDebateTurnText(turn = debateTurn, mode = debateMode) {
+      return `Lượt ${Math.max(Number(turn) || 1, 1)}/${getDebateTurnLimitLabel(mode)}`;
     }
 
     function sanitizeStatusMessage(msg) {
@@ -459,7 +486,9 @@
 
       if (noteEl) {
         if (isDebateMode) {
-          noteEl.textContent = config.seconds > 0
+          noteEl.textContent = debateMode === "endless"
+            ? "Tranh biện đến cùng • thắng khi Ami hết phản biện hợp lệ"
+            : config.seconds > 0
             ? `Mốc ${config.label} • vượt giờ sẽ mất bonus thời gian`
             : "Chế độ không giới hạn thời gian";
         } else {
@@ -496,7 +525,7 @@
         if (isDebateMode) {
           liveStateEl.textContent = debateTimerExpired
             ? "Đã hết giờ lượt hiện tại"
-            : `Đang chạy lượt ${Math.max(debateTurn, 1)}/${MAX_DEBATE_TURN}`;
+            : `Đang chạy ${getDebateTurnText()}`;
         } else {
           liveStateEl.textContent = config.seconds > 0
             ? `Sẵn sàng • mốc ${config.label} mỗi lượt`
@@ -744,6 +773,10 @@
       if (!hint) return;
 
       if (isDebateMode) {
+        if (debateMode === "endless") {
+          hint.textContent = "Bám lý thuyết, khóa chặt lập luận để Ami hết đường phản biện.";
+          return;
+        }
         const config = getDebateTimeConfig();
         hint.textContent = config.seconds > 0
           ? `Trả lời rõ ràng, bám môn học và giữ trong ${formatCountdown(config.seconds)} để còn bonus thời gian.`
@@ -779,7 +812,7 @@
       }
 
       if (isDebateMode) {
-        subtitleEl.textContent = `Lượt ${Math.max(debateTurn, 1)}/${MAX_DEBATE_TURN}`;
+        subtitleEl.textContent = getDebateTurnText();
         return;
       }
 
@@ -993,7 +1026,9 @@
       chatInput.disabled = isSending || lockedByMissingSubject || voiceBusy;
 
       if (isDebateMode) {
-        chatInput.placeholder = "Nhập câu trả lời cho thử thách của Ami...";
+        chatInput.placeholder = debateMode === "endless"
+          ? "Đáp lại Ami bằng lập luận đủ chặt..."
+          : "Nhập câu trả lời cho thử thách của Ami...";
       } else if (amiSelectedSource) {
         chatInput.placeholder = `Hỏi Ami về ${amiSelectedName}...`;
       } else {
@@ -1010,7 +1045,7 @@
 
     function getEmptyChatMarkup() {
       if (isDebateMode) {
-        return '<div class="empty-chat">Ami đang chuẩn bị thử thách cho bạn...</div>';
+        return `<div class="empty-chat">Ami đang chuẩn bị ${escapeHtml(getDebateModeLabel()).toLowerCase()} cho bạn...</div>`;
       }
 
       if (!amiSelectedSource) {
@@ -1391,6 +1426,7 @@
         return;
       }
       isDebateMode = false;
+      debateMode = "quick";
       debateTurn = 0;
       debateUserHistory = [];
       debateQuestionHistory = [];
@@ -1409,7 +1445,7 @@
       if (!normalizedSessionId || !amiToken) return;
       if (isDebateMode) {
         if (!silent) {
-          status("Đang trong phiên Phản biện nhanh, hãy dừng phiên trước khi mở lịch sử chat.", "error");
+          status(`Đang trong phiên ${getDebateModeLabel()}, hãy dừng phiên trước khi mở lịch sử chat.`, "error");
         }
         return;
       }
@@ -1664,7 +1700,7 @@
 
     async function clearAmiChatHistory() {
       if (isDebateMode) {
-        status("Hãy dừng phiên Phản biện nhanh trước khi xóa lịch sử chat.", "error");
+        status(`Hãy dừng phiên ${getDebateModeLabel()} trước khi xóa lịch sử chat.`, "error");
         return;
       }
       if (!amiToken) {
@@ -3247,9 +3283,21 @@
       }
     }
 
+    function updateDebateHeaderDisplay() {
+      const debateHeader = document.getElementById("debate-header");
+      if (!debateHeader) return;
+
+      const badge = debateHeader.querySelector(".debate-badge");
+      const turnIndicator = document.getElementById("debate-turn-indicator");
+      if (badge) badge.textContent = getDebateModeLabel();
+      if (turnIndicator) turnIndicator.textContent = getDebateTurnText();
+    }
+
     function cancelDebate() {
       const wasDebating = isDebateMode;
+      const activeLabel = getDebateModeLabel();
       isDebateMode = false;
+      debateMode = "quick";
       debateTurn = 0;
       debateUserHistory = [];
       debateQuestionHistory = [];
@@ -3263,7 +3311,7 @@
 
       if (wasDebating) {
         newConversation();
-        status("Ami đã tắt chế độ Phản biện nhanh.");
+        status(`Ami đã tắt chế độ ${activeLabel}.`);
       }
 
       if (isCompactViewport()) {
@@ -3274,16 +3322,31 @@
     }
 
     async function startDebate() {
+      return startDebateSession("quick");
+    }
+
+    async function startEndlessDebate() {
+      return startDebateSession("endless");
+    }
+
+    async function startDebateSession(modeVariant = "quick") {
+      const normalizedMode = normalizeDebateMode(modeVariant);
+      const modeLabel = getDebateModeLabel(normalizedMode);
       if (!amiSelectedSource) {
-        status("Chọn môn học trước khi bắt đầu Phản biện nhanh nhé.", "error");
+        status(`Chọn môn học trước khi bắt đầu ${modeLabel} nhé.`, "error");
         openDrawerPage('subjects', true);
         return;
+      }
+
+      if (normalizedMode === "endless") {
+        setDebateTimeOption("unlimited");
       }
 
       // Tạo session mới trước, sau đó mới bật debate mode để tránh bị reset timer/header
       newConversation();
 
       isDebateMode = true;
+      debateMode = normalizedMode;
       debateTurn = 1;
       debateUserHistory = [];
       debateQuestionHistory = [];
@@ -3296,7 +3359,7 @@
       applyChatShellState();
 
       document.getElementById("debate-header").style.display = "flex";
-      document.getElementById("debate-turn-indicator").textContent = `Lượt ${debateTurn}/${MAX_DEBATE_TURN}`;
+      updateDebateHeaderDisplay();
       updateDebateTimerDisplay();
       updateChatHint();
       updateShellHeader();
@@ -3313,7 +3376,9 @@
       setSendingState(true);
       playMotion("Reading");
       const debateSessionUserId = amiUserId || new Date().toISOString();
-      const fallbackScenario = `Tình huống môn **${amiSelectedName}**:\n\nCó người nói rằng kiến thức trong môn này chỉ là lý thuyết và gần như không còn giá trị khi làm việc thực tế. Bạn hãy phản biện lại nhận định đó bằng một lập luận rõ ràng, có ít nhất 1 khái niệm hoặc ví dụ minh họa nhé!`;
+      const fallbackScenario = normalizedMode === "endless"
+        ? `Ami chốt trước trong môn **${amiSelectedName}**:\n\nChỉ hiểu khái niệm rời rạc thì không đủ để xử lý tình huống thực tế. Bạn thử bẻ lại xem: vì sao cách hiểu của bạn mới đúng, và căn cứ lý thuyết nào chống lưng cho nó?`
+        : `Tình huống môn **${amiSelectedName}**:\n\nCó người nói rằng kiến thức trong môn này chỉ là lý thuyết và gần như không còn giá trị khi làm việc thực tế. Bạn hãy phản biện lại nhận định đó bằng một lập luận rõ ràng, có ít nhất 1 khái niệm hoặc ví dụ minh họa nhé!`;
       const timeConfig = getDebateTimeConfig();
 
       try {
@@ -3324,7 +3389,8 @@
             source: amiSelectedSource,
             subjectName: amiSelectedName,
             userName: amiUserName,
-            timeOption: debateTimeOption,
+            timeOption: normalizedMode === "endless" ? "unlimited" : debateTimeOption,
+            debateMode: normalizedMode,
             styleMode: amiStyleMode
           }
         }, 1);
@@ -3342,7 +3408,9 @@
         renderMessages();
         // Đảm bảo luôn ở mode tranh biện trước khi bật đếm ngược
         isDebateMode = true;
+        debateMode = normalizedMode;
         document.getElementById("debate-header").style.display = "flex";
+        updateDebateHeaderDisplay();
         updateChatHint();
         updateShellHeader();
         refreshComposerState();
@@ -3350,11 +3418,13 @@
           playMotion("Chong_Nanh");
         }
         startDebateTurnTimer();
-        status(
-          timeConfig.seconds > 0
+        if (normalizedMode === "endless") {
+          status("Ami đã mở Tranh biện đến cùng.");
+        } else {
+          status(timeConfig.seconds > 0
             ? `Ami đã mở Phản biện nhanh. Mốc bạn chọn là ${timeConfig.label}.`
-            : "Ami đã mở Phản biện nhanh."
-        );
+            : "Ami đã mở Phản biện nhanh.");
+        }
         await playPreparedSpeech(preparedSpeech, { silent: true });
       } catch (error) {
         console.error(error);
@@ -3370,7 +3440,9 @@
         renderMessages();
         // Đảm bảo luôn ở mode tranh biện trước khi bật đếm ngược
         isDebateMode = true;
+        debateMode = normalizedMode;
         document.getElementById("debate-header").style.display = "flex";
+        updateDebateHeaderDisplay();
         updateChatHint();
         updateShellHeader();
         refreshComposerState();
@@ -3378,7 +3450,7 @@
           playMotion("Chong_Nanh");
         }
         startDebateTurnTimer();
-        status("Ami đang dùng đề dự phòng cho lượt thử thách này.");
+        status(`Ami đang dùng đề dự phòng cho ${modeLabel}.`);
         await playPreparedSpeech(preparedSpeech, { silent: true });
       } finally {
         setSendingState(false);
@@ -3387,6 +3459,10 @@
 
     async function handleDebateSubmit(content) {
       const answeredTurn = debateTurn || 1;
+      const activeDebateMode = normalizeDebateMode(debateMode);
+      const isEndlessDebate = activeDebateMode === "endless";
+      const activeDebateMaxTurn = getDebateApiMaxTurn(activeDebateMode);
+      const shouldFinalizeQuickDebate = !isEndlessDebate && answeredTurn >= MAX_DEBATE_TURN;
       const previousAnswerCount = debateUserHistory.length;
       const previousTurnScoreCount = debateTurnScores.length;
       const timerSnapshot = freezeDebateTurnTimer(answeredTurn);
@@ -3398,9 +3474,11 @@
       const pendingMessage = {
         id: `a-${Date.now()}`,
         role: "assistant",
-        content: answeredTurn >= MAX_DEBATE_TURN
+        content: shouldFinalizeQuickDebate
           ? "Ami đang chấm câu cuối và tổng kết cả vòng thử thách cho bạn nha..."
-          : "Ami đang chấm câu này rồi nghĩ tiếp thử thách kế tiếp cho bạn nha...",
+          : isEndlessDebate
+            ? "Ami đang soi lỗ hổng để phản biện tiếp..."
+            : "Ami đang chấm câu này rồi nghĩ tiếp thử thách kế tiếp cho bạn nha...",
         timestamp: new Date().toISOString(),
         pending: true
       };
@@ -3411,6 +3489,7 @@
 
       if (!(amiSelectedSource && amiToken)) {
         isDebateMode = false;
+        debateMode = "quick";
         debateTurn = 0;
         debateUserHistory = [];
         debateQuestionHistory = [];
@@ -3435,7 +3514,7 @@
       setSendingState(true);
       playMotion("Reading");
 
-      if (answeredTurn >= MAX_DEBATE_TURN) {
+      if (shouldFinalizeQuickDebate) {
         try {
           const data = await callAmiMbaApiWithRetry("/ami/debate/evaluate", {
             method: "POST",
@@ -3451,6 +3530,7 @@
               timeOption: debateTimeOption,
               turnDurations: pendingTurnDurations,
               timedOutTurns: pendingTimedOutTurns,
+              debateMode: activeDebateMode,
               styleMode: amiStyleMode
             }
           }, 1);
@@ -3465,6 +3545,7 @@ ${overallSummary}`, { silent: true });
           debateTurnDurations = Array.isArray(data.turn_durations) ? data.turn_durations : pendingTurnDurations;
           debateTimedOutTurns = Array.isArray(data.timed_out_turns) ? data.timed_out_turns : pendingTimedOutTurns;
           isDebateMode = false;
+          debateMode = "quick";
           debateTurn = 0;
           debateUserHistory = [];
           debateQuestionHistory = [];
@@ -3523,13 +3604,14 @@ ${overallSummary}`, { silent: true });
             userId: amiUserId || new Date().toISOString(),
             source: amiSelectedSource,
             turn: answeredTurn,
-            maxTurn: MAX_DEBATE_TURN,
+            maxTurn: activeDebateMaxTurn,
             userAnswer: content,
             history: debateUserHistory,
             questionHistory: debateQuestionHistory,
             currentQuestion: debateCurrentQuestion,
             subjectName: amiSelectedName,
             userName: amiUserName,
+            debateMode: activeDebateMode,
             styleMode: amiStyleMode
           }
         }, 1);
@@ -3537,29 +3619,67 @@ ${overallSummary}`, { silent: true });
         const evaluationMessage = data.evaluation_message || "Ami chưa chấm được rõ ràng cho câu này.";
         const nextQuestion = data.next_question_message || data.next_question || "Bạn thử đào sâu thêm vào khái niệm cốt lõi trong tài liệu nhé.";
         const turnScore = Number(data?.evaluation?.score ?? 0) || 0;
-        const preparedSpeech = await requestSpeechAudio(`${evaluationMessage}
-${nextQuestion}`, { silent: true });
+        const assistantSpeech = isEndlessDebate ? nextQuestion : `${evaluationMessage}
+${nextQuestion}`;
+        const preparedSpeech = await requestSpeechAudio(assistantSpeech, { silent: true });
 
         debateTurnScores.push(turnScore);
         debateTurnDurations = pendingTurnDurations;
         debateTimedOutTurns = pendingTimedOutTurns;
+
+        if (isEndlessDebate && (data.is_conceded || data.is_complete)) {
+          isDebateMode = false;
+          debateMode = "quick";
+          debateTurn = 0;
+          debateUserHistory = [];
+          debateQuestionHistory = [];
+          debateCurrentQuestion = "";
+          resetDebateTimingState();
+          document.getElementById("debate-header").style.display = "none";
+          updateChatHint();
+          updateShellHeader();
+          refreshComposerState();
+          messages = messages.map((message) =>
+            message.id === pendingMessage.id
+              ? { ...message, content: nextQuestion, pending: false }
+              : message
+          );
+          renderMessages();
+          if (!preparedSpeech?.audioBlob) {
+            playMotion("Happy");
+          }
+          status("Bạn đã thắng Ami ở Tranh biện đến cùng.");
+          await playPreparedSpeech(preparedSpeech, { silent: true });
+          return;
+        }
+
         debateCurrentQuestion = nextQuestion;
         debateQuestionHistory.push(nextQuestion);
-        debateTurn = Math.min(MAX_DEBATE_TURN, answeredTurn + 1);
-        document.getElementById("debate-turn-indicator").textContent = `Lượt ${debateTurn}/${MAX_DEBATE_TURN}`;
+        debateTurn = isEndlessDebate
+          ? answeredTurn + 1
+          : Math.min(MAX_DEBATE_TURN, answeredTurn + 1);
+        updateDebateHeaderDisplay();
         startDebateTurnTimer();
 
-        messages = messages.map((message) =>
-          message.id === pendingMessage.id
-            ? { ...message, content: evaluationMessage, pending: false }
-            : message
-        );
-        messages.push({
-          id: `a-${Date.now()}-question`,
-          role: "assistant",
-          content: nextQuestion,
-          timestamp: new Date().toISOString()
-        });
+        if (isEndlessDebate) {
+          messages = messages.map((message) =>
+            message.id === pendingMessage.id
+              ? { ...message, content: nextQuestion, pending: false }
+              : message
+          );
+        } else {
+          messages = messages.map((message) =>
+            message.id === pendingMessage.id
+              ? { ...message, content: evaluationMessage, pending: false }
+              : message
+          );
+          messages.push({
+            id: `a-${Date.now()}-question`,
+            role: "assistant",
+            content: nextQuestion,
+            timestamp: new Date().toISOString()
+          });
+        }
         renderMessages();
         if (!preparedSpeech?.audioBlob) {
           playMotion("Checkin3");
@@ -3591,7 +3711,9 @@ ${nextQuestion}`, { silent: true });
         setExpression,
         playMotion,
         setDebateTimeOption,
+        setAmiStyleMode,
         startDebate,
+        startEndlessDebate,
         cancelDebate,
         toggleShellPanels,
         toggleChatShellVisibility,
@@ -3604,6 +3726,18 @@ ${nextQuestion}`, { silent: true });
         scrollMessagesToTop,
         handleAmiHistoryButtonClick,
         clearAmiChatHistory
+      });
+    }
+
+    function bindDebateStartButtons() {
+      document.querySelectorAll("[data-start-debate-mode]").forEach((button) => {
+        if (button.dataset.debateStartBound === "1") return;
+        button.dataset.debateStartBound = "1";
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          const mode = normalizeDebateMode(button.dataset.startDebateMode);
+          void startDebateSession(mode);
+        });
       });
     }
 
@@ -3638,4 +3772,5 @@ ${nextQuestion}`, { silent: true });
     }
 
     bindAmiGlobalActions();
+    bindDebateStartButtons();
     bindAmiHistoryButton();
