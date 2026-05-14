@@ -2,8 +2,8 @@
 // so facial expressions and motions can never blend them back to default.
 // Uses exponential lerp for smooth transitions matching the original expression fade times.
 const COSTUME_TARGETS = {
-  'Glasses Toggle':    { Param_Glasses: 10, Param_Jacket: 0 },
-  'Jacket Toggle':     { Param_Glasses: 0,  Param_Jacket: 10 },
+  'Glasses Toggle':    { Param_Glasses: 10 },
+  'Jacket Toggle':     { Param_Jacket: 10 },
   'No_Jacket_Glasses': { Param_Glasses: 10, Param_Jacket: 10 },
   'Default':           { Param_Glasses: 0,  Param_Jacket: 0 },
 };
@@ -37,7 +37,8 @@ export function createAmiCostumeController(model) {
 
   return {
     setCostume(key) {
-      target = { ...(COSTUME_TARGETS[key] || { Param_Glasses: 0, Param_Jacket: 0 }) };
+      const patch = COSTUME_TARGETS[key];
+      if (patch) target = { ...target, ...patch };
     },
     dispose() {
       internal.off('beforeModelUpdate', onBeforeModelUpdate);

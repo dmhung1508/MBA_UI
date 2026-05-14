@@ -37,19 +37,12 @@ export function setupHitHandlers(model, view, onActivity) {
     onActivity?.()
   }
 
-  const toCanvas = (e) => {
-    const rect = view.getBoundingClientRect()
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top }
-  }
-
   const onPointerDown = (e) => {
-    const { x, y } = toCanvas(e)
-    model.tap(x, y)
+    model.tap(e.clientX, e.clientY)
   }
 
   const onPointerMove = (e) => {
-    const { x, y } = toCanvas(e)
-    const hitAreas = model.hitTest?.(x, y) ?? []
+    const hitAreas = model.hitTest?.(e.clientX, e.clientY) ?? []
     const isOnHitArea = triggersHitMotion(hitAreas)
     view.style.cursor = isOnHitArea ? 'pointer' : ''
   }
