@@ -182,15 +182,21 @@ export default function useLive2D(containerRef) {
       let dragOffsetX = 0;
       let dragOffsetY = 0;
       const canvas = app.view || app.canvas;
+      const toCanvas = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      };
       const onDragDown = (e) => {
         dragging = true;
-        dragOffsetX = e.clientX - model.x;
-        dragOffsetY = e.clientY - model.y;
+        const { x, y } = toCanvas(e);
+        dragOffsetX = x - model.x;
+        dragOffsetY = y - model.y;
       };
       const onDragMove = (e) => {
         if (!dragging) return;
         manuallyPositionedRef.current = true;
-        model.position.set(e.clientX - dragOffsetX, e.clientY - dragOffsetY);
+        const { x, y } = toCanvas(e);
+        model.position.set(x - dragOffsetX, y - dragOffsetY);
       };
       const onDragUp = () => { dragging = false; };
       const MIN_SCALE = 0.15;

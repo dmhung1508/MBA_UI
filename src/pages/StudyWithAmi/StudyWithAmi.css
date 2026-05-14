@@ -686,6 +686,40 @@
 .voice-bar-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .voice-bar-label { font-size: 13px; font-weight: 700; color: #fca5a5; }
 .voice-bar-hint   { font-size: 11px; color: rgba(255,255,255,0.40); }
+.voice-bar-cancel { flex-shrink:0;width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(239,68,68,0.30);border-radius:8px;background:rgba(239,68,68,0.08);color:#f87171;cursor:pointer;transition:all 0.14s ease; }
+.voice-bar-cancel:hover { background:rgba(239,68,68,0.18);color:#fca5a5; }
+
+/* History items */
+.history-item { display:flex;align-items:center;gap:6px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);margin-bottom:6px; }
+.history-item-btn { width:100%;text-align:left;padding:10px 12px;background:rgba(255,255,255,0.04);color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:3px;transition:background 0.14s ease;min-width:0; }
+.history-item-btn:hover { background:rgba(255,255,255,0.09); }
+.history-item-title { font-size:13px;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.history-item-meta { font-size:10px;color:rgba(255,255,255,0.40); }
+
+/* Markdown bubble */
+.bubble-text--md { font-size:inherit;line-height:1.6; }
+.bubble-text--md p { margin:0 0 8px;line-height:1.6; }
+.bubble-text--md p:last-child { margin-bottom:0; }
+.bubble-text--md strong { font-weight:700; }
+.bubble-text--md em { font-style:italic; }
+.bubble-text--md ul,.bubble-text--md ol { margin:6px 0 6px 18px;padding:0; }
+.bubble-text--md li { margin-bottom:3px; }
+.bubble-text--md code { background:rgba(255,255,255,0.10);border-radius:4px;padding:1px 5px;font-size:0.87em;font-family:monospace; }
+.bubble-text--md pre { background:rgba(0,0,0,0.30);border-radius:8px;padding:10px 12px;overflow-x:auto;margin:8px 0; }
+.bubble-text--md pre code { background:none;padding:0; }
+.bubble-text--md blockquote { border-left:3px solid rgba(255,255,255,0.20);padding-left:10px;margin:6px 0;color:rgba(255,255,255,0.65); }
+.bubble-text--md h1,.bubble-text--md h2,.bubble-text--md h3 { font-weight:700;margin:10px 0 4px; }
+.bubble-text--md a { color:#93c5fd;text-decoration:underline; }
+.bubble-text--md table { border-collapse:collapse;width:100%;margin:8px 0;font-size:13px; }
+.bubble-text--md th,.bubble-text--md td { border:1px solid rgba(255,255,255,0.12);padding:5px 8px; }
+.bubble-text--md th { background:rgba(255,255,255,0.07); }
+
+/* option-button active state */
+.option-button.is-active { background:rgba(255,43,120,0.18);border-color:rgba(255,43,120,0.50);color:#fff; }
+.option-button.is-active:hover { background:rgba(255,43,120,0.25); }
+
+/* Ami style grid — taller cards */
+.ami-style-grid .option-button { height:auto;padding:12px 10px;text-align:center; }
 
 .debate-header { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border-radius:12px;background:linear-gradient(135deg,rgba(245,158,11,0.62),rgba(234,88,12,0.62));border:1px solid rgba(255,255,255,0.10);flex-shrink:0;margin:0 12px 10px; }
 .debate-heading { display:grid;gap:2px;min-width:0; }

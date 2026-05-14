@@ -1,4 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 import { useAmi } from "../../../context/AmiContext";
 
 const AMI_BASE = import.meta.env.BASE_URL || "/";
@@ -114,9 +119,15 @@ export default function MessageList() {
               )}
 
               {/* Main content */}
-              <span className="bubble-text">
-                {isPending && !msg.content ? "Ami đang trả lời..." : msg.content}
-              </span>
+              <div className="bubble-text bubble-text--md">
+                {isPending && !msg.content ? (
+                  <span>Ami đang trả lời...</span>
+                ) : (
+                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                    {msg.content}
+                  </ReactMarkdown>
+                )}
+              </div>
               {msg.timestamp && <span className="bubble-time">{new Date(msg.timestamp).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span>}
             </div>
           </div>

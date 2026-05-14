@@ -1,6 +1,21 @@
 import React from "react";
 import { useAmi } from "../../../context/AmiContext";
 import { fetchLeaderboard } from "../../../services/amiApi";
+import useAmiSessions from "../../../hooks/useAmiSessions";
+
+const DEBATE_TIME_OPTIONS = {
+  "2m": { label: "2 phút", seconds: 120, bonus: 150 },
+  "3m": { label: "3 phút", seconds: 180, bonus: 100 },
+  "5m": { label: "5 phút", seconds: 300, bonus: 50 },
+  unlimited: { label: "Không giới hạn", seconds: 0, bonus: 0 },
+};
+
+const AMI_STYLE_OPTIONS = [
+  { key: "gentle",  label: "Dịu dàng",         icon: "😇", desc: "Ấm áp, kiên nhẫn, giải thích từng bước" },
+  { key: "playful", label: "Ngổ ngáo",          icon: "😎", desc: "Cộc lốc, cà khịa nhẹ, đúng chất" },
+  { key: "strict",  label: "Nóng tính áp lực",  icon: "🔥", desc: "Khó tính, ép lập luận, tạo pressure" },
+  { key: "ceo",     label: "Tổng tài bá đạo",   icon: "👑", desc: "Lạnh lùng command, vibe đại tiểu thư" },
+];
 
 function SubjectAvatar({ avatar }) {
   if (!avatar) return "📚";
@@ -44,32 +59,67 @@ function FeatureSubjects() {
 }
 
 function FeatureHistory() {
+  const { sessions, loadSession } = useAmiSessions();
   return (
     <div className="feature-page">
       <div className="feature-hero">
         <p className="panel-copy">Xem lại các cuộc trò chuyện trước đây với Ami.</p>
       </div>
       <div className="feature-list">
-        <p className="panel-empty">Tính năng đang phát triển</p>
+        {sessions.length === 0 ? (
+          <p className="panel-empty">Chưa có lịch sử chat nào.</p>
+        ) : (
+          sessions.map((s) => {
+            const id = s.session_id || s.id;
+            const title = s.session_title || s.first_message || s.last_message || `Phiên ${String(id).slice(0, 8)}`;
+            const meta  = s.last_timestamp ? new Date(s.last_timestamp).toLocaleDateString("vi-VN") : "";
+            return (
+              <button key={id} className="history-item history-item-btn" onClick={() => loadSession(id)}>
+                <span className="history-item-title">{title}</span>
+                {meta && <span className="history-item-meta">{meta}</span>}
+              </button>
+            );
+          })
+        )}
       </div>
     </div>
   );
 }
 
 function FeatureDebate() {
-  const { selectedSource, openFeature } = useAmi();
+  const { selectedSource, openFeature, debateActive, debateTimeOption, setDebateTimeOption } = useAmi();
   return (
     <div className="feature-page">
       <div className="feature-hero">
-        <p className="panel-copy">Ami sẽ đưa thử thách, phản biện lại câu trả lời của bạn và chấm điểm.</p>
+        <p className="panel-copy">Ami sẽ đưa thử thách, phản biện lại câu trả lời của bạn và chấm điểm cuối cùng.</p>
+      </div>
+      <div className="expr-group">
+        <p className="expr-label">Thời gian mỗi lượt</p>
+        <div className="option-grid">
+          {Object.entries(DEBATE_TIME_OPTIONS).map(([key, opt]) => (
+            <button
+              key={key}
+              className={`option-button${debateTimeOption === key ? " is-active" : ""}`}
+              onClick={() => setDebateTimeOption(key)}
+            >
+              {opt.label}
+              {opt.bonus > 0 && <span style={{ fontSize: 10, opacity: 0.6, display: "block" }}>+{opt.bonus} điểm thưởng</span>}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="feature-actions">
         {!selectedSource ? (
-          <button className="hero-btn hero-btn--green" onClick={() => openFeature("subjects")}>Chọn môn học</button>
+          <button className="hero-btn hero-btn--green" onClick={() => openFeature("subjects")}>Chọn môn học trước</button>
         ) : (
-          <button className="hero-btn hero-btn--warm" onClick={() => window.dispatchEvent(new CustomEvent("ami-start-debate"))}>Bắt đầu thử thách</button>
+          <button className="hero-btn hero-btn--warm" onClick={() => window.dispatchEvent(new CustomEvent("ami-start-debate"))}>
+            {debateActive ? "Tiếp tục thử thách" : "Bắt đầu thử thách"}
+          </button>
         )}
         <button className="hero-btn hero-btn--ghost" onClick={() => openFeature("leaderboard")}>Xem bảng xếp hạng</button>
+        {debateActive && (
+          <button className="hero-btn hero-btn--ghost" onClick={() => window.dispatchEvent(new CustomEvent("ami-cancel-debate"))}>Dừng phiên hiện tại</button>
+        )}
       </div>
     </div>
   );
@@ -203,7 +253,37 @@ function FeatureProfile() {
   );
 }
 
-const FEATURE_PAGES = { subjects: FeatureSubjects, history: FeatureHistory, debate: FeatureDebate, leaderboard: FeatureLeaderboard, expressions: FeatureExpressions, profile: FeatureProfile };
+function FeatureSettings() {
+  const { amiStyle, setAmiStyle } = useAmi();
+  const handleSelect = (key) => {
+    setAmiStyle(key);
+    localStorage.setItem("ami-style-mode", key);
+  };
+  return (
+    <div className="feature-page">
+      <div className="feature-hero">
+        <p className="panel-copy">Chọn phong cách Ami khi đồng hành cùng bạn. Nội dung học vẫn bám môn, chỉ thay đổi giọng điệu.</p>
+      </div>
+      <div className="expr-group">
+        <div className="option-grid ami-style-grid">
+          {AMI_STYLE_OPTIONS.map((opt) => (
+            <button
+              key={opt.key}
+              className={`option-button ami-style-option${amiStyle === opt.key ? " is-active" : ""}`}
+              onClick={() => handleSelect(opt.key)}
+            >
+              <span style={{ fontSize: 18, display: "block", marginBottom: 4 }}>{opt.icon}</span>
+              <span style={{ fontWeight: 600, fontSize: 12 }}>{opt.label}</span>
+              <span style={{ fontSize: 10, opacity: 0.65, display: "block", marginTop: 2 }}>{opt.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const FEATURE_PAGES = { subjects: FeatureSubjects, history: FeatureHistory, debate: FeatureDebate, leaderboard: FeatureLeaderboard, expressions: FeatureExpressions, profile: FeatureProfile, settings: FeatureSettings };
 
 export default function DrawerPage({ feature }) {
   const Active = FEATURE_PAGES[feature];

@@ -14,9 +14,13 @@ export default function ChatShell() {
     selectedSource, selectedName,
     thinkEnabled, setThinkEnabled,
     searchEnabled, setSearchEnabled,
-    debateActive,
+    debateActive, debateTurn, debateTimeOption,
     voiceEnabled, setVoiceEnabled,
   } = useAmi();
+
+  const MAX_DEBATE_TURN = 3;
+  const debateTurnLabel = `Lượt ${Math.max(debateTurn, 1)}/${MAX_DEBATE_TURN}`;
+  const debateTimeLabel = debateTimeOption === "unlimited" ? "∞" : debateTimeOption;
 
   const [backendOnline, setBackendOnline] = useState(null);
 
@@ -91,11 +95,11 @@ export default function ChatShell() {
               <div id="debate-header" className="debate-header">
                 <div className="debate-heading">
                   <span className="debate-badge">Thử thách Ami</span>
-                  <span className="debate-meta">Chọn mốc thời gian trước khi bắt đầu</span>
+                  <span className="debate-meta">Phản biện nhanh · {MAX_DEBATE_TURN} lượt</span>
                 </div>
                 <div className="debate-pill-group">
-                  <span className="debate-turn-pill">Lượt 1/3</span>
-                  <span className="debate-time-pill">∞</span>
+                  <span className="debate-turn-pill">{debateTurnLabel}</span>
+                  <span className="debate-time-pill">{debateTimeLabel}</span>
                 </div>
               </div>
             )}
@@ -145,7 +149,14 @@ export default function ChatShell() {
             </svg>
           </button>
         ) : null}
-
+        <button className="quick-btn" type="button" title="Phát lại câu trả lời gần nhất"
+          onClick={() => window.dispatchEvent(new CustomEvent("ami-replay-voice"))}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 5 8.5 9H5v6h3.5L14 19V5Z" />
+            <path d="M17.5 9.5a4 4 0 0 1 0 5" />
+            <path d="M19.8 7a7 7 0 0 1 0 10" />
+          </svg>
+        </button>
       </div>
     </>
   );

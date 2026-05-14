@@ -1,6 +1,12 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import { useAmi } from "../context/AmiContext";
-import { debateRespond, debateEvaluate } from "../services/amiApi";
+import { debateStart, debateRespond, debateEvaluate } from "../services/amiApi";
+
+function getUserId() {
+  const token = localStorage.getItem("access_token");
+  try { return token ? (JSON.parse(atob(token.split(".")[1])).sub || "unknown") : "unknown"; }
+  catch { return "unknown"; }
+}
 
 const MAX_DEBATE_TURN = 3;
 const DEBATE_TIME_OPTIONS = {
@@ -14,30 +20,64 @@ export default function useAmiDebate() {
   const {
     debateActive, setDebateActive,
     debateTurn, setDebateTurn,
+    debateTimeOption: timeOption, setDebateTimeOption: setTimeOption,
     selectedSource, selectedName,
     messages, setMessages, setIsSending,
     model,
   } = useAmi();
-
-  const [timeOption, setTimeOption] = useState("unlimited");
   const timerRef = useRef(null);
   const userHistoryRef = useRef([]);
   const questionHistoryRef = useRef([]);
   const currentQuestionRef = useRef("");
   const turnScoresRef = useRef([]);
 
-  const startDebate = useCallback(() => {
+  const startDebate = useCallback(async () => {
     if (!selectedSource) {
-      window.dispatchEvent(new CustomEvent("ami-open-page", { detail: "subjects" }));
+      window.dispatchEvent(new CustomEvent("ami-open-feature", { detail: "subjects" }));
       return;
     }
-    setDebateActive(true);
-    setDebateTurn(1);
     userHistoryRef.current = [];
     questionHistoryRef.current = [];
     currentQuestionRef.current = "";
     turnScoresRef.current = [];
-  }, [selectedSource, setDebateActive, setDebateTurn]);
+
+    setDebateActive(true);
+    setDebateTurn(1);
+    setIsSending(true);
+
+    const pendingId = `a-${Date.now()}-debate-open`;
+    setMessages((prev) => [
+      ...prev,
+      { id: pendingId, role: "assistant", content: "", pending: true, timestamp: new Date().toISOString() },
+    ]);
+
+    try {
+      const data = await debateStart({
+        userId: getUserId(),
+        source: selectedSource,
+        subjectName: selectedName,
+        userName: "Bạn",
+        timeOption,
+        styleMode: "gentle",
+      });
+      const opening = data?.opening || `Tình huống môn **${selectedName}**: Bạn hãy phản biện lại nhận định sau bằng một lập luận rõ ràng, có ít nhất 1 khái niệm hoặc ví dụ minh họa nhé!`;
+      currentQuestionRef.current = opening;
+      questionHistoryRef.current = [opening];
+      setMessages((prev) =>
+        prev.map((m) => m.id === pendingId ? { ...m, content: opening, pending: false } : m)
+      );
+      window.dispatchEvent(new CustomEvent("ami-speak", { detail: opening }));
+    } catch {
+      const fallback = `Bắt đầu thử thách môn **${selectedName}**! Hãy đưa ra lập luận của bạn.`;
+      currentQuestionRef.current = fallback;
+      questionHistoryRef.current = [fallback];
+      setMessages((prev) =>
+        prev.map((m) => m.id === pendingId ? { ...m, content: fallback, pending: false } : m)
+      );
+    } finally {
+      setIsSending(false);
+    }
+  }, [selectedSource, selectedName, timeOption, setDebateActive, setDebateTurn, setIsSending, setMessages]);
 
   const cancelDebate = useCallback(() => {
     setDebateActive(false);
@@ -79,7 +119,7 @@ export default function useAmiDebate() {
     if (answeredTurn >= MAX_DEBATE_TURN) {
       try {
         const data = await debateEvaluate({
-          userId: "ami-user",
+          userId: getUserId(),
           source: selectedSource,
           subjectName: selectedName,
           userName: "Bạn",
@@ -113,7 +153,7 @@ export default function useAmiDebate() {
       // Mid-debate response
       try {
         const data = await debateRespond({
-          userId: "ami-user",
+          userId: getUserId(),
           source: selectedSource,
           turn: answeredTurn,
           maxTurn: MAX_DEBATE_TURN,

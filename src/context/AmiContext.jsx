@@ -40,11 +40,13 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
   // ── Debate ──
   const [debateActive, setDebateActive] = useState(false);
   const [debateTurn, setDebateTurn] = useState(0);
+  const [debateTimeOption, setDebateTimeOption] = useState("unlimited");
 
   // ── Settings ──
   const [thinkEnabled, setThinkEnabled] = useState(false);
   const [searchEnabled, setSearchEnabled] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [amiStyle, setAmiStyle] = useState(() => localStorage.getItem("ami-style-mode") || "gentle");
 
   // ── Chat shell UI ──
   const [chatHidden, setChatHidden] = useState(false);
@@ -92,6 +94,7 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
     setSubjectPanelClosed(false);
     setDebateActive(false);
     setDebateTurn(0);
+    setDebateTimeOption("unlimited");
     setActiveFeature(null);
     // Only open to extended if we were in a feature pane; don't expand a collapsed sidebar
     setSidebarState(prev => prev === "feature" ? "extended" : prev);
@@ -125,8 +128,9 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
     isSpeaking, setIsSpeaking,
     lastSpeechText, setLastSpeechText,
     interimText, setInterimText,
-    debateActive, setDebateActive, debateTurn, setDebateTurn,
+    debateActive, setDebateActive, debateTurn, setDebateTurn, debateTimeOption, setDebateTimeOption,
     thinkEnabled, setThinkEnabled, searchEnabled, setSearchEnabled, voiceEnabled, setVoiceEnabled,
+    amiStyle, setAmiStyle,
     chatHidden, setChatHidden, studyPanelClosed, setStudyPanelClosed,
     subjectPanelClosed, setSubjectPanelClosed,
     profile, token,

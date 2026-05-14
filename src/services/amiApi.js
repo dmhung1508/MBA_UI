@@ -31,20 +31,20 @@ async function handleResponse(response) {
 
 // ── Chat ──
 
-export async function chatStream({ userId, text, source, sessionId, think, search, mode, history }) {
-  const url = `${AMI_API_BASE}/chat/streaming`;
+export async function chatRequest({ userId, text, source, sessionId, think, search, mode, style_mode, history }) {
+  const url = `${AMI_API_BASE}/chat`;
   const response = await fetch(url, {
     method: "POST",
     headers: headers(),
-    body: JSON.stringify({ userId, text, source, sessionId, think, search, mode, history }),
+    body: JSON.stringify({
+      userId, text, source, sessionId,
+      think, search, mode, style_mode,
+      save: true,
+      history,
+      metadata: { style_mode },
+    }),
   });
-  if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    const error = new Error(data.detail || data.message || `HTTP ${response.status}`);
-    error.status = response.status;
-    throw error;
-  }
-  return response.body.getReader();
+  return handleResponse(response);
 }
 
 // ── TTS ──
@@ -62,25 +62,37 @@ export async function textToSpeech(text) {
 
 // ── Sessions ──
 
-export async function fetchSessions(userId, source, limit = 30, skip = 0) {
-  const url = `${AMI_API_BASE}/user/${userId}/sessions/grouped?source=${source}&limit=${limit}&skip=${skip}`;
+export async function fetchSessions(userId, source, limit = 30) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (source) params.set("source", source);
+  const url = `${AMI_API_BASE}/ami/chat_sessions/${encodeURIComponent(userId)}?${params}`;
   const response = await fetch(url, { headers: headers() });
   return handleResponse(response);
 }
 
 export async function fetchSession(sessionId) {
-  const url = `${AMI_API_BASE}/session/${sessionId}`;
+  const url = `${AMI_API_BASE}/ami/chat_history/session/${encodeURIComponent(sessionId)}`;
   const response = await fetch(url, { headers: headers() });
   return handleResponse(response);
 }
 
-export async function deleteSession(sessionId) {
-  const url = `${AMI_API_BASE}/session/${sessionId}`;
+export async function deleteAllHistory(userId) {
+  const url = `${AMI_API_BASE}/ami/chat_history/${encodeURIComponent(userId)}`;
   const response = await fetch(url, { method: "DELETE", headers: headers() });
   return handleResponse(response);
 }
 
 // ── Debate ──
+
+export async function debateStart({ userId, source, subjectName, userName, timeOption, styleMode }) {
+  const url = `${AMI_API_BASE}/ami/debate/start`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({ userId, source, subjectName, userName, timeOption, debateMode: "quick", styleMode }),
+  });
+  return handleResponse(response);
+}
 
 export async function debateRespond({ userId, source, turn, maxTurn, userAnswer, history, questionHistory, currentQuestion, subjectName, userName }) {
   const url = `${AMI_API_BASE}/ami/debate/respond`;

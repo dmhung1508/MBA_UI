@@ -7,6 +7,7 @@ import ChatShell from "./components/ChatShell";
 import DrawerPage from "./components/Drawer";
 import useAmiChat from "../../hooks/useAmiChat";
 import useAmiVoice from "../../hooks/useAmiVoice";
+import useAmiDebate from "../../hooks/useAmiDebate";
 import "./StudyWithAmi.css";
 
 function MobileNav({ initials }) {
@@ -20,6 +21,7 @@ function MobileNav({ initials }) {
     { id: "history",     label: "Lịch sử",   svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.9"><path d="M12 7v5l3 2"/><path d="M12 3a9 9 0 1 1-9 9"/><path d="M5 4v4H1"/></svg> },
     { id: "debate",      label: "Thử thách", svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.9"><path d="M8 21h8M12 17v4M7 4h10c1.7 0 3 1.3 3 3v2c0 2.2-1.8 4-4 4h-8c-2.2 0-4-1.8-4-4V7c0-1.7 1.3-3 3-3Z"/></svg> },
     { id: "profile",     label: "Tài khoản", isAvatar: true },
+    { id: "settings",   label: "Cài đặt",   svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.9"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H20a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.6Z"/></svg> },
   ];
 
   const handleTap = (id) => {
@@ -95,6 +97,7 @@ function AmiApp() {
   const modelRef = useRef(null);
   const { submitMessage } = useAmiChat();
   const { toggleRecording, cancelRecording, finishRecording, replayLastSpeech, speakText } = useAmiVoice();
+  const { startDebate, cancelDebate, submitDebateAnswer, debateActive } = useAmiDebate();
   const { modelRef: contextModelRef, mouthHoldRef: contextMouthHoldRef, costumeControllerRef: contextCostumeRef, selectedSource, selectedName, profile } = useAmi();
   const [modelReady, setModelReady] = useState(false);
   const initials = getInitials(profile?.full_name, profile?.username);
@@ -135,31 +138,41 @@ function AmiApp() {
   }, []);
 
   const handlerRefs = useRef({});
-  handlerRefs.current = { submitMessage, toggleRecording, cancelRecording, finishRecording, replayLastSpeech, speakText };
+  handlerRefs.current = { submitMessage, submitDebateAnswer, debateActive, startDebate, cancelDebate, toggleRecording, cancelRecording, finishRecording, replayLastSpeech, speakText };
 
   // Wire custom events — stable listeners via ref, no re-registration on dep changes
   useEffect(() => {
-    const onChatSubmit  = (e) => handlerRefs.current.submitMessage(e.detail);
-    const onToggleVoice = ()  => handlerRefs.current.toggleRecording();
-    const onCancelVoice = ()  => handlerRefs.current.cancelRecording();
-    const onStopVoice   = ()  => handlerRefs.current.finishRecording();
-    const onReplayVoice = ()  => handlerRefs.current.replayLastSpeech();
-    const onSpeak       = (e) => handlerRefs.current.speakText(e.detail);
+    const onChatSubmit  = (e) => {
+      const { debateActive: isDebate, submitDebateAnswer: debateSubmit, submitMessage: normalSubmit } = handlerRefs.current;
+      if (isDebate) debateSubmit(e.detail);
+      else normalSubmit(e.detail);
+    };
+    const onToggleVoice  = ()  => handlerRefs.current.toggleRecording();
+    const onCancelVoice  = ()  => handlerRefs.current.cancelRecording();
+    const onStopVoice    = ()  => handlerRefs.current.finishRecording();
+    const onReplayVoice  = ()  => handlerRefs.current.replayLastSpeech();
+    const onSpeak        = (e) => handlerRefs.current.speakText(e.detail);
+    const onStartDebate  = ()  => handlerRefs.current.startDebate();
+    const onCancelDebate = ()  => handlerRefs.current.cancelDebate();
 
-    window.addEventListener("ami-submit-chat",  onChatSubmit);
-    window.addEventListener("ami-toggle-voice", onToggleVoice);
-    window.addEventListener("ami-cancel-voice", onCancelVoice);
-    window.addEventListener("ami-stop-voice",   onStopVoice);
-    window.addEventListener("ami-replay-voice", onReplayVoice);
-    window.addEventListener("ami-speak",        onSpeak);
+    window.addEventListener("ami-submit-chat",    onChatSubmit);
+    window.addEventListener("ami-toggle-voice",   onToggleVoice);
+    window.addEventListener("ami-cancel-voice",   onCancelVoice);
+    window.addEventListener("ami-stop-voice",     onStopVoice);
+    window.addEventListener("ami-replay-voice",   onReplayVoice);
+    window.addEventListener("ami-speak",          onSpeak);
+    window.addEventListener("ami-start-debate",   onStartDebate);
+    window.addEventListener("ami-cancel-debate",  onCancelDebate);
 
     return () => {
-      window.removeEventListener("ami-submit-chat",  onChatSubmit);
-      window.removeEventListener("ami-toggle-voice", onToggleVoice);
-      window.removeEventListener("ami-cancel-voice", onCancelVoice);
-      window.removeEventListener("ami-stop-voice",   onStopVoice);
-      window.removeEventListener("ami-replay-voice", onReplayVoice);
-      window.removeEventListener("ami-speak",        onSpeak);
+      window.removeEventListener("ami-submit-chat",    onChatSubmit);
+      window.removeEventListener("ami-toggle-voice",   onToggleVoice);
+      window.removeEventListener("ami-cancel-voice",   onCancelVoice);
+      window.removeEventListener("ami-stop-voice",     onStopVoice);
+      window.removeEventListener("ami-replay-voice",   onReplayVoice);
+      window.removeEventListener("ami-speak",          onSpeak);
+      window.removeEventListener("ami-start-debate",   onStartDebate);
+      window.removeEventListener("ami-cancel-debate",  onCancelDebate);
     };
   }, []);
 
