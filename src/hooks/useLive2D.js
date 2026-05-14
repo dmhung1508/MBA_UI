@@ -5,11 +5,11 @@ import { createAmiMouthHold } from "../pages/StudyWithAmi/amiMouthHold.js";
 import { createAmiCostumeController } from "../pages/StudyWithAmi/amiCostumeController.js";
 
 const BASE = import.meta.env.BASE_URL || "/";
-const MODEL_PATH = `${BASE}live2d/models/Ami/ptit_sdk.model3.json`;
+const MODEL_PATH = `${BASE}ami_clone/public/live2d-models/Ami/ptit_sdk.model3.json`;
 const SCRIPT_PATHS = [
-  `${BASE}live2d/libs/pixi.min.js`,
-  `${BASE}live2d/libs/live2dcubismcore.min.js`,
-  `${BASE}live2d/libs/pixi-live2d-display-cubism4.min.js`,
+  `${BASE}ami_clone/public/libs/pixi.min.js`,
+  `${BASE}ami_clone/public/libs/live2dcubismcore.min.js`,
+  `${BASE}ami_clone/public/libs/pixi-live2d-display-cubism4.min.js`,
 ];
 
 const BASE_WIDTH = 420;
