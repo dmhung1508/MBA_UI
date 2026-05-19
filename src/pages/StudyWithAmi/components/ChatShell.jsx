@@ -149,14 +149,6 @@ export default function ChatShell() {
             </svg>
           </button>
         ) : null}
-        <button className="quick-btn" type="button" title="Phát lại câu trả lời gần nhất"
-          onClick={() => window.dispatchEvent(new CustomEvent("ami-replay-voice"))}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 5 8.5 9H5v6h3.5L14 19V5Z" />
-            <path d="M17.5 9.5a4 4 0 0 1 0 5" />
-            <path d="M19.8 7a7 7 0 0 1 0 10" />
-          </svg>
-        </button>
       </div>
     </>
   );
