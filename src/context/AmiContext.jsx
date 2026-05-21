@@ -48,6 +48,9 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
   const [timeLeft, setTimeLeft] = useState(null);
   const [debateFinished, setDebateFinished] = useState(false);
   const [debateResult, setDebateResult] = useState(null);
+  const [debateReadOnly, setDebateReadOnly] = useState(false);
+  const [debateShowHistory, setDebateShowHistory] = useState(false);
+  const [debateFromHistory, setDebateFromHistory] = useState(false);
 
   // ── Settings ──
   const [thinkEnabled, setThinkEnabled] = useState(false);
@@ -76,6 +79,8 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
     setActiveFeature(feature);
     setSidebarState("feature");
     setReturnFeature(returnTo);
+    setDebateShowHistory(false);
+    setDebateFromHistory(false);
   }, []);
 
   const backToExtended = useCallback(() => {
@@ -101,6 +106,9 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
     setSubjectPanelClosed(false);
     setDebateActive(false);
     setDebateTurn(0);
+    setDebateReadOnly(false);
+    setDebateShowHistory(false);
+    setDebateFromHistory(false);
     setActiveFeature(null);
     // Only open to extended if we were in a feature pane; don't expand a collapsed sidebar
     setSidebarState(prev => prev === "feature" ? "extended" : prev);
@@ -109,6 +117,7 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
   const formatChatHistoryToMessages = useCallback((chatHistoryData) => {
     const formattedMessages = [];
     chatHistoryData.forEach(chatItem => {
+      if (chatItem.session_type === "debate_score") return;
       formattedMessages.push({
         id: `user-${chatItem._id}`,
         role: "user",
@@ -147,7 +156,7 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
       });
       if (response.ok) {
         const data = await response.json();
-        const fetchedSessions = data.sessions || [];
+        const fetchedSessions = (data.sessions || []).filter(s => s.session_type !== "debate");
         if (append) {
           setSessions(prev => [...prev, ...fetchedSessions]);
         } else {
@@ -175,6 +184,20 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
         const data = await response.json();
         if (data.status === "success" && data.history) {
           setMessages(formatChatHistoryToMessages(data.history));
+          const scoreMsg = data.history.find(m => m.session_type === "debate_score");
+          if (scoreMsg?.response) {
+            try {
+              const raw = scoreMsg.response;
+              const jsonStr = raw.includes("```")
+                ? (raw.match(/```(?:json)?\s*([\s\S]*?)```/)?.[1] ?? raw)
+                : raw;
+              const evaluation = JSON.parse(jsonStr.trim());
+              if (evaluation && typeof evaluation === "object") {
+                setDebateResult(evaluation);
+                setDebateFinished(true);
+              }
+            } catch {}
+          }
         } else {
           setMessages([]);
         }
@@ -240,7 +263,7 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
     isSpeaking, setIsSpeaking,
     lastSpeechText, setLastSpeechText,
     interimText, setInterimText,
-    debateActive, setDebateActive, debateTurn, setDebateTurn, timeLeft, setTimeLeft, debateFinished, setDebateFinished, debateResult, setDebateResult,
+    debateActive, setDebateActive, debateTurn, setDebateTurn, timeLeft, setTimeLeft, debateFinished, setDebateFinished, debateResult, setDebateResult, debateReadOnly, setDebateReadOnly, debateShowHistory, setDebateShowHistory, debateFromHistory, setDebateFromHistory,
     thinkEnabled, setThinkEnabled, searchEnabled, setSearchEnabled, voiceEnabled, setVoiceEnabled,
     chatHidden, setChatHidden, studyPanelClosed, setStudyPanelClosed,
     subjectPanelClosed, setSubjectPanelClosed,

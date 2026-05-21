@@ -1,6 +1,6 @@
 import React from "react";
 import { useAmi } from "../../../context/AmiContext";
-import { fetchLeaderboard } from "../../../services/amiApi";
+import { fetchSessions } from "../../../services/amiApi";
 import { DEBATE_TIME_OPTIONS } from "../../../hooks/useAmiDebate";
 
 function SubjectAvatar({ avatar }) {
@@ -140,26 +140,75 @@ const RING_R = 52;
 const RING_C = 2 * Math.PI * RING_R;
 
 function FeatureDebate() {
-  const { selectedSource, openFeature, debateActive, timeLeft, debateFinished, setDebateFinished, debateResult, setMessages, setCurrentSessionId } = useAmi();
+  const { selectedSource, openFeature, debateActive, timeLeft, debateFinished, setDebateFinished, debateResult, setDebateResult, setMessages, setCurrentSessionId, debateReadOnly, setDebateReadOnly, loadSessionMessages, profile, debateShowHistory, setDebateShowHistory, debateFromHistory, setDebateFromHistory } = useAmi();
   const [timeOpt, setTimeOpt] = React.useState("unlimited");
   const [confirmAction, setConfirmAction] = React.useState(null);
+  const [evaluating, setEvaluating] = React.useState(false);
+  const [debateSessions, setDebateSessions] = React.useState([]);
+  const [loadingDebateHistory, setLoadingDebateHistory] = React.useState(false);
   const isUnlimited = debateActive && timeLeft === null;
   const totalTimeRef = React.useRef(null);
   const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   React.useEffect(() => {
     if (debateActive && timeLeft !== null && totalTimeRef.current === null) totalTimeRef.current = timeLeft;
-    if (!debateActive) { totalTimeRef.current = null; setConfirmAction(null); }
+    if (!debateActive) { totalTimeRef.current = null; setConfirmAction(null); setEvaluating(false); }
   }, [debateActive, timeLeft]);
+
+  React.useEffect(() => {
+    if (timeLeft === 0 && debateActive) setEvaluating(true);
+  }, [timeLeft, debateActive]);
+
+  React.useEffect(() => {
+    if (!debateShowHistory || !profile?.username || !selectedSource) return;
+    setLoadingDebateHistory(true);
+    fetchSessions(profile.username, selectedSource, 100, 0)
+      .then(data => setDebateSessions((data.sessions || []).filter(s => s.session_type === "debate")))
+      .catch(() => setDebateSessions([]))
+      .finally(() => setLoadingDebateHistory(false));
+  }, [debateShowHistory, profile?.username, selectedSource]);
+
+  if (debateShowHistory && !debateActive && !debateFinished) {
+    return (
+      <div className="feature-page debate-history-view">
+        <p className="panel-copy" style={{ fontSize: 11, paddingBottom: 8 }}>Các phiên thử thách đã hoàn thành.</p>
+        <div className="feature-list">
+          {loadingDebateHistory && <p className="panel-empty">Đang tải...</p>}
+          {!loadingDebateHistory && debateSessions.length === 0 && (
+            <p className="panel-empty">Chưa có phiên thử thách nào.</p>
+          )}
+          {debateSessions.map(session => (
+            <button
+              key={session.session_id}
+              className="subject-card"
+              style={{ flexDirection: "column", alignItems: "flex-start", padding: "8px 12px", gap: 2 }}
+              onClick={() => {
+                setDebateReadOnly(true);
+                setDebateFromHistory(true);
+                setCurrentSessionId(session.session_id);
+                loadSessionMessages(session.session_id);
+                setDebateShowHistory(false);
+              }}
+            >
+              <span className="subject-name" style={{ fontSize: 12, display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden", width: "100%" }}>
+                {session.first_response || session.first_message || "Phiên thử thách"}
+              </span>
+              <span className="subject-code">{fmtSessionTime(session.last_timestamp)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (debateFinished) {
     const ev = debateResult || {};
     const score = ev.score ?? null;
     const rubric = ev.rubric || {};
-    const scoreColor = score === null ? "rgba(255,255,255,0.3)" : score >= 80 ? "#4ade80" : score >= 60 ? "#fbbf24" : "#f87171";
-    const scoreLabel = score === null ? "Không có dữ liệu" : score >= 80 ? "Xuất sắc" : score >= 60 ? "Khá tốt" : score >= 40 ? "Cần cố gắng" : "Cần ôn lại";
-    const RING_R = 38, RING_C = 2 * Math.PI * RING_R;
-    const targetOffset = score !== null ? RING_C * (1 - score / 100) : RING_C;
+    const scoreColor = score === null ? "rgba(255,255,255,0.3)" : score >= 8 ? "#4ade80" : score >= 6 ? "#fbbf24" : "#f87171";
+    const scoreLabel = score === null ? "Không có dữ liệu" : score >= 8 ? "Xuất sắc" : score >= 6 ? "Khá tốt" : score >= 4 ? "Cần cố gắng" : "Cần ôn lại";
+    const RING_R = 52, RING_C = 2 * Math.PI * RING_R;
+    const targetOffset = score !== null ? RING_C * (1 - score / 10) : RING_C;
     const RUBRICS = [
       { key: "accuracy",  label: "Chính xác" },
       { key: "evidence",  label: "Bằng chứng" },
@@ -174,25 +223,28 @@ function FeatureDebate() {
 
           {/* ── Score ring ── */}
           <div className="result-score-wrap">
-            <div style={{ position: "relative", display: "inline-flex" }}>
-              <svg viewBox="0 0 90 90" width="90" height="90" style={{ display: "block" }}>
-                <circle cx="45" cy="45" r={RING_R} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="5" />
-                <circle cx="45" cy="45" r={RING_R} fill="none"
-                  stroke={scoreColor} strokeWidth="5" strokeLinecap="round"
+            <div className="result-ring-container" style={{ filter: `drop-shadow(0 0 12px ${scoreColor}50)` }}>
+              <svg viewBox="0 0 130 130" width="150" height="150" style={{ display: "block" }}>
+                <circle cx="65" cy="65" r="61" fill="rgba(255,255,255,0.025)" />
+                <circle cx="65" cy="65" r={RING_R} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="9" />
+                <circle cx="65" cy="65" r={RING_R} fill="none"
+                  stroke={scoreColor} strokeWidth="9" strokeLinecap="round"
                   strokeDasharray={RING_C}
                   className="result-ring-arc"
                   style={{ "--target": targetOffset }}
-                  transform="rotate(-90 45 45)"
+                  transform="rotate(-90 65 65)"
                 />
               </svg>
               <div className="result-score-center">
                 <span className="result-score-num" style={{ color: scoreColor }}>
                   {score !== null ? score : "--"}
                 </span>
-                <span className="result-score-denom">/100</span>
+                <span className="result-score-denom">/10</span>
               </div>
             </div>
-            <span className="result-score-label" style={{ color: scoreColor }}>{scoreLabel}</span>
+            <div className="result-score-badge" style={{ background: `${scoreColor}18`, borderColor: `${scoreColor}45`, color: scoreColor }}>
+              {scoreLabel}
+            </div>
           </div>
 
           {/* ── Rubric bars ── */}
@@ -204,7 +256,7 @@ function FeatureDebate() {
                   <div key={key} className="rubric-row" style={{ animationDelay: `${0.5 + i * 0.09}s` }}>
                     <span className="rubric-label">{label}</span>
                     <div className="rubric-track">
-                      <div className="rubric-fill" style={{ "--w": `${(val / 25) * 100}%`, animationDelay: `${0.6 + i * 0.09}s` }} />
+                      <div className="rubric-fill" style={{ "--w": `${(val / 10) * 100}%`, animationDelay: `${0.6 + i * 0.09}s` }} />
                     </div>
                     <span className="rubric-val">{val}</span>
                   </div>
@@ -214,40 +266,61 @@ function FeatureDebate() {
           )}
 
           {/* ── Sections ── */}
-          {ev.feedback && (
-            <details className="result-section" open>
-              <summary><span>💡</span> Nhận xét</summary>
-              <p className="result-sec-body">{ev.feedback}</p>
-            </details>
-          )}
-          {ev.strengths?.length > 0 && (
-            <details className="result-section">
-              <summary><span>💪</span> Điểm mạnh</summary>
-              <ul className="result-sec-list result-sec-list--green">
-                {ev.strengths.map((s, i) => <li key={i}>{s}</li>)}
-              </ul>
-            </details>
-          )}
-          {weaknesses.length > 0 && (
-            <details className="result-section">
-              <summary><span>⚠️</span> Cần cải thiện</summary>
-              <ul className="result-sec-list result-sec-list--amber">
-                {weaknesses.map((w, i) => <li key={i}>{w}</li>)}
-              </ul>
-            </details>
-          )}
-          {ev.ideal_answer && (
-            <details className="result-section">
-              <summary><span>🎯</span> Gợi ý lý tưởng</summary>
-              <p className="result-sec-body result-sec-ideal">{ev.ideal_answer}</p>
-            </details>
-          )}
+          <div className="result-sections">
+            {ev.feedback && (
+              <div className="result-card result-card--feedback" style={{ animationDelay: "0.45s" }}>
+                <div className="result-card-head">
+                  <span className="result-card-label">Nhận xét</span>
+                </div>
+                <p className="result-card-body">{ev.feedback}</p>
+              </div>
+            )}
+            {ev.strengths?.length > 0 && (
+              <div className="result-card result-card--strengths" style={{ animationDelay: "0.55s" }}>
+                <div className="result-card-head">
+                  <span className="result-card-label">Điểm mạnh</span>
+                </div>
+                <ul className="result-card-list">
+                  {ev.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                </ul>
+              </div>
+            )}
+            {weaknesses.length > 0 && (
+              <div className="result-card result-card--improve" style={{ animationDelay: "0.65s" }}>
+                <div className="result-card-head">
+                  <span className="result-card-label">Cần cải thiện</span>
+                </div>
+                <ul className="result-card-list">
+                  {weaknesses.map((w, i) => <li key={i}>{w}</li>)}
+                </ul>
+              </div>
+            )}
+            {ev.ideal_answer && (
+              <div className="result-card result-card--suggestion" style={{ animationDelay: "0.75s" }}>
+                <div className="result-card-head">
+                  <span className="result-card-label">Góp ý</span>
+                </div>
+                <p className="result-card-body">{ev.ideal_answer}</p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="feature-actions" style={{ marginTop: 16 }}>
-          <button className="hero-btn hero-btn--ghost" onClick={() => { setDebateFinished(false); setMessages([]); setCurrentSessionId(""); }}>
+          <button className="hero-btn hero-btn--ghost" onClick={() => { setDebateFinished(false); setDebateReadOnly(false); setDebateFromHistory(false); setDebateResult(null); setMessages([]); setCurrentSessionId(""); }}>
             Thử thách lại
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (debateActive && evaluating) {
+    return (
+      <div className="feature-page">
+        <div className="debate-evaluating">
+          <div className="debate-eval-spinner" />
+          <p className="debate-eval-msg">Ami đang chấm điểm...</p>
         </div>
       </div>
     );
@@ -274,7 +347,7 @@ function FeatureDebate() {
                     {confirmAction === "finish" ? "Kết thúc và nhận kết quả ngay?" : "Hủy thử thách? Kết quả sẽ không được lưu."}
                   </p>
                   <button className={`hero-btn ${confirmAction === "finish" ? "hero-btn--green" : "hero-btn--red"}`}
-                    onClick={() => { setConfirmAction(null); window.dispatchEvent(new CustomEvent(confirmAction === "finish" ? "ami-finish-debate" : "ami-cancel-debate")); }}>
+                    onClick={() => { const a = confirmAction; setConfirmAction(null); if (a === "finish") setEvaluating(true); window.dispatchEvent(new CustomEvent(a === "finish" ? "ami-finish-debate" : "ami-cancel-debate")); }}>
                     Xác nhận
                   </button>
                   <button className="hero-btn hero-btn--ghost" onClick={() => setConfirmAction(null)}>Giữ lại</button>
@@ -352,6 +425,7 @@ function FeatureDebate() {
           </div>
           <div className="feature-actions">
             <button className="hero-btn hero-btn--warm" onClick={() => window.dispatchEvent(new CustomEvent("ami-start-debate", { detail: timeOpt }))}>Bắt đầu thử thách</button>
+            <button className="hero-btn hero-btn--ghost" onClick={() => setDebateShowHistory(true)}>Lịch sử thử thách</button>
           </div>
         </>
       ) : (
@@ -366,40 +440,6 @@ function FeatureDebate() {
   );
 }
 
-function FeatureLeaderboard() {
-  const { selectedSource } = useAmi();
-  const [leaderboard, setLeaderboard] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
-  const refresh = React.useCallback(() => {
-    if (!selectedSource) return;
-    setLoading(true);
-    fetchLeaderboard(selectedSource).then((d) => setLeaderboard(d.leaderboard || [])).catch(() => setLeaderboard([])).finally(() => setLoading(false));
-  }, [selectedSource]);
-
-  React.useEffect(() => { refresh(); }, [refresh]);
-
-  React.useEffect(() => {
-    window.addEventListener("ami-debate-ended", refresh);
-    return () => window.removeEventListener("ami-debate-ended", refresh);
-  }, [refresh]);
-  return (
-    <div className="feature-page">
-      <div className="feature-hero">
-        <p className="panel-copy">{selectedSource ? "Top người học có điểm thử thách cao nhất." : "Chọn môn học để xem bảng xếp hạng."}</p>
-      </div>
-      <div className="feature-list">
-        {!selectedSource ? <p className="panel-empty">Vui lòng chọn môn học.</p>
-        : loading ? <p className="panel-empty">Đang tải...</p>
-        : leaderboard.length === 0 ? <p className="panel-empty">Chưa có ai ghi tên.</p>
-        : leaderboard.map((item, idx) => {
-            const icon = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`;
-            const meta = [`${item.attempt_count || 1} lượt`, item.bonus_points ? `+${item.bonus_points} bonus` : "", item.time_label || ""].filter(Boolean).join(" · ");
-            return <div key={idx} className={`leaderboard-item ${idx < 3 ? "is-podium" : ""}`}><div className="leaderboard-rank">{icon}</div><div className="leaderboard-meta"><strong>{item.user_name || "Ẩn danh"}</strong><span>{meta}</span></div><div className="leaderboard-score">{item.score || 0} đ</div></div>;
-          })}
-      </div>
-    </div>
-  );
-}
 
 const COOLDOWNS = { costume: 500, motion: 3500, expression: 500 };
 
@@ -501,9 +541,16 @@ function FeatureProfile() {
   );
 }
 
-const FEATURE_PAGES = { subjects: FeatureSubjects, history: FeatureHistory, debate: FeatureDebate, leaderboard: FeatureLeaderboard, expressions: FeatureExpressions, profile: FeatureProfile };
+const FEATURE_PAGES = { subjects: FeatureSubjects, history: FeatureHistory, debate: FeatureDebate, expressions: FeatureExpressions, profile: FeatureProfile };
+
+function DebateWithTransition() {
+  const { debateFinished, debateShowHistory, debateActive } = useAmi();
+  const stateKey = debateFinished ? "result" : debateShowHistory ? "history" : debateActive ? "active" : "setup";
+  return <FeatureDebate key={stateKey} />;
+}
 
 export default function DrawerPage({ feature }) {
+  if (feature === "debate") return <DebateWithTransition />;
   const Active = FEATURE_PAGES[feature];
   if (!Active) return <p className="panel-empty">Chọn một mục từ menu</p>;
   return <Active />;

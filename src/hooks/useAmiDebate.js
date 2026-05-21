@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { useAmi } from "../context/AmiContext";
-import { debateRespond, debateEvaluate } from "../services/amiApi";
+import { debateStart, debateRespond, debateEvaluate } from "../services/amiApi";
 
 export const DEBATE_TIME_OPTIONS = {
   "2m":      { label: "2 phút",          seconds: 120 },
@@ -28,6 +28,7 @@ export default function useAmiDebate() {
     setMessages, setIsSending,
     newConversation, openFeature,
     currentSessionId, setCurrentSessionId, loadSessionMessages,
+    setDebateReadOnly,
     model,
   } = useAmi();
 
@@ -43,8 +44,9 @@ export default function useAmiDebate() {
   const timeOptionRef      = useRef(timeOption);
   timeOptionRef.current    = timeOption;
 
-  const endDebateRef   = useRef(null);
-  const runEvaluateRef = useRef(null);
+  const endDebateRef       = useRef(null);
+  const runEvaluateRef     = useRef(null);
+  const debateSessionIdRef = useRef(null);
 
   const endDebate = useCallback(() => {
     setDebateActive(false);
@@ -56,6 +58,7 @@ export default function useAmiDebate() {
     currentQuestionRef.current = "";
     turnScoresRef.current      = [];
     isEvaluatingRef.current    = false;
+    debateSessionIdRef.current = null;
     if (readingTimerRef.current) { clearTimeout(readingTimerRef.current); readingTimerRef.current = null; }
     if (countdownRef.current)    { clearInterval(countdownRef.current);   countdownRef.current    = null; }
   }, [setDebateActive, setDebateFinished, setDebateTurn, setTimeLeft]);
@@ -83,6 +86,7 @@ export default function useAmiDebate() {
     try {
       const data = await debateEvaluate({
         userId:          getUserId(),
+        sessionId:       debateSessionIdRef.current,
         source:          selectedSource,
         subjectName:     selectedName,
         userName:        "Bạn",
@@ -96,7 +100,6 @@ export default function useAmiDebate() {
       });
       setDebateResult(data.evaluation || null);
       endDebateRef.current();
-      window.dispatchEvent(new CustomEvent("ami-debate-ended"));
     } catch {
       setDebateResult(null);
       endDebateRef.current();
@@ -135,6 +138,7 @@ export default function useAmiDebate() {
     isEvaluatingRef.current    = false;
 
     setDebateResult(null);
+    setDebateReadOnly(false);
     newConversation();
     setCurrentSessionId(`debate-local-${Date.now()}`);
     openFeature("debate");
@@ -151,27 +155,25 @@ export default function useAmiDebate() {
       timestamp: new Date().toISOString(),
     }]);
 
-    // Start countdown immediately
-    startCountdown(initSeconds);
+    // Countdown starts on user's first message (not here)
 
     // Ami asks the opening question
     setIsSending(true);
     model.playMotion("Reading");
     try {
-      const data = await debateRespond({
-        userId:          getUserId(),
-        source:          selectedSource,
-        turn:            1,
-        maxTurn:         UNLIMITED_MAX_TURNS,
-        userAnswer:      `Bắt đầu thử thách môn ${selectedName}`,
-        history:         [],
-        questionHistory: [],
-        currentQuestion: "",
-        subjectName:     selectedName,
-        userName:        "Bạn",
+      const data = await debateStart({
+        userId:      getUserId(),
+        source:      selectedSource,
+        subjectName: selectedName,
+        timeOption:  timeOptionRef.current,
+        debateMode:  "quick",
       });
-      currentQuestionRef.current = data.next_question_message || data.next_question || "";
-      questionHistoryRef.current.push(currentQuestionRef.current);
+      if (data.session_id) {
+        debateSessionIdRef.current = data.session_id;
+        setCurrentSessionId(data.session_id);
+      }
+      currentQuestionRef.current = data.opening || "";
+      if (currentQuestionRef.current) questionHistoryRef.current.push(currentQuestionRef.current);
       setMessages(prev => prev.map(msg =>
         msg.id === initPendingId
           ? { ...msg, content: currentQuestionRef.current || "Hãy bắt đầu trả lời!", pending: false }
@@ -221,6 +223,12 @@ export default function useAmiDebate() {
 
     userHistoryRef.current.push({ answer: content, turn: answeredTurn });
 
+    // Start countdown on first answer for timed modes
+    if (answeredTurn === 1) {
+      const secs = DEBATE_TIME_OPTIONS[timeOptionRef.current]?.seconds || 0;
+      startCountdown(secs);
+    }
+
     // Unlimited soft cap
     if (timeOptionRef.current === "unlimited" && answeredTurn >= UNLIMITED_MAX_TURNS) {
       keepReading = false;
@@ -233,6 +241,7 @@ export default function useAmiDebate() {
     try {
       const data = await debateRespond({
         userId:          getUserId(),
+        sessionId:       debateSessionIdRef.current,
         source:          selectedSource,
         turn:            answeredTurn,
         maxTurn:         UNLIMITED_MAX_TURNS,
@@ -275,7 +284,7 @@ export default function useAmiDebate() {
     setIsSending(false);
   }, [
     debateActive, debateTurn, selectedSource, selectedName,
-    setMessages, setIsSending, model, setDebateTurn,
+    setMessages, setIsSending, model, setDebateTurn, startCountdown,
   ]);
 
   const finishDebate = useCallback(() => runEvaluateRef.current?.(), []);

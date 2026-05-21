@@ -14,7 +14,7 @@ export default function ChatShell() {
     selectedSource, selectedName,
     thinkEnabled, setThinkEnabled,
     searchEnabled, setSearchEnabled,
-    debateActive, timeLeft,
+    debateActive, timeLeft, debateFinished, debateReadOnly,
     voiceEnabled, setVoiceEnabled,
   } = useAmi();
 
@@ -141,8 +141,17 @@ export default function ChatShell() {
               </div>
               <MessageList />
             </div>
-            <VoiceRecorder />
+            {!debateFinished && !debateReadOnly && <VoiceRecorder />}
 
+            {debateFinished || debateReadOnly ? (
+              <div className="debate-locked-bar">
+                <svg className="debate-locked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span className="debate-locked-text">Phiên tranh biện đã kết thúc</span>
+              </div>
+            ) : (
             <ChatInput
               optionsOpen={optionsOpen}
               onToggleOptions={() => setOptionsOpen((p) => !p)}
@@ -157,6 +166,7 @@ export default function ChatShell() {
                 window.dispatchEvent(new CustomEvent("ami-submit-chat", { detail: text }));
               }}
             />
+            )}
           </>
         ) : (
           <div className="study-panel study-panel--bottom">

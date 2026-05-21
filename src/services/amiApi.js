@@ -62,8 +62,9 @@ export async function textToSpeech(text) {
 
 // ── Sessions ──
 
-export async function fetchSessions(userId, source, limit = 30, skip = 0) {
-  const url = `${AMI_API_BASE}/user/${userId}/sessions/grouped?source=${source}&limit=${limit}&skip=${skip}`;
+export async function fetchSessions(userId, source, limit = 30, skip = 0, sessionType = null) {
+  let url = `${AMI_API_BASE}/user/${userId}/sessions/grouped?source=${source}&limit=${limit}&skip=${skip}`;
+  if (sessionType) url += `&session_type=${sessionType}`;
   const response = await fetch(url, { headers: headers() });
   return handleResponse(response);
 }
@@ -82,31 +83,36 @@ export async function deleteSession(sessionId) {
 
 // ── Debate ──
 
-export async function debateRespond({ userId, source, turn, maxTurn, userAnswer, history, questionHistory, currentQuestion, subjectName, userName }) {
+export async function debateStart({ userId, source, subjectName, timeOption, debateMode, styleMode }) {
+  const url = `${AMI_API_BASE}/ami/debate/start`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({ userId, source, subjectName, timeOption, debateMode, styleMode }),
+  });
+  return handleResponse(response);
+}
+
+export async function debateRespond({ userId, sessionId, source, turn, maxTurn, userAnswer, history, questionHistory, currentQuestion, subjectName, userName }) {
   const url = `${AMI_API_BASE}/ami/debate/respond`;
   const response = await fetch(url, {
     method: "POST",
     headers: headers(),
-    body: JSON.stringify({ userId, source, turn, maxTurn, userAnswer, history, questionHistory, currentQuestion, subjectName, userName }),
+    body: JSON.stringify({ userId, sessionId, source, turn, maxTurn, userAnswer, history, questionHistory, currentQuestion, subjectName, userName }),
   });
   return handleResponse(response);
 }
 
-export async function debateEvaluate({ userId, source, subjectName, userName, answers, questionHistory, currentQuestion, turnScores, timeOption, turnDurations, timedOutTurns }) {
+export async function debateEvaluate({ userId, sessionId, source, subjectName, userName, answers, questionHistory, currentQuestion, turnScores, timeOption, turnDurations, timedOutTurns }) {
   const url = `${AMI_API_BASE}/ami/debate/evaluate`;
   const response = await fetch(url, {
     method: "POST",
     headers: headers(),
-    body: JSON.stringify({ userId, source, subjectName, userName, answers, questionHistory, currentQuestion, turnScores, timeOption, turnDurations, timedOutTurns }),
+    body: JSON.stringify({ userId, sessionId, source, subjectName, userName, answers, questionHistory, currentQuestion, turnScores, timeOption, turnDurations, timedOutTurns }),
   });
   return handleResponse(response);
 }
 
-export async function fetchLeaderboard(source, limit = 10) {
-  const url = `${AMI_API_BASE}/ami/debate/leaderboard?source=${encodeURIComponent(source)}&limit=${limit}`;
-  const response = await fetch(url, { headers: headers() });
-  return handleResponse(response);
-}
 
 // ── Voice Transcription ──
 
