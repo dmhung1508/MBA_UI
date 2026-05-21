@@ -14,13 +14,9 @@ export default function ChatShell() {
     selectedSource, selectedName,
     thinkEnabled, setThinkEnabled,
     searchEnabled, setSearchEnabled,
-    debateActive, debateTurn, debateTimeOption,
+    debateActive, timeLeft,
     voiceEnabled, setVoiceEnabled,
   } = useAmi();
-
-  const MAX_DEBATE_TURN = 3;
-  const debateTurnLabel = `Lượt ${Math.max(debateTurn, 1)}/${MAX_DEBATE_TURN}`;
-  const debateTimeLabel = debateTimeOption === "unlimited" ? "∞" : debateTimeOption;
 
   const [backendOnline, setBackendOnline] = useState(null);
 
@@ -45,7 +41,43 @@ export default function ChatShell() {
   const [optionsOpen, setOptionsOpen] = useState(false);
   const optionsRef = useRef(null);
   const shellRef = useRef(null);
+  const [shellHeight, setShellHeight] = useState(null);
+  const defaultHeightRef = useRef(null);
+  const dragRef = useRef(null);
   const toggleVisibility = useCallback(() => setChatHidden((p) => !p), [setChatHidden]);
+
+  const onResizeStart = useCallback((e) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startH = shellRef.current.getBoundingClientRect().height;
+    if (!defaultHeightRef.current) defaultHeightRef.current = startH;
+
+    const onMove = (ev) => {
+      const delta = startY - ev.clientY;
+      const pill = document.querySelector(".ami-subject-pill");
+      const stage = shellRef.current?.closest(".ami-stage") || shellRef.current?.parentElement;
+      const stageRect = stage?.getBoundingClientRect();
+      const pillRect = pill?.getBoundingClientRect();
+
+      const minH = defaultHeightRef.current || 300;
+      let maxH = stageRect ? stageRect.height - 16 - 16 : 820;
+      if (pillRect && stageRect) {
+        const pillBottom = pillRect.bottom - stageRect.top + 4;
+        maxH = stageRect.height - pillBottom - 8;
+      }
+
+      const newH = Math.min(maxH, Math.max(minH, startH + delta));
+      setShellHeight(newH);
+    };
+
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, []);
 
   useEffect(() => {
     if (!optionsOpen) return;
@@ -64,7 +96,8 @@ export default function ChatShell() {
 
   return (
     <>
-      <section id="chat-shell" ref={shellRef} className={`${chatHidden ? "is-hidden" : ""} ${!selectedSource ? "is-no-subject" : ""}`}>
+      <section id="chat-shell" ref={shellRef} style={shellHeight ? { height: shellHeight } : undefined} className={`${chatHidden ? "is-hidden" : ""} ${!selectedSource ? "is-no-subject" : ""}`}>
+        <div className="chat-resize-handle" ref={dragRef} onMouseDown={onResizeStart} />
         {/* Header */}
         <div className="chat-shell-header">
           <div className="chat-shell-meta">
@@ -91,19 +124,23 @@ export default function ChatShell() {
 
         {selectedSource ? (
           <>
-            {debateActive && (
-              <div id="debate-header" className="debate-header">
-                <div className="debate-heading">
+            <div className={`chat-content-area${debateActive ? " has-debate" : ""}`}>
+              <div className={`debate-header-clip${debateActive ? " is-visible" : ""}`}>
+                <div id="debate-header" className="debate-header">
+                  <div className="debate-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="14" height="14"><path d="M8 21h8M12 17v4M7 4h10c1.7 0 3 1.3 3 3v2c0 2.2-1.8 4-4 4h-8c-2.2 0-4-1.8-4-4V7c0-1.7 1.3-3 3-3Z"/></svg>
+                  </div>
                   <span className="debate-badge">Thử thách Ami</span>
-                  <span className="debate-meta">Phản biện nhanh · {MAX_DEBATE_TURN} lượt</span>
-                </div>
-                <div className="debate-pill-group">
-                  <span className="debate-turn-pill">{debateTurnLabel}</span>
-                  <span className="debate-time-pill">{debateTimeLabel}</span>
+                  <div className="debate-spacer" />
+                  <span className={`debate-timer${timeLeft !== null && timeLeft <= 30 ? " is-urgent" : ""}`}>
+                    {timeLeft !== null
+                      ? `${String(Math.floor(timeLeft / 60)).padStart(2, "0")}:${String(timeLeft % 60).padStart(2, "0")}`
+                      : "∞"}
+                  </span>
                 </div>
               </div>
-            )}
-            <MessageList />
+              <MessageList />
+            </div>
             <VoiceRecorder />
 
             <ChatInput
@@ -131,10 +168,6 @@ export default function ChatShell() {
                 onClick={() => window.dispatchEvent(new CustomEvent("ami-open-feature", { detail: "subjects" }))}>
                 Chọn môn học
               </button>
-              <button className="hero-btn hero-btn--ghost" type="button"
-                onClick={() => window.dispatchEvent(new CustomEvent("ami-open-feature", { detail: "leaderboard" }))}>
-                Bảng xếp hạng
-              </button>
             </div>
           </div>
         )}
@@ -149,6 +182,7 @@ export default function ChatShell() {
             </svg>
           </button>
         ) : null}
+
       </div>
     </>
   );

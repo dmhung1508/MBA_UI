@@ -93,25 +93,20 @@ export default function useAmiVoice() {
     }
   }, [isRecording, startRecording, finishRecording]);
 
-  // ── TTS Playback ──
-  const stopSpeaking = useCallback(() => {
-    if (audioRef.current) {
-      try { audioRef.current.close(); } catch {}
-      audioRef.current = null;
-    }
-    setIsSpeaking(false);
-  }, [setIsSpeaking]);
+  const ttsQueueRef = useRef([]);   // [{ text, bufferPromise }]
+  const isPlayingRef = useRef(false);
 
-  const speakText = useCallback(async (text) => {
-    if (!voiceEnabled || !text?.trim()) return;
-    stopSpeaking();
+  const playNextInQueue = useCallback(async () => {
+    if (isPlayingRef.current || ttsQueueRef.current.length === 0) return;
+    const { text, bufferPromise } = ttsQueueRef.current.shift();
+    isPlayingRef.current = true;
 
     try {
-      const blob = await textToSpeech(text);
-      if (!blob?.size) return;
+      // Buffer đã được fetch từ trước (parallel), await gần như tức thì
+      const arrayBuffer = await bufferPromise;
+      if (!arrayBuffer) { isPlayingRef.current = false; playNextInQueue(); return; }
       setLastSpeechText(text);
 
-      const arrayBuffer = await blob.arrayBuffer();
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       const ctx = new AudioCtx();
       audioRef.current = ctx;
@@ -119,19 +114,21 @@ export default function useAmiVoice() {
       let rafId = null;
       const mouthHold = mouthHoldRef?.current;
 
-      const closeMouth = () => {
+      const onDone = () => {
         if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
         mouthHoldRef?.current?.setAgentTranscriptionActive(0);
-        setIsSpeaking(false);
         try { ctx.close(); } catch {}
         if (audioRef.current === ctx) audioRef.current = null;
+        isPlayingRef.current = false;
+        if (ttsQueueRef.current.length === 0) setIsSpeaking(false);
+        playNextInQueue(); // Phát câu tiếp theo ngay lập tức
       };
 
       const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
       const source = ctx.createBufferSource();
       source.buffer = audioBuffer;
       source.loop = false;
-      source.onended = closeMouth;
+      source.onended = onDone;
 
       if (mouthHold) {
         const analyser = ctx.createAnalyser();
@@ -153,10 +150,32 @@ export default function useAmiVoice() {
       setIsSpeaking(true);
       if (ctx.state === "suspended") await ctx.resume();
       source.start(0);
-    } catch (e) {
-      setIsSpeaking(false);
+    } catch {
+      isPlayingRef.current = false;
+      playNextInQueue();
     }
-  }, [voiceEnabled, stopSpeaking, setIsSpeaking, setLastSpeechText, mouthHoldRef]);
+  }, [setIsSpeaking, setLastSpeechText, mouthHoldRef]);
+
+  const stopSpeaking = useCallback(() => {
+    ttsQueueRef.current = [];
+    isPlayingRef.current = false;
+    if (audioRef.current) {
+      try { audioRef.current.close(); } catch {}
+      audioRef.current = null;
+    }
+    setIsSpeaking(false);
+  }, [setIsSpeaking]);
+
+  const speakText = useCallback((text) => {
+    if (!voiceEnabled || !text?.trim()) return;
+    // Bắt đầu fetch TTS NGAY LẬP TỨC song song với audio đang phát
+    // Lưu promise vào queue — khi câu trước kết thúc, buffer đã sẵn sàng
+    const bufferPromise = textToSpeech(text)
+      .then((blob) => blob?.size ? blob.arrayBuffer() : null)
+      .catch(() => null);
+    ttsQueueRef.current.push({ text, bufferPromise });
+    playNextInQueue();
+  }, [voiceEnabled, playNextInQueue]);
 
   const replayLastSpeech = useCallback(() => {
     if (lastSpeechText) speakText(lastSpeechText);

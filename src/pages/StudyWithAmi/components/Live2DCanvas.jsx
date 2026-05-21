@@ -6,7 +6,7 @@ const AMI_AVATAR = `${AMI_BASE}ami-avatar.png`;
 
 const Live2DCanvas = forwardRef(function Live2DCanvas(_props, ref) {
   const containerRef = useRef(null);
-  const { ready, error, fitModel, playMotion, setExpression, notifyActivity, mouthHold, costumeController } = useLive2D(containerRef);
+  const { ready, error, fitModel, playMotion, setExpression, notifyActivity, pauseIdle, resumeIdle, mouthHold, costumeController } = useLive2D(containerRef);
 
   useImperativeHandle(ref, () => ({
     ready,
@@ -14,9 +14,11 @@ const Live2DCanvas = forwardRef(function Live2DCanvas(_props, ref) {
     playMotion,
     setExpression,
     notifyActivity,
+    pauseIdle,
+    resumeIdle,
     mouthHold,
     costumeController,
-  }), [ready, fitModel, playMotion, setExpression, notifyActivity, mouthHold, costumeController]);
+  }), [ready, fitModel, playMotion, setExpression, notifyActivity, pauseIdle, resumeIdle, mouthHold, costumeController]);
 
   return (
     <>

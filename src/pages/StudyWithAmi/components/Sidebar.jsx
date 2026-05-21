@@ -15,14 +15,14 @@ const FEATURE_META = {
 const TOP_ITEMS = [
   { action: "subjects",    label: "Môn học",   svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> },
   { action: "history",     label: "Lịch sử",   svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8"><path d="M12 7v5l3 2"/><path d="M12 3a9 9 0 1 1-9 9"/><path d="M5 4v4H1"/></svg> },
-  { action: "debate",      label: "Thử thách", svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8"><path d="M8 21h8M12 17v4M7 4h10c1.7 0 3 1.3 3 3v2c0 2.2-1.8 4-4 4h-8c-2.2 0-4-1.8-4-4V7c0-1.7 1.3-3 3-3Z"/></svg> },
-  { action: "leaderboard", label: "Xếp hạng",  svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v3a5 5 0 0 1-10 0V4Z"/><path d="M5 6H4a2 2 0 0 0 0 4h2"/><path d="M19 6h1a2 2 0 1 1 0 4h-2"/></svg> },
+  { action: "debate",      label: "Thử thách", svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v3a5 5 0 0 1-10 0V4Z"/><path d="M5 6H4a2 2 0 0 0 0 4h2"/><path d="M19 6h1a2 2 0 1 1 0 4h-2"/></svg> },
+  { action: "leaderboard", label: "Xếp hạng",  svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="12" width="5" height="8"/><rect x="9.5" y="4" width="5" height="16"/><rect x="17" y="8" width="5" height="12"/></svg> },
 ];
 
 const BOTTOM_ITEMS = [
   { action: "expressions", label: "Biểu cảm",  svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8"><circle cx="12" cy="12" r="8"/><path d="M9 10h.01M15 10h.01M9 14c.8 1 1.8 1.5 3 1.5s2.2-.5 3-1.5"/></svg> },
-  { action: "profile",     label: "Tài khoản", svg: null, isAvatar: true },
-  { action: "settings",    label: "Cài đặt",   svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H20a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.6Z"/></svg> },
+  { action: "settings",   label: "Cài đặt",   svg: <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
+  { action: "profile",    label: "Tài khoản", svg: null, isAvatar: true },
 ];
 
 function toVietnameseOrder(name) {
@@ -82,6 +82,7 @@ export default function Sidebar() {
             <button
               key={item.action}
               className={`strip-icon-btn${activeFeature === item.action && isFeature ? " is-active" : ""}`}
+              style={item.action === "debate" ? { marginTop: 8 } : undefined}
               onClick={() => openFeature(item.action)}
               title={item.label}
             >
@@ -143,6 +144,7 @@ export default function Sidebar() {
                 <button
                   key={item.action}
                   className="panel-label-btn"
+                  style={item.action === "debate" ? { marginTop: 8 } : undefined}
                   onClick={() => openFeature(item.action)}
                 >
                   {FEATURE_META[item.action]?.label || item.label}
