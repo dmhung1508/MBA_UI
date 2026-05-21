@@ -32,7 +32,12 @@ export const API_ENDPOINTS = {
   FILE_DELETE: (source, filename) => `${AUTH_MINI_BASE}/mba/files/${source}/delete/${filename}`,
   FILE_DELETE_BY_FILENAME: (source, filename) => `${AUTH_MINI_BASE}/mba/files/${source}/by-filename/${filename}?delete_original_file=true`,
 
-  // Chat History (auth_mini)
+  // Chat History Management
+  CHAT_SESSIONS: (userId, source, limit=30, skip=0) => `${AUTH_MINI_BASE}/mba/user/${userId}/sessions/grouped?source=${source}&limit=${limit}&skip=${skip}`,
+  CHAT_SESSION_DETAIL: (sessionId) => `${AUTH_MINI_BASE}/mba/session/${sessionId}`,
+  DELETE_CHAT_SESSION: (sessionId) => `${AUTH_MINI_BASE}/mba/session/${sessionId}`,
+
+  // Legacy Chat History (auth_mini)
   CHAT_HISTORY: (userId, limit, skip, source) => `${AUTH_MINI_BASE}/mba/chat_history/${userId}?limit=${limit}&skip=${skip}&source=${source}`,
   DELETE_CHAT_HISTORY: (userId, source) => `${AUTH_MINI_BASE}/mba/chat_history/${userId}?source=${source}`,
 
