@@ -39,7 +39,7 @@
   background:
     linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0) 28%),
     linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18)),
-    url("/dpt/live2d/backgrounds/hoa_sua.jpg") center center / cover no-repeat;
+    url("/mini/ami_clone/public/background/hoa_sua.jpg") center center / cover no-repeat;
 }
 .ami-stage::before {
   content: "";
