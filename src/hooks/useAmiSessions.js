@@ -26,7 +26,13 @@ export default function useAmiSessions() {
         const msgs = [];
         data.exchanges.forEach((ex) => {
           if (ex.user_query) msgs.push({ id: `h-u-${msgs.length}`, role: "user", content: ex.user_query, timestamp: ex.timestamp });
-          if (ex.agent_response) msgs.push({ id: `h-a-${msgs.length}`, role: "assistant", content: ex.agent_response, timestamp: ex.timestamp });
+          if (ex.agent_response) msgs.push({
+            id: `h-a-${msgs.length}`,
+            role: "assistant",
+            content: ex.agent_response,
+            timestamp: ex.timestamp,
+            sources: Array.isArray(ex.sources) ? ex.sources : [],
+          });
         });
         setMessages(msgs);
       }

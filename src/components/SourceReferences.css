@@ -1,0 +1,144 @@
+.source-references {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.3);
+  color: #334155;
+  font-size: 12px;
+}
+
+.source-references__title {
+  margin-bottom: 7px;
+  color: #475569;
+  font-weight: 700;
+}
+
+.source-references__list {
+  display: grid;
+  gap: 8px;
+}
+
+.source-reference {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.source-reference__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.source-reference__index {
+  flex: none;
+  color: #2563eb;
+  font-weight: 800;
+}
+
+.source-reference__filename {
+  overflow: hidden;
+  flex: 1;
+  color: #1e293b;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-reference__page {
+  flex: none;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.source-reference__heading {
+  margin-top: 4px;
+  overflow: hidden;
+  color: #64748b;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-reference__snippet {
+  display: -webkit-box;
+  margin: 7px 0 0;
+  overflow: hidden;
+  padding-left: 8px;
+  border-left: 2px solid #93c5fd;
+  color: #475569;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.source-reference__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.source-reference__actions button {
+  padding: 5px 9px;
+  border: 1px solid #bfdbfe;
+  border-radius: 7px;
+  background: #fff;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.source-reference__actions button:hover:not(:disabled) {
+  background: #eff6ff;
+}
+
+.source-reference__actions button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.source-reference__legacy {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.source-references__error {
+  margin-top: 7px;
+  color: #b91c1c;
+}
+
+.source-references--compact .source-reference__snippet {
+  -webkit-line-clamp: 2;
+}
+
+.inline-citation {
+  display: inline;
+  margin: 0 1px;
+  padding: 0 3px;
+  border: 0;
+  border-radius: 4px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 750;
+  line-height: inherit;
+}
+
+.inline-citation:hover:not(:disabled) {
+  background: #bfdbfe;
+  text-decoration: underline;
+}
+
+.inline-citation:disabled {
+  color: #64748b;
+  cursor: default;
+}

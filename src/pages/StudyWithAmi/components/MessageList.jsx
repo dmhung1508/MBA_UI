@@ -7,6 +7,9 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
 import { useAmi } from "../../../context/AmiContext";
+import SourceReferences from "../../../components/SourceReferences";
+import { buildDocumentPreviewUrl } from "../../../services/documentApi";
+import { linkifyInlineCitations, sourceForCitation } from "../../../utils/citations";
 
 const AMI_BASE = import.meta.env.BASE_URL || "/";
 const AMI_AVATAR = `${AMI_BASE}ami-avatar.png`;
@@ -66,6 +69,32 @@ export default function MessageList() {
   const jumpToLatest = useCallback(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, []);
+
+  const citationComponents = useCallback((sources) => ({
+    ...MD_COMPONENTS,
+    a({ href, children, ...props }) {
+      const match = /^#source-(\d+)$/.exec(href || "");
+      if (!match) return <a href={href} {...props}>{children}</a>;
+      const source = sourceForCitation(sources, Number(match[1]));
+      const documentId = Number(source?.document_id);
+      const canPreview = Number.isInteger(documentId) && documentId > 0 && source?.preview_supported;
+      return (
+        <button
+          type="button"
+          className="inline-citation"
+          title={source?.filename || source?.source || `Nguồn ${match[1]}`}
+          disabled={!canPreview}
+          onClick={() => {
+            if (canPreview) {
+              window.open(buildDocumentPreviewUrl(documentId, source?.page), "_blank", "noopener,noreferrer");
+            }
+          }}
+        >
+          {children}
+        </button>
+      );
+    },
+  }), []);
 
   useLayoutEffect(() => {
     if (!listRef.current) return;
@@ -149,13 +178,16 @@ export default function MessageList() {
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkMath]}
                     rehypePlugins={[rehypeKatex]}
-                    components={MD_COMPONENTS}
+                    components={citationComponents(msg.sources)}
                   >
-                    {msg.content}
+                    {linkifyInlineCitations(msg.content, msg.sources)}
                   </ReactMarkdown>
                 </div>
               )}
               {msg.timestamp && <span className="bubble-time">{new Date(msg.timestamp).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span>}
+              {!isPending && Array.isArray(msg.sources) && msg.sources.length > 0 && (
+                <SourceReferences sources={msg.sources} compact />
+              )}
             </div>
             {!isPending && msg.content && voiceEnabled && (
               <button

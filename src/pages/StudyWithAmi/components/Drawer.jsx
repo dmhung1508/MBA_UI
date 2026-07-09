@@ -1,7 +1,7 @@
 import React from "react";
 import { useAmi } from "../../../context/AmiContext";
 import { fetchSessions } from "../../../services/amiApi";
-import { DEBATE_TIME_OPTIONS } from "../../../hooks/useAmiDebate";
+import { DEBATE_ROUND_OPTIONS, DEBATE_TIME_OPTIONS } from "../../../hooks/useAmiDebate";
 
 function SubjectAvatar({ avatar }) {
   if (!avatar) return "📚";
@@ -142,6 +142,7 @@ const RING_C = 2 * Math.PI * RING_R;
 function FeatureDebate() {
   const { selectedSource, openFeature, debateActive, timeLeft, debateFinished, setDebateFinished, debateResult, setDebateResult, setMessages, setCurrentSessionId, debateReadOnly, setDebateReadOnly, loadSessionMessages, profile, debateShowHistory, setDebateShowHistory, debateFromHistory, setDebateFromHistory } = useAmi();
   const [timeOpt, setTimeOpt] = React.useState("unlimited");
+  const [roundOpt, setRoundOpt] = React.useState(5);
   const [confirmAction, setConfirmAction] = React.useState(null);
   const [evaluating, setEvaluating] = React.useState(false);
   const [debateSessions, setDebateSessions] = React.useState([]);
@@ -186,7 +187,7 @@ function FeatureDebate() {
                 setDebateReadOnly(true);
                 setDebateFromHistory(true);
                 setCurrentSessionId(session.session_id);
-                loadSessionMessages(session.session_id);
+                loadSessionMessages(session.session_id, { includeDebate: true });
                 setDebateShowHistory(false);
               }}
             >
@@ -423,8 +424,22 @@ function FeatureDebate() {
               ))}
             </div>
           </div>
+          <div className="expr-group" style={{ marginBottom: 12 }}>
+            <p className="expr-label">Số vòng</p>
+            <div className="option-grid">
+              {DEBATE_ROUND_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  className={`option-button${roundOpt === opt.value ? " is-active" : ""}`}
+                  onClick={() => setRoundOpt(opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="feature-actions">
-            <button className="hero-btn hero-btn--warm" onClick={() => window.dispatchEvent(new CustomEvent("ami-start-debate", { detail: timeOpt }))}>Bắt đầu thử thách</button>
+            <button className="hero-btn hero-btn--warm" onClick={() => window.dispatchEvent(new CustomEvent("ami-start-debate", { detail: { timeOption: timeOpt, maxRounds: roundOpt } }))}>Bắt đầu thử thách</button>
             <button className="hero-btn hero-btn--ghost" onClick={() => setDebateShowHistory(true)}>Lịch sử thử thách</button>
           </div>
         </>

@@ -1,20 +1,32 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAmi } from "../../../context/AmiContext";
 
+const WORD_LIMIT = 1000;
+
+const wordsOf = (text) => text.trim().split(/\s+/).filter(Boolean);
+
+const limitWords = (text) => {
+  const words = wordsOf(text);
+  if (words.length <= WORD_LIMIT) return text;
+  return words.slice(0, WORD_LIMIT).join(" ");
+};
+
 export default function ChatInput({
   onSubmit, optionsOpen, onToggleOptions, optionsRef,
   thinkEnabled, onThinkToggle, searchEnabled, onSearchToggle,
   voiceEnabled, onVoiceToggle,
 }) {
-  const { isSending, isRecording, interimText } = useAmi();
+  const { isSending, isRecording } = useAmi();
   const [value, setValue] = useState("");
   const inputRef = useRef(null);
+  const wordCount = wordsOf(value).length;
+  const showWordCount = wordCount >= 800;
 
   useEffect(() => {
     const handler = (e) => {
       const text = e.detail?.trim();
       if (text) {
-        setValue(text);
+        setValue(limitWords(text));
         setTimeout(() => inputRef.current?.focus(), 0);
       }
     };
@@ -22,12 +34,30 @@ export default function ChatInput({
     return () => window.removeEventListener("ami-voice-ready", handler);
   }, []);
 
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    input.style.height = "0px";
+    input.style.height = `${Math.min(input.scrollHeight, 160)}px`;
+  }, [value]);
+
+  const updateValue = (nextValue) => {
+    setValue(limitWords(nextValue));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const text = value.trim();
     if (!text || isSending) return;
     setValue("");
     onSubmit(text);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
   };
 
   return (
@@ -65,17 +95,25 @@ export default function ChatInput({
         </svg>
       </button>
 
-      <input
-        id="chat-input"
-        ref={inputRef}
-        type="text"
-        autoComplete="off"
-        placeholder={isRecording ? "Đang nghe..." : "Nhắn Ami..."}
-        value={isRecording ? "" : value}
-        onChange={isRecording ? undefined : (e) => setValue(e.target.value)}
-        disabled={isSending}
-        readOnly={isRecording}
-      />
+      <div className="chat-input-wrap">
+        <textarea
+          id="chat-input"
+          ref={inputRef}
+          rows={1}
+          autoComplete="off"
+          placeholder={isRecording ? "Đang nghe..." : "Nhắn Ami..."}
+          value={isRecording ? "" : value}
+          onChange={isRecording ? undefined : (e) => updateValue(e.target.value)}
+          onKeyDown={isRecording ? undefined : handleKeyDown}
+          disabled={isSending}
+          readOnly={isRecording}
+        />
+        {showWordCount && (
+          <span className={`chat-word-count${wordCount >= WORD_LIMIT ? " is-limit" : ""}`}>
+            {wordCount}/{WORD_LIMIT} từ
+          </span>
+        )}
+      </div>
 
       <button
         id="voice-record-btn"

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useRef, useEff
 import { API_ENDPOINTS } from "../config/api";
 
 const AmiContext = createContext(null);
+const DEBATE_SESSION_TYPES = new Set(["debate", "debate_score"]);
 
 export function useAmi() {
   const ctx = useContext(AmiContext);
@@ -114,10 +115,11 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
     setSidebarState(prev => prev === "feature" ? "extended" : prev);
   }, []);
 
-  const formatChatHistoryToMessages = useCallback((chatHistoryData) => {
+  const formatChatHistoryToMessages = useCallback((chatHistoryData, { includeDebate = false } = {}) => {
     const formattedMessages = [];
     chatHistoryData.forEach(chatItem => {
-      if (chatItem.session_type === "debate_score") return;
+      if (!includeDebate && DEBATE_SESSION_TYPES.has(chatItem.session_type)) return;
+      if (includeDebate && chatItem.session_type === "debate_score") return;
       formattedMessages.push({
         id: `user-${chatItem._id}`,
         role: "user",
@@ -127,11 +129,11 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
       });
 
       let botText = "";
-      let sources = [];
+      let sources = Array.isArray(chatItem.sources) ? chatItem.sources : [];
       if (typeof chatItem.response === 'string') botText = chatItem.response;
       else if (chatItem.response && typeof chatItem.response === 'object') {
         botText = chatItem.response.response || JSON.stringify(chatItem.response);
-        if (Array.isArray(chatItem.response.sources)) sources = chatItem.response.sources;
+        if (!sources.length && Array.isArray(chatItem.response.sources)) sources = chatItem.response.sources;
       }
 
       formattedMessages.push({
@@ -156,7 +158,7 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
       });
       if (response.ok) {
         const data = await response.json();
-        const fetchedSessions = (data.sessions || []).filter(s => s.session_type !== "debate");
+        const fetchedSessions = (data.sessions || []).filter(s => !DEBATE_SESSION_TYPES.has(s.session_type));
         if (append) {
           setSessions(prev => [...prev, ...fetchedSessions]);
         } else {
@@ -169,7 +171,7 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
     }
   }, [profile?.username, selectedSource, token]);
 
-  const loadSessionMessages = useCallback(async (sessionId) => {
+  const loadSessionMessages = useCallback(async (sessionId, options = {}) => {
     if (!sessionId) {
       setMessages([]);
       return;
@@ -183,9 +185,9 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
       if (response.ok) {
         const data = await response.json();
         if (data.status === "success" && data.history) {
-          setMessages(formatChatHistoryToMessages(data.history));
+          setMessages(formatChatHistoryToMessages(data.history, options));
           const scoreMsg = data.history.find(m => m.session_type === "debate_score");
-          if (scoreMsg?.response) {
+          if (options.includeDebate && scoreMsg?.response) {
             try {
               const raw = scoreMsg.response;
               const jsonStr = raw.includes("```")

@@ -32,6 +32,56 @@ export const API_ENDPOINTS = {
   FILE_DELETE: (source, filename) => `${AUTH_MINI_BASE}/mba/files/${source}/delete/${filename}`,
   FILE_DELETE_BY_FILENAME: (source, filename) => `${AUTH_MINI_BASE}/mba/files/${source}/by-filename/${filename}?delete_original_file=true`,
 
+  // Documents (RAG source references / preview)
+  DOCUMENT_METADATA: (documentId) => `${AUTH_MINI_BASE}/mba/documents/${documentId}`,
+  DOCUMENT_FILE: (documentId, disposition = 'inline') =>
+    `${AUTH_MINI_BASE}/mba/documents/${documentId}/file?disposition=${encodeURIComponent(disposition)}`,
+
+  // Versioned AI modules / Agent Creator / Agent sessions (debate, chat, seminar)
+  AGENT_MODULES: `${AUTH_MINI_BASE}/mba/modules`,
+  AGENT_PROFILES: `${AUTH_MINI_BASE}/mba/agent-profiles`,
+  AGENT_PROFILE_JOB: (profileKey, capabilityKey) =>
+    `${AUTH_MINI_BASE}/mba/agent-profiles/${encodeURIComponent(profileKey)}/capabilities/${encodeURIComponent(capabilityKey)}/jobs`,
+  AGENT_PROFILE_SESSION: (profileKey, capabilityKey) =>
+    `${AUTH_MINI_BASE}/mba/agent-profiles/${encodeURIComponent(profileKey)}/capabilities/${encodeURIComponent(capabilityKey)}/sessions`,
+  AGENT_MODULE_JOB: (moduleKey) =>
+    `${AUTH_MINI_BASE}/mba/modules/${encodeURIComponent(moduleKey)}/jobs`,
+  AGENT_MODULE_JOB_STATUS: (jobId) =>
+    `${AUTH_MINI_BASE}/mba/modules/jobs/${encodeURIComponent(jobId)}`,
+  AGENT_ARTIFACT: (artifactId) =>
+    `${AUTH_MINI_BASE}/mba/modules/artifacts/${encodeURIComponent(artifactId)}`,
+  AGENT_ARTIFACT_FEEDBACK: (artifactId) =>
+    `${AUTH_MINI_BASE}/mba/modules/artifacts/${encodeURIComponent(artifactId)}/feedback`,
+  AGENT_SESSION_START: (moduleKey) =>
+    `${AUTH_MINI_BASE}/mba/modules/${encodeURIComponent(moduleKey)}/sessions`,
+  AGENT_SESSION: (sessionId) =>
+    `${AUTH_MINI_BASE}/mba/modules/sessions/${encodeURIComponent(sessionId)}`,
+  AGENT_SESSION_TURN: (sessionId) =>
+    `${AUTH_MINI_BASE}/mba/modules/sessions/${encodeURIComponent(sessionId)}/turns`,
+  AGENT_SESSION_END: (sessionId) =>
+    `${AUTH_MINI_BASE}/mba/modules/sessions/${encodeURIComponent(sessionId)}/end`,
+  AGENT_DEFINITIONS: (workspaceId) =>
+    `${AUTH_MINI_BASE}/mba/agents?workspace_id=${encodeURIComponent(workspaceId)}`,
+  AGENT_ARCHIVED_DEFINITIONS: (workspaceId) =>
+    `${AUTH_MINI_BASE}/mba/agents?workspace_id=${encodeURIComponent(workspaceId)}&archived=true`,
+  AGENT_DEFINITION_CREATE: `${AUTH_MINI_BASE}/mba/agents`,
+  AGENT_DEFINITION: (definitionId) =>
+    `${AUTH_MINI_BASE}/mba/agents/${encodeURIComponent(definitionId)}`,
+  AGENT_DEFINITION_ARCHIVE: (definitionId) =>
+    `${AUTH_MINI_BASE}/mba/agents/${encodeURIComponent(definitionId)}`,
+  AGENT_DEFINITION_RESTORE: (definitionId) =>
+    `${AUTH_MINI_BASE}/mba/agents/${encodeURIComponent(definitionId)}/restore`,
+  AGENT_DEFINITION_HARD_DELETE: (definitionId) =>
+    `${AUTH_MINI_BASE}/mba/agents/${encodeURIComponent(definitionId)}/hard`,
+  AGENT_VERSIONS: (definitionId) =>
+    `${AUTH_MINI_BASE}/mba/agents/${encodeURIComponent(definitionId)}/versions`,
+  AGENT_VERSION_PUBLISH: (versionId) =>
+    `${AUTH_MINI_BASE}/mba/agents/versions/${encodeURIComponent(versionId)}/publish`,
+  AGENT_VERSION_GLOBAL_DEFAULT: (versionId, enabled) =>
+    `${AUTH_MINI_BASE}/mba/agents/versions/${encodeURIComponent(versionId)}/global-default?enabled=${enabled}`,
+  AGENT_VERSION_ARCHIVE: (versionId) =>
+    `${AUTH_MINI_BASE}/mba/agents/versions/${encodeURIComponent(versionId)}/archive`,
+
   // Chat History Management
   CHAT_SESSIONS: (userId, source, limit=30, skip=0) => `${AUTH_MINI_BASE}/mba/user/${userId}/sessions/grouped?source=${source}&limit=${limit}&skip=${skip}`,
   CHAT_SESSION_DETAIL: (sessionId) => `${AUTH_MINI_BASE}/mba/session/${sessionId}`,
