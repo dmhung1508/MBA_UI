@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API_ENDPOINTS } from './api';
-import { resolveApiBaseUrl } from './runtimeConfig';
+import { resolveApiBaseUrl, withBase } from './runtimeConfig';
 
 // Create axios instance
 const axiosInstance = axios.create({
@@ -21,7 +21,7 @@ const clearAuthAndRedirect = () => {
   localStorage.removeItem('token_type');
   localStorage.removeItem('user_role');
   localStorage.removeItem('token_expiration');
-  window.location.href = '/mini/login';
+  window.location.href = withBase('/login');
 };
 
 const processQueue = (error, token = null) => {

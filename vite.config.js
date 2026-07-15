@@ -11,8 +11,14 @@ export default defineConfig(({ mode }) => {
   const authProxyTarget = env.VITE_DEV_PROXY_AUTH_TARGET || 'http://localhost:4559';
   const mbaProxyTarget = env.VITE_DEV_PROXY_MBA_TARGET || 'http://localhost:4558';
 
+  // Base path (asset + router) lấy từ VITE_PREF_PATH — đảm bảo có leading &
+  // trailing slash theo yêu cầu của Vite.
+  let basePath = env.VITE_PREF_PATH || '/mini';
+  if (!basePath.startsWith('/')) basePath = '/' + basePath;
+  if (!basePath.endsWith('/')) basePath = basePath + '/';
+
   return {
-    base: '/mini/',
+    base: basePath,
     envDir: rootEnvDir,
     plugins: [react()],
 

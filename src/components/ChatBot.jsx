@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { withBase } from "../config/runtimeConfig";
 import { FaBars, FaChevronLeft, FaHome, FaComment, FaSearch } from "react-icons/fa";
 import { BsCircleFill } from "react-icons/bs";
 import UnifiedChatbot from "./UnifiedChatbot";
@@ -140,7 +141,7 @@ const ChatUI = () => {
   };
 
   const renderIntroduction = () => {
-    window.location.href = "/mini/";
+    window.location.href = withBase('/');
   };
 
   const handleSendMessage = (chatbotId, newMessage) => {
@@ -229,7 +230,7 @@ const ChatUI = () => {
             }}
           >
             <img
-              src={chatbot.avatar}
+              src={chatbot.avatar || API_ENDPOINTS.CHATBOT_AVATAR(chatbot.id)}
               alt={chatbot.name}
               className="w-10 h-10 rounded-full mr-3"
             />
@@ -252,7 +253,7 @@ const ChatUI = () => {
               </button>
             )}
             <img
-              src={currentChat.avatar}
+              src={currentChat.avatar || API_ENDPOINTS.CHATBOT_AVATAR(currentChat.id)}
               alt={currentChat.name}
               className="w-10 h-10 rounded-full mr-3"
             />

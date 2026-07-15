@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { withBase } from "../config/runtimeConfig";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -430,7 +431,7 @@ const QuizHistory = () => {
                                         Bạn chưa có lịch sử làm bài kiểm tra. Hãy bắt đầu luyện tập để cải thiện kiến thức của mình!
                                     </p>
                                     <button
-                                        onClick={() => window.location.href = '/mini/'}
+                                        onClick={() => window.location.href = withBase('/')}
                                         className="inline-flex items-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
                                     >
                                         <FaPlus className="mr-2" />

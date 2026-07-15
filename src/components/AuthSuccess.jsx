@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { resolveApiBaseUrl, resolveBasePath, resolveBaseUrl } from "../config/runtimeConfig";
+import { resolveApiBaseUrl, resolveBasePath, resolveBaseUrl, withBase } from "../config/runtimeConfig";
 
 const API_BASE_URL = resolveApiBaseUrl();
 const BASE_URL = resolveBaseUrl();
@@ -98,7 +98,7 @@ const AuthSuccess = () => {
         setLoading(false);
 
         setTimeout(() => {
-          window.location.href = "/mini/";
+          window.location.href = withBase('/');
         }, 800);
       } catch (error) {
         console.error("Unexpected error in auth flow:", error);

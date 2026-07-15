@@ -17,7 +17,8 @@ import {
   FaExclamationTriangle,
   FaTimes,
   FaChevronLeft,
-  FaChevronRight
+  FaChevronRight,
+  FaFileExcel
 } from 'react-icons/fa';
 
 const AdminLogs = () => {
@@ -72,7 +73,7 @@ const AdminLogs = () => {
   useEffect(() => {
     const userRole = localStorage.getItem('user_role');
     if (userRole !== 'admin') {
-      navigate('/mini/');
+      navigate('/');
       return;
     }
     fetchLogs();
@@ -174,6 +175,45 @@ const AdminLogs = () => {
     }
   };
 
+  const handleExportLogs = async () => {
+    try {
+      setError('');
+
+      // Xuất theo cùng bộ lọc đang áp dụng (không kèm offset/limit).
+      const params = new URLSearchParams();
+      if (filters.username) params.append('username', filters.username);
+      if (filters.role) params.append('role', filters.role);
+      if (filters.action) params.append('action', filters.action);
+      if (filters.resource_type) params.append('resource_type', filters.resource_type);
+      if (filters.from_date) params.append('from_date', filters.from_date);
+      if (filters.to_date) params.append('to_date', filters.to_date);
+
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(
+        `${API_ENDPOINTS.ADMIN_LOGS_EXPORT}?${params.toString()}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
+      if (!response.ok) {
+        throw new Error('Không thể xuất file logs');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `logs_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setSuccess('Đã xuất file logs thành công!');
+    } catch (err) {
+      setError(err.message || 'Không thể xuất file logs');
+    }
+  };
+
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({
       ...prev,
@@ -254,13 +294,22 @@ const AdminLogs = () => {
               </h1>
               <p className="text-gray-600">Theo dõi và quản lý logs hoạt động của admin và teacher</p>
             </div>
-            <button
-              onClick={() => setShowCleanupModal(true)}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 flex items-center"
-            >
-              <FaTrash className="w-4 h-4 inline-block align-middle mr-2" />
-              Dọn dẹp Logs
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleExportLogs}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 flex items-center"
+              >
+                <FaFileExcel className="w-4 h-4 inline-block align-middle mr-2" />
+                Xuất Excel
+              </button>
+              <button
+                onClick={() => setShowCleanupModal(true)}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 flex items-center"
+              >
+                <FaTrash className="w-4 h-4 inline-block align-middle mr-2" />
+                Dọn dẹp Logs
+              </button>
+            </div>
           </div>
         </div>
 

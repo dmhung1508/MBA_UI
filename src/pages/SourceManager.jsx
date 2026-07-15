@@ -33,7 +33,7 @@ const SourceManager = () => {
   useEffect(() => {
     const role = localStorage.getItem('user_role');
     if (role !== 'admin' && role !== 'teacher') {
-      navigate('/mini/');
+      navigate('/');
       return;
     }
     setUserRole(role);

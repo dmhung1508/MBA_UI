@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { withBase } from "../config/runtimeConfig";
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { FaUser, FaLock, FaEnvelope, FaRobot, FaGraduationCap, FaUniversity, FaArrowRight } from 'react-icons/fa';
@@ -112,7 +113,7 @@ const Signup = () => {
 
                   <div className="text-center">
                     <p className="text-red-100 mb-4">Đã có tài khoản?</p>
-                    <a href="/mini/login" className="inline-flex items-center bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300">
+                    <a href={withBase("/login")} className="inline-flex items-center bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300">
                       <span>Đăng nhập ngay</span>
                       <FaArrowRight className="ml-2" />
                     </a>

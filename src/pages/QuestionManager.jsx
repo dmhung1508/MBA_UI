@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
+import { withBase } from "../config/runtimeConfig";
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -1277,7 +1278,7 @@ const QuestionManager = () => {
                       <div className="flex items-center">
                         <span className="mr-3 text-gray-600 font-medium">Hoặc:</span>
                         <a
-                          href="/mini/sample_import.xlsx"
+                          href={withBase("/sample_import.xlsx")}
                           download
                           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                         >
@@ -1342,7 +1343,7 @@ const QuestionManager = () => {
                           <div className="flex justify-between items-center mb-2">
                             <p className="font-medium">Format file Excel:</p>
                             <a
-                              href="/mini/sample_import.xlsx"
+                              href={withBase("/sample_import.xlsx")}
                               download
                               className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center hover:underline"
                             >

@@ -28,7 +28,7 @@ const TeacherStats = () => {
     useEffect(() => {
         const userRole = localStorage.getItem('user_role');
         if (userRole !== 'admin') {
-            navigate('/mini/');
+            navigate('/');
             return;
         }
         fetchStats();

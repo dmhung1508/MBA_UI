@@ -1,5 +1,6 @@
 // Navbar.jsx
 import React, { useState, useEffect, useCallback, memo } from "react";
+import { withBase } from "../config/runtimeConfig";
 import {
   FaRobot,
   FaBars,
@@ -122,16 +123,16 @@ const Navbar = () => {
     setIsLoggedIn(false);
     setIsAdmin(false);
     setIsTeacher(false);
-    window.location.href = "/mini/";
+    window.location.href = withBase('/');
   }, []);
 
   // Hàm xử lý khi người dùng nhấn vào Chat
   const handleChatClick = useCallback((e) => {
     e.preventDefault(); // Ngăn chặn hành động mặc định của liên kết
     if (isLoggedIn) {
-      window.location.href = "/mini/mini"; // Chuyển hướng đến trang Chat
+      window.location.href = withBase('/mini'); // Chuyển hướng đến trang Chat
     } else {
-      window.location.href = "/mini/?message=login_required"; // Chuyển hướng về trang Home với thông báo cảnh báo
+      window.location.href = withBase('/?message=login_required'); // Chuyển hướng về trang Home với thông báo cảnh báo
     }
   }, [isLoggedIn]);
 
@@ -143,7 +144,7 @@ const Navbar = () => {
       >
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center flex-shrink-0">
-            <a href="/mini/" className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
+            <a href={withBase("/")} className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
               <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
                 <FaRobot className="text-white text-lg" />
               </div>
@@ -154,37 +155,37 @@ const Navbar = () => {
             {isLoggedIn && (
               <div className="hidden lg:flex items-center space-x-1 ml-6">
                 <a
-                  href="/mini/"
+                  href={withBase("/")}
                   className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                 >
                   <FaHome className="mr-1 text-sm" /> Trang chủ
                 </a>
                 <a
-                  href="/mini/mini"
+                  href={withBase("/mini")}
                   onClick={handleChatClick}
                   className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg cursor-pointer font-medium"
                 >
                   <FaComments className="mr-1 text-sm" /> Nhắn tin
                 </a>
                 <a
-                  href="/mini/quiz-history"
+                  href={withBase("/quiz-history")}
                   className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                 >
                   <FaHistory className="mr-1 text-sm" /> Lịch sử
                 </a>
                 <a
-                  href="/mini/ai-qa"
+                  href={withBase("/ai-qa")}
                   className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                 >
                   <FaRobot className="mr-1 text-sm" /> Vấn đáp AI
                 </a>
                 <a
-                  href="/mini/study-with-ami"
+                  href={withBase("/study-with-ami")}
                   className="text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                   style={{ whiteSpace: 'nowrap' }}
                 >
                   <img
-                    src="/mini/ami-avatar.png"
+                    src={withBase("/ami-avatar.png")}
                     alt="Ami"
                     className="mr-1"
                     style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #ff2b78', flexShrink: 0 }}
@@ -193,7 +194,7 @@ const Navbar = () => {
                 </a>
                 {!isAdmin && (
                   <a
-                    href="/mini/tickets"
+                    href={withBase("/tickets")}
                     className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium relative"
                   >
                     <FaTicketAlt className="mr-1 text-sm" /> Hỗ trợ
@@ -207,19 +208,19 @@ const Navbar = () => {
                 {isTeacher && (
                   <>
                     <a
-                      href="/mini/teacher"
+                      href={withBase("/teacher")}
                       className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                     >
                       <FaChalkboardTeacher className="mr-1 text-sm" /> Bảng điều khiển giảng viên
                     </a>
                     {/* <a
-                      href="/mini/edit"
+                      href={withBase("/edit")}
                       className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                     >
                       <FaEdit className="mr-1 text-sm" /> Chỉnh sửa
                     </a> */}
                     {/* <a
-                      href="/mini/messages"
+                      href={withBase("/messages")}
                       className="text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center px-2 py-2 rounded-lg font-medium"
                     >
                       <FaComments className="mr-1 text-sm" /> Tin nhắn
@@ -239,77 +240,77 @@ const Navbar = () => {
                       <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                         <div className="py-1">
                           <a
-                            href="/mini/edit"
+                            href={withBase("/edit")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaEdit className="mr-2 text-sm inline" /> Chỉnh sửa nguồn
                           </a>
                           <a
-                            href="/mini/admin"
+                            href={withBase("/admin")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaUserShield className="mr-2 text-sm inline" /> Quản lý Chatbot
                           </a>
                           <a
-                            href="/mini/admin#student-analytics-management"
+                            href={withBase("/admin#student-analytics-management")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaChartBar className="mr-2 text-sm inline" /> Quản lý phân tích sinh viên
                           </a>
                           <a
-                            href="/mini/sources"
+                            href={withBase("/sources")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaFileAlt className="mr-2 text-sm inline" /> Quản lý File
                           </a>
                           <a
-                            href="/mini/questions"
+                            href={withBase("/questions")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaQuestionCircle className="mr-2 text-sm inline" /> Quản lý Câu hỏi
                           </a>
                           <a
-                            href="/mini/users"
+                            href={withBase("/users")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaUsers className="mr-2 text-sm inline" /> Quản lý Người dùng
                           </a>
                           <a
-                            href="/mini/messages"
+                            href={withBase("/messages")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaComments className="mr-2 text-sm inline" /> Quản lý Tin nhắn
                           </a>
                           <a
-                            href="/mini/logs"
+                            href={withBase("/logs")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaClipboardList className="mr-2 text-sm inline" /> Quản lý Logs
                           </a>
                           <a
-                            href="/mini/admin/tickets"
+                            href={withBase("/admin/tickets")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaTicketAlt className="mr-2 text-sm inline" /> Quản lý Hỗ trợ
                           </a>
                           <a
-                            href="/mini/teacher-stats"
+                            href={withBase("/teacher-stats")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
                             <FaChartBar className="mr-2 text-sm inline" /> Thống kê Giáo viên
                           </a>
                           <a
-                            href="/mini/ratings"
+                            href={withBase("/ratings")}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
@@ -329,13 +330,13 @@ const Navbar = () => {
             {!isLoggedIn ? (
               <>
                 <a
-                  href="/mini/login"
+                  href={withBase("/login")}
                   className="text-gray-700 hover:text-red-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-gray-50"
                 >
                   Đăng nhập
                 </a>
                 <a
-                  href="/mini/signup"
+                  href={withBase("/signup")}
                   className="bg-red-600 hover:bg-red-700 text-white font-medium px-3 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md"
                 >
                   Đăng ký
@@ -344,7 +345,7 @@ const Navbar = () => {
             ) : (
               <>
                 <a
-                  href="/mini/account"
+                  href={withBase("/account")}
                   className="text-gray-700 hover:text-red-600 transition-all duration-200 flex items-center px-2 py-2 rounded-lg hover:bg-gray-50 font-medium"
                 >
                   <FaUser className="mr-1 text-sm" /> Tài khoản
@@ -400,7 +401,7 @@ const Navbar = () => {
                 <div className="space-y-2">
                   {/* Always show basic navigation */}
                   <a
-                    href="/mini/"
+                    href={withBase("/")}
                     className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -411,7 +412,7 @@ const Navbar = () => {
                   {isLoggedIn ? (
                     <>
                       <a
-                        href="/mini/mini"
+                        href={withBase("/mini")}
                         onClick={(e) => {
                           handleChatClick(e);
                           setIsMenuOpen(false);
@@ -423,7 +424,7 @@ const Navbar = () => {
                       </a>
 
                       <a
-                        href="/mini/quiz-history"
+                        href={withBase("/quiz-history")}
                         className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                         onClick={() => setIsMenuOpen(false)}
                       >
@@ -431,7 +432,7 @@ const Navbar = () => {
                         Lịch sử
                       </a>
                       <a
-                        href="/mini/ai-qa"
+                        href={withBase("/ai-qa")}
                         className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                         onClick={() => setIsMenuOpen(false)}
                       >
@@ -439,12 +440,12 @@ const Navbar = () => {
                         Vấn đáp AI
                       </a>
                       <a
-                        href="/mini/study-with-ami"
+                        href={withBase("/study-with-ami")}
                         className="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-all duration-200"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <img
-                          src="/mini/ami-avatar.png"
+                          src={withBase("/ami-avatar.png")}
                           alt="Ami"
                           className="mr-3"
                           style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #ff2b78', flexShrink: 0 }}
@@ -455,7 +456,7 @@ const Navbar = () => {
                       {/* Show "Hỗ trợ" for non-admin users only (admins have "Quản lý Hỗ trợ" in dropdown) */}
                       {!isAdmin && (
                         <a
-                          href="/mini/tickets"
+                          href={withBase("/tickets")}
                           className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                           onClick={() => setIsMenuOpen(false)}
                         >
@@ -472,7 +473,7 @@ const Navbar = () => {
                       {isTeacher && (
                         <>
                           <a
-                            href="/mini/teacher"
+                            href={withBase("/teacher")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -480,7 +481,7 @@ const Navbar = () => {
                             Bảng điều khiển giảng viên
                           </a>
                           {/* <a
-                            href="/mini/edit"
+                            href={withBase("/edit")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -488,7 +489,7 @@ const Navbar = () => {
                             Chỉnh sửa nguồn
                           </a>
                           <a
-                            href="/mini/messages"
+                            href={withBase("/messages")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -507,7 +508,7 @@ const Navbar = () => {
                             </div>
                           </div>
                           <a
-                            href="/mini/edit"
+                            href={withBase("/edit")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -515,7 +516,7 @@ const Navbar = () => {
                             Chỉnh sửa nguồn
                           </a>
                           <a
-                            href="/mini/admin"
+                            href={withBase("/admin")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -523,7 +524,7 @@ const Navbar = () => {
                             Quản lý Chatbot
                           </a>
                           <a
-                            href="/mini/admin#student-analytics-management"
+                            href={withBase("/admin#student-analytics-management")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -531,7 +532,7 @@ const Navbar = () => {
                             Quản lý phân tích sinh viên
                           </a>
                           <a
-                            href="/mini/sources"
+                            href={withBase("/sources")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -539,7 +540,7 @@ const Navbar = () => {
                             Quản lý File
                           </a>
                           <a
-                            href="/mini/questions"
+                            href={withBase("/questions")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -547,7 +548,7 @@ const Navbar = () => {
                             Quản lý Câu hỏi
                           </a>
                           <a
-                            href="/mini/users"
+                            href={withBase("/users")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -555,7 +556,7 @@ const Navbar = () => {
                             Quản lý Người dùng
                           </a>
                           <a
-                            href="/mini/messages"
+                            href={withBase("/messages")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -563,7 +564,7 @@ const Navbar = () => {
                             Quản lý Tin nhắn
                           </a>
                           <a
-                            href="/mini/logs"
+                            href={withBase("/logs")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -571,7 +572,7 @@ const Navbar = () => {
                             Quản lý Logs
                           </a>
                           <a
-                            href="/mini/admin/tickets"
+                            href={withBase("/admin/tickets")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -579,7 +580,7 @@ const Navbar = () => {
                             Quản lý Hỗ trợ
                           </a>
                           <a
-                            href="/mini/teacher-stats"
+                            href={withBase("/teacher-stats")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -587,7 +588,7 @@ const Navbar = () => {
                             Thống kê Giáo viên
                           </a>
                           <a
-                            href="/mini/ratings"
+                            href={withBase("/ratings")}
                             className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
@@ -599,7 +600,7 @@ const Navbar = () => {
                     </>
                   ) : (
                     <a
-                      href="/mini/mini"
+                      href={withBase("/mini")}
                       onClick={(e) => {
                         handleChatClick(e);
                         setIsMenuOpen(false);
@@ -618,14 +619,14 @@ const Navbar = () => {
                 {!isLoggedIn ? (
                   <div className="space-y-2">
                     <a
-                      href="/mini/login"
+                      href={withBase("/login")}
                       className="block text-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-all duration-200 font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Đăng nhập
                     </a>
                     <a
-                      href="/mini/signup"
+                      href={withBase("/signup")}
                       className="block text-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -635,7 +636,7 @@ const Navbar = () => {
                 ) : (
                   <div className="space-y-2">
                     <a
-                      href="/mini/account"
+                      href={withBase("/account")}
                       className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-all duration-200"
                       onClick={() => setIsMenuOpen(false)}
                     >

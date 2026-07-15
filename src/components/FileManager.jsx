@@ -35,12 +35,46 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
   const [deleteConfirm, setDeleteConfirm] = useState({ show: false, file: null });
   const [showContentViewer, setShowContentViewer] = useState(false);
   const [selectedFileForViewing, setSelectedFileForViewing] = useState(null);
+  const [processing, setProcessing] = useState([]); // file đang chờ/đang phân tích/lỗi
 
   useEffect(() => {
     fetchFileMetadata();
+    fetchUploadStatus();
   }, [source]);
 
-  const fetchFileMetadata = async () => {
+  // Poll khi còn file đang chờ/đang phân tích, để tự cập nhật trạng thái.
+  useEffect(() => {
+    const hasActive = processing.some(
+      (p) => p.status === 'pending' || p.status === 'analyzing'
+    );
+    if (!hasActive) return;
+    const timer = setInterval(() => {
+      fetchUploadStatus();
+      fetchFileMetadata(true); // silent: không hiện spinner toàn trang
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [processing, source]);
+
+  const fetchUploadStatus = async () => {
+    const sid = (source && String(source).trim()) || '';
+    if (!sid) {
+      setProcessing([]);
+      return;
+    }
+    try {
+      const response = await fetch(API_ENDPOINTS.FILE_UPLOAD_STATUS(sid), {
+        method: 'GET',
+        headers: getAuthHeaders({ 'accept': 'application/json' }),
+      });
+      if (!response.ok) return; // im lặng, không phá UI
+      const data = await response.json();
+      setProcessing(Array.isArray(data?.items) ? data.items : []);
+    } catch {
+      // bỏ qua lỗi mạng tạm thời
+    }
+  };
+
+  const fetchFileMetadata = async (silent = false) => {
     const sid = (source && String(source).trim()) || '';
     if (!sid) {
       setLoading(false);
@@ -51,7 +85,7 @@ const FileManager = ({ source = 'hung', chatbotName = '' }) => {
     }
 
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError('');
 
       const headers = getAuthHeaders({
@@ -296,12 +330,9 @@ Có thể do:
 
   const handleUploadSuccess = () => {
     setShowUploader(false);
-    fetchFileMetadata();
-    // Upload đi qua RabbitMQ: MBA API xử lý sau vài giây — làm mới thêm vài lần
-    const delays = [2000, 5000, 12000];
-    delays.forEach((ms) => {
-      setTimeout(() => fetchFileMetadata(), ms);
-    });
+    // Hiện ngay trạng thái "đang chờ phân tích"; effect poll sẽ tự cập nhật tiếp.
+    fetchUploadStatus();
+    fetchFileMetadata(true);
   };
 
   const deleteFile = async (filename) => {
@@ -483,6 +514,38 @@ Có thể do:
               <h3 className="text-red-800 font-medium">Lỗi</h3>
               <p className="text-red-700 text-sm mt-1">{error}</p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Trạng thái phân tích (file vừa upload, đang chờ/đang xử lý/lỗi) */}
+      {processing.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">
+            Đang xử lý ({processing.length})
+          </h3>
+          <div className="space-y-2">
+            {processing.map((item, idx) => {
+              const badge = {
+                pending: { text: '⏳ Đang chờ phân tích', cls: 'bg-yellow-100 text-yellow-800' },
+                analyzing: { text: '🔄 Đang phân tích', cls: 'bg-blue-100 text-blue-800' },
+                error: { text: '❌ Lỗi phân tích', cls: 'bg-red-100 text-red-800' },
+              }[item.status] || { text: item.status, cls: 'bg-gray-100 text-gray-800' };
+              return (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 border border-gray-100"
+                >
+                  <div className="flex items-center min-w-0">
+                    <FaFileAlt className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+                    <span className="text-sm text-gray-800 truncate">{item.filename}</span>
+                  </div>
+                  <span className={`ml-3 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${badge.cls}`}>
+                    {badge.text}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

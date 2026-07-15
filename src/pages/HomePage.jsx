@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { withBase } from "../config/runtimeConfig";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import {
@@ -91,7 +92,7 @@ const HomePage = () => {
   const handleButtonClick = () => {
     if (!isLoggedIn) {
       // Nếu chưa đăng nhập, chuyển hướng đến trang login
-      window.location.href = '/mini/login';
+      window.location.href = withBase('/login');
     }
   };
 
@@ -139,7 +140,7 @@ const HomePage = () => {
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start max-w-md mx-auto lg:mx-0">
                     {isLoggedIn ? (
                       <a
-                        href="/mini/mini"
+                        href={withBase("/mini")}
                         className="group inline-flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-sm sm:text-base"
                       >
                         <FaComments className="mr-2 text-sm sm:text-base" />
@@ -150,14 +151,14 @@ const HomePage = () => {
                     ) : (
                       <>
                         <a
-                          href="/mini/login"
+                          href={withBase("/login")}
                           className="group inline-flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-sm sm:text-base"
                         >
                           Đăng nhập
                           <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform text-sm sm:text-base" />
                         </a>
                         <a
-                          href="/mini/signup"
+                          href={withBase("/signup")}
                           className="inline-flex items-center justify-center border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 text-sm sm:text-base"
                         >
                           Đăng ký ngay
@@ -442,7 +443,7 @@ const HomePage = () => {
               {!isLoggedIn && (
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md mx-auto">
                   <a
-                    href="/mini/signup"
+                    href={withBase("/signup")}
                     className="group inline-flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-sm sm:text-base"
                   >
                     <span className="hidden sm:inline">Đăng ký miễn phí</span>
@@ -450,7 +451,7 @@ const HomePage = () => {
                     <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform text-sm sm:text-base" />
                   </a>
                   <a
-                    href="/mini/login"
+                    href={withBase("/login")}
                     className="inline-flex items-center justify-center border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 text-sm sm:text-base"
                   >
                     <span className="hidden sm:inline">Đã có tài khoản? Đăng nhập</span>

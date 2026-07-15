@@ -64,6 +64,18 @@ export function resolveBasePath() {
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
+/**
+ * Ghép base path (VITE_PREF_PATH) vào đầu một đường dẫn tuyệt đối — dùng cho
+ * điều hướng full-page (window.location.href, thẻ <a href>, <img src>) vốn
+ * KHÔNG đi qua basename của React Router.
+ * Ví dụ: base "/mini" → withBase("/login") = "/mini/login"; base "/" → "/login".
+ */
+export function withBase(path = "/") {
+  const base = resolveBasePath();
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return base === "/" ? p : `${base}${p}`;
+}
+
 export function resolveApiBaseUrl() {
   const configuredBase = import.meta.env.VITE_API_BASE_URL || "";
 
@@ -86,5 +98,13 @@ export function resolveApiBaseUrl() {
     return configuredBase;
   }
 
-  return `${protocol}//${hostname}:4559`;
+  // Local/LAN: dùng hostname hiện tại + port của backend auth (MBA_BE).
+  // Ưu tiên port lấy từ VITE_API_BASE_URL để khớp .env; fallback BACKEND_PORT=4659.
+  let apiPort = "4659";
+  try {
+    const configuredPort = new URL(configuredBase).port;
+    if (configuredPort) apiPort = configuredPort;
+  } catch {}
+
+  return `${protocol}//${hostname}:${apiPort}`;
 }

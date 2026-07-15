@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { withBase } from "../config/runtimeConfig";
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { FaUser, FaLock, FaRobot, FaGraduationCap, FaUniversity, FaArrowRight } from 'react-icons/fa';
@@ -65,7 +66,7 @@ const Login = () => {
             setSuccessMessage('Đăng nhập thành công!');
             sessionStorage.setItem('check_rating', 'true');
             setTimeout(() => {
-                window.location.href = '/mini/';
+                window.location.href = withBase('/');
             }, 2000);
         } catch (err) {
             setError(err.message);
@@ -163,7 +164,7 @@ const Login = () => {
                                 <div className="mt-6 text-center">
                                     <p className="text-gray-600">
                                         Chưa có tài khoản?{' '}
-                                                                <a href="/mini/signup" className="text-red-600 hover:text-red-700 font-medium">
+                                                                <a href={withBase("/signup")} className="text-red-600 hover:text-red-700 font-medium">
                             Đăng ký ngay
                         </a>
                                     </p>

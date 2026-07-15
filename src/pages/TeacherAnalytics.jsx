@@ -94,7 +94,7 @@ const TeacherAnalytics = () => {
     useEffect(() => {
         const userRole = localStorage.getItem('user_role');
         if (userRole !== 'teacher' && userRole !== 'admin') {
-            navigate('/mini/');
+            navigate('/');
             return;
         }
         fetchTopics();

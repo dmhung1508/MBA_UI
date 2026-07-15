@@ -41,7 +41,7 @@ const AIQAPage = () => {
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token) {
-            navigate('/mini/login');
+            navigate('/login');
             return;
         }
         fetchChatbots();

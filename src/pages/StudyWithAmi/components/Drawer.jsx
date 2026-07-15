@@ -2,6 +2,7 @@ import React from "react";
 import { useAmi } from "../../../context/AmiContext";
 import { fetchSessions } from "../../../services/amiApi";
 import { DEBATE_ROUND_OPTIONS, DEBATE_TIME_OPTIONS } from "../../../hooks/useAmiDebate";
+import { API_ENDPOINTS } from "../../../config/api";
 
 function SubjectAvatar({ avatar }) {
   if (!avatar) return "📚";
@@ -45,7 +46,7 @@ function FeatureSubjects() {
           <button key={bot.id || bot.source}
             className={`subject-card ${bot.source === selectedSource ? "is-active" : ""}`}
             onClick={() => handleSelect(bot)}>
-            <span className="subject-icon"><SubjectAvatar avatar={bot.avatar} /></span>
+            <span className="subject-icon"><SubjectAvatar avatar={bot.avatar || (bot.id != null ? API_ENDPOINTS.CHATBOT_AVATAR(bot.id) : null)} /></span>
             <span className="subject-info" style={bot.source === selectedSource ? { paddingRight: 72 } : undefined}><span className="subject-name">{bot.name}</span><span className="subject-code">{bot.source}</span></span>
             {bot.source === selectedSource && (
               <span className="subject-active-badge">

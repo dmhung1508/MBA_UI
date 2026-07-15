@@ -337,7 +337,7 @@ const EditPage = () => {
                   onClick={() => handleChatbotSelect(chatbot)}
                 >
                   <img
-                    src={chatbot.avatar}
+                    src={chatbot.avatar || API_ENDPOINTS.CHATBOT_AVATAR(chatbot.id)}
                     alt={chatbot.name}
                     className="w-10 h-10 rounded-full mr-3"
                     onError={(e) => {
@@ -367,7 +367,7 @@ const EditPage = () => {
               {selectedChatbot ? (
                 <>
                   <img
-                    src={selectedChatbot.avatar}
+                    src={selectedChatbot.avatar || API_ENDPOINTS.CHATBOT_AVATAR(selectedChatbot.id)}
                     alt={selectedChatbot.name}
                     className="w-10 h-10 rounded-full mr-3"
                   />

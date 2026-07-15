@@ -24,9 +24,11 @@ export const API_ENDPOINTS = {
   // Chatbots
   CHATBOTS: `${AUTH_MINI_BASE}/chatbots`,
   CHATBOT_BY_ID: (id) => `${AUTH_MINI_BASE}/chatbots/${id}`,
+  CHATBOT_AVATAR: (id) => `${AUTH_MINI_BASE}/chatbots/${id}/avatar`,
 
   // Files (auth_mini endpoints)
   FILE_UPLOAD: `${AUTH_MINI_BASE}/mba/upload`,
+  FILE_UPLOAD_STATUS: (source) => `${AUTH_MINI_BASE}/mba/uploads/${source}/status`,
   FILE_METADATA: (source) => `${AUTH_MINI_BASE}/mba/files/${source}/metadata`,
   FILE_VIEW: (source, filename) => `${AUTH_MINI_BASE}/mba/files/${source}/view/${filename}`,
   FILE_DELETE: (source, filename) => `${AUTH_MINI_BASE}/mba/files/${source}/delete/${filename}`,
@@ -122,11 +124,14 @@ export const API_ENDPOINTS = {
 
   // Admin - Users
   ADMIN_USERS: `${AUTH_MINI_BASE}/users`,
+  ADMIN_USERS_BY_ROLE: (role, offset = 0, limit = 10, search = '') =>
+    `${AUTH_MINI_BASE}/users/by-role?role=${encodeURIComponent(role)}&offset=${offset}&limit=${limit}${search ? `&search=${encodeURIComponent(search)}` : ''}`,
   ADMIN_USER_ROLE: (username) => `${AUTH_MINI_BASE}/admin/users/${username}/role`,
   ADMIN_USER_ASSIGN_TOPICS: (username) => `${AUTH_MINI_BASE}/admin/users/${username}/assign-topics`,
 
   // Admin - Logs
   ADMIN_LOGS: `${AUTH_MINI_BASE}/admin/logs`,
+  ADMIN_LOGS_EXPORT: `${AUTH_MINI_BASE}/admin/logs/export`,
 
   // Teacher
   TEACHER_MY_TOPICS: `${AUTH_MINI_BASE}/teacher/my-topics`,

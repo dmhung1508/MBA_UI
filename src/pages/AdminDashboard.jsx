@@ -56,7 +56,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const userRole = localStorage.getItem('user_role');
     if (userRole !== 'admin') {
-      navigate('/mini/');
+      navigate('/');
       return;
     }
     fetchChatbots();
@@ -188,52 +188,41 @@ const AdminDashboard = () => {
   const handleUpdateChatbot = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      
+
+      // Backend nhận multipart form (để có thể đổi cả avatar). Chỉ gửi field
+      // thực sự thay đổi; kèm avatar_file nếu người dùng chọn ảnh mới.
+      const formDataToSend = new FormData();
+      let hasChange = false;
+
+      if (formData.name !== '' && formData.name !== selectedChatbot.name) {
+        formDataToSend.append('name', formData.name);
+        hasChange = true;
+      }
+      if (formData.prompt !== '' && formData.prompt !== selectedChatbot.prompt) {
+        formDataToSend.append('prompt', formData.prompt);
+        hasChange = true;
+      }
       if (avatarFile) {
-        // Nếu có file avatar mới, sử dụng FormData
-        const formDataToSend = new FormData();
-        
-        if (formData.name !== selectedChatbot.name) {
-          formDataToSend.append('name', formData.name);
-        }
-        if (formData.prompt !== selectedChatbot.prompt) {
-          formDataToSend.append('prompt', formData.prompt);
-        }
         formDataToSend.append('avatar_file', avatarFile);
+        hasChange = true;
+      }
 
-        const response = await fetch(API_ENDPOINTS.ADMIN_CHATBOT_BY_ID(selectedChatbot.id), {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: formDataToSend
-        });
+      if (!hasChange) {
+        setError('Không có thay đổi nào để cập nhật');
+        return;
+      }
 
-        if (!response.ok) {
-          const errorData = (await parseJsonSafe(response)) || {};
-          throw new Error(errorData.detail || 'Không thể cập nhật chatbot');
-        }
-      } else {
-        // Nếu không có file avatar mới, sử dụng JSON
-        const updateData = Object.fromEntries(
-          Object.entries(formData).filter(([key, value]) => value !== '' && value !== selectedChatbot[key])
-        );
+      const response = await fetch(API_ENDPOINTS.ADMIN_CHATBOT_BY_ID(selectedChatbot.id), {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formDataToSend
+      });
 
-        if (Object.keys(updateData).length === 0) {
-          setError('Không có thay đổi nào để cập nhật');
-          return;
-        }
-
-        const response = await fetch(API_ENDPOINTS.ADMIN_CHATBOT_BY_ID(selectedChatbot.id), {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(updateData)
-        });
-
-        if (!response.ok) {
-          const errorData = (await parseJsonSafe(response)) || {};
-          throw new Error(errorData.detail || 'Không thể cập nhật chatbot');
-        }
+      if (!response.ok) {
+        const errorData = (await parseJsonSafe(response)) || {};
+        throw new Error(errorData.detail || 'Không thể cập nhật chatbot');
       }
 
       setSuccess('Chatbot đã được cập nhật thành công!');
@@ -280,7 +269,7 @@ const AdminDashboard = () => {
       prompt: chatbot.prompt
     });
     setAvatarFile(null);
-    setAvatarPreview(chatbot.avatar || '');
+    setAvatarPreview(chatbot.avatar || API_ENDPOINTS.CHATBOT_AVATAR(chatbot.id));
     setShowModal(true);
   };
 
@@ -760,8 +749,8 @@ const AdminDashboard = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="h-10 w-10 rounded-full bg-white border border-gray-200 flex items-center justify-center p-1">
-                        <img 
-                          src={getAvatarSrc(chatbot.avatar)} 
+                        <img
+                          src={getAvatarSrc(chatbot.avatar || API_ENDPOINTS.CHATBOT_AVATAR(chatbot.id))}
                           alt={chatbot.name}
                           className="h-8 w-8 rounded-full object-cover"
                           onError={(e) => {

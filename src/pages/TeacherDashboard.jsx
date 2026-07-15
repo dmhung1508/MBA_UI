@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { withBase } from "../config/runtimeConfig";
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -38,7 +39,7 @@ const TeacherDashboard = () => {
   useEffect(() => {
     const userRole = localStorage.getItem('user_role');
     if (userRole !== 'teacher' && userRole !== 'admin') {
-      navigate('/mini/');
+      navigate('/');
       return;
     }
     fetchTeacherInfo();
@@ -204,7 +205,7 @@ const TeacherDashboard = () => {
           {/* All buttons in grid with 3 per row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <a
-              href="/mini/messages"
+              href={withBase("/messages")}
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-purple-300"
             >
               <div className="text-center">
@@ -215,7 +216,7 @@ const TeacherDashboard = () => {
             </a>
 
             <a
-              href="/mini/questions"
+              href={withBase("/questions")}
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-blue-300"
             >
               <div className="text-center">
@@ -226,7 +227,7 @@ const TeacherDashboard = () => {
             </a>
 
             <a
-              href="/mini/sources"
+              href={withBase("/sources")}
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-green-300"
             >
               <div className="text-center">
@@ -237,7 +238,7 @@ const TeacherDashboard = () => {
             </a>
 
             <a
-              href="/mini/edit"
+              href={withBase("/edit")}
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-orange-300"
             >
               <div className="text-center">
@@ -248,7 +249,7 @@ const TeacherDashboard = () => {
             </a>
 
             <a
-              href="/mini/teacher/quiz-history"
+              href={withBase("/teacher/quiz-history")}
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-indigo-300"
             >
               <div className="text-center">
@@ -259,7 +260,7 @@ const TeacherDashboard = () => {
             </a>
 
             <a
-              href="/mini/teacher/ai-qa"
+              href={withBase("/teacher/ai-qa")}
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-cyan-300"
             >
               <div className="text-center">
@@ -270,7 +271,7 @@ const TeacherDashboard = () => {
             </a>
 
             <a
-              href="/mini/teacher-analytics"
+              href={withBase("/teacher-analytics")}
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-pink-300"
             >
               <div className="text-center">
@@ -283,7 +284,7 @@ const TeacherDashboard = () => {
             {teacherInfo?.role === 'admin' && (
               <>
                 <a
-                  href="/mini/admin"
+                  href={withBase("/admin")}
                   className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-purple-300"
                 >
                   <div className="text-center">
@@ -294,7 +295,7 @@ const TeacherDashboard = () => {
                 </a>
 
                 <a
-                  href="/mini/users"
+                  href={withBase("/users")}
                   className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-red-300"
                 >
                   <div className="text-center">
@@ -332,14 +333,14 @@ const TeacherDashboard = () => {
                         <h4 className="font-medium text-gray-900">{topicName}</h4>
                         <div className="flex space-x-2">
                           <a
-                            href={`/mini/questions?source=${encodeURIComponent(topicCode)}`}
+                            href={withBase(`/questions?source=${encodeURIComponent(topicCode)}`)}
                             className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-100"
                             title="Quản lý câu hỏi"
                           >
                             <FaQuestionCircle className="w-4 h-4" />
                           </a>
                           <a
-                            href={`/mini/sources?source=${encodeURIComponent(topicCode)}`}
+                            href={withBase(`/sources?source=${encodeURIComponent(topicCode)}`)}
                             className="text-green-600 hover:text-green-800 p-2 rounded hover:bg-green-100"
                             title="Quản lý file"
                           >

@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useTokenRefresh } from './hooks/useTokenRefresh';
 import RatingPopup from "./components/RatingPopup";
 import { API_ENDPOINTS } from "./config/api";
+import { resolveBasePath } from "./config/runtimeConfig";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -47,6 +48,8 @@ function App() {
   useTokenRefresh();
 
   useEffect(() => {
+    // Popup đánh giá tắt mặc định; bật bằng VITE_ENABLE_RATING_POPUP=true trong .env
+    if (import.meta.env.VITE_ENABLE_RATING_POPUP !== 'true') return;
     const shouldCheck = sessionStorage.getItem('check_rating');
     if (!shouldCheck) return;
     const token = localStorage.getItem('access_token');
@@ -61,7 +64,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter basename="/mini" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <BrowserRouter basename={resolveBasePath()} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="App">
         {showRatingPopup && <RatingPopup onClose={() => setShowRatingPopup(false)} />}
         <Suspense fallback={<LoadingFallback />}>

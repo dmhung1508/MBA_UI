@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -17,23 +17,33 @@ import {
   FaFilter,
   FaCheck,
   FaStar,
-  FaBookOpen
+  FaBookOpen,
+  FaChevronLeft,
+  FaChevronRight
 } from 'react-icons/fa';
 
+const ROLES = ['admin', 'teacher', 'user'];
+const PAGE_LIMIT = 10; // số user tải mỗi role mỗi lần (không lấy hết một lúc)
+const emptyRoleData = () => ({
+  admin: { items: [], total: 0, offset: 0 },
+  teacher: { items: [], total: 0, offset: 0 },
+  user: { items: [], total: 0, offset: 0 },
+});
+
 const UserManager = () => {
-  const [users, setUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
+  // Mỗi role có dữ liệu + phân trang riêng, tải theo limit từ server.
+  const [roleData, setRoleData] = useState(emptyRoleData());
   const [availableChatbots, setAvailableChatbots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   // Filter states
   const [filters, setFilters] = useState({
     role: '',
     search: ''
   });
-  
+
   // Modal states
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('role'); // 'role', 'assign-topics'
@@ -68,22 +78,6 @@ const UserManager = () => {
     user: FaUser
   };
 
-  // Kiểm tra quyền admin
-  useEffect(() => {
-    const userRole = localStorage.getItem('user_role');
-    if (userRole !== 'admin') {
-      navigate('/mini/');
-      return;
-    }
-    fetchUsers();
-    fetchChatbots();
-  }, [navigate]);
-
-  // Filter users when filters change
-  useEffect(() => {
-    filterUsers();
-  }, [users, filters]);
-
   const getAuthHeaders = () => {
     const token = localStorage.getItem('access_token');
     return {
@@ -92,24 +86,55 @@ const UserManager = () => {
     };
   };
 
-  const fetchUsers = async () => {
+  const fetchRole = async (role, offset = 0, searchVal = filters.search) => {
     try {
       setLoading(true);
-      const response = await fetch(API_ENDPOINTS.ADMIN_USERS, {
-        headers: getAuthHeaders()
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.all_users || []);
-      } else {
-        throw new Error('Không thể tải danh sách người dùng');
-      }
+      const response = await fetch(
+        API_ENDPOINTS.ADMIN_USERS_BY_ROLE(role, offset, PAGE_LIMIT, searchVal),
+        { headers: getAuthHeaders() }
+      );
+      if (!response.ok) throw new Error('Không thể tải danh sách người dùng');
+      const data = await response.json();
+      setRoleData(prev => ({
+        ...prev,
+        [role]: { items: data.users || [], total: data.total || 0, offset },
+      }));
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchAllRoles = (searchVal = filters.search) => {
+    ROLES.forEach(role => fetchRole(role, 0, searchVal));
+  };
+
+  // Kiểm tra quyền admin + tải trang đầu của mỗi role
+  useEffect(() => {
+    const userRole = localStorage.getItem('user_role');
+    if (userRole !== 'admin') {
+      navigate('/');
+      return;
+    }
+    fetchAllRoles('');
+    fetchChatbots();
+  }, [navigate]);
+
+  // Tìm kiếm: debounce rồi tải lại từ trang đầu cho mọi role
+  const didMount = useRef(false);
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
+    const t = setTimeout(() => fetchAllRoles(filters.search), 400);
+    return () => clearTimeout(t);
+  }, [filters.search]);
+
+  const changePage = (role, newOffset) => {
+    if (newOffset < 0) return;
+    fetchRole(role, newOffset, filters.search);
   };
 
   const fetchChatbots = async () => {
@@ -145,26 +170,6 @@ const UserManager = () => {
       .toLowerCase();
   };
 
-  const filterUsers = () => {
-    let filtered = [...users];
-
-    // Filter by role
-    if (filters.role) {
-      filtered = filtered.filter(user => user.role === filters.role);
-    }
-
-    // Filter by search term
-    if (filters.search) {
-      const searchNormalized = removeVietnameseDiacritics(filters.search);
-      filtered = filtered.filter(user =>
-        removeVietnameseDiacritics(user.username).includes(searchNormalized) ||
-        (user.full_name && removeVietnameseDiacritics(user.full_name).includes(searchNormalized))
-      );
-    }
-
-    setFilteredUsers(filtered);
-  };
-
   const handleUpdateRole = async () => {
     try {
       const response = await fetch(
@@ -182,7 +187,7 @@ const UserManager = () => {
       }
 
       setSuccess(`Đã cập nhật role cho ${selectedUser.username} thành ${roleForm.role}`);
-      fetchUsers();
+      fetchAllRoles(filters.search);
       closeModal();
     } catch (err) {
       setError(err.message);
@@ -206,7 +211,7 @@ const UserManager = () => {
       }
 
       setSuccess(`Đã assign ${roleForm.assigned_topics.length} topics cho ${selectedUser.username}`);
-      fetchUsers();
+      fetchAllRoles(filters.search);
       closeModal();
     } catch (err) {
       setError(err.message);
@@ -295,11 +300,9 @@ const UserManager = () => {
            sourceNormalized.includes(searchNormalized);
   });
 
-  const getUsersByRole = (role) => {
-    return filteredUsers.filter(user => user.role === role);
-  };
+  const totalAllUsers = ROLES.reduce((sum, r) => sum + (roleData[r].total || 0), 0);
 
-  if (loading && users.length === 0) {
+  if (loading && totalAllUsers === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
@@ -357,8 +360,8 @@ const UserManager = () => {
             </div>
             <div className="flex items-end">
               <div className="text-sm text-gray-600">
-                <div>Tổng: <strong>{users.length}</strong> users</div>
-                <div>Đang hiển thị: <strong>{filteredUsers.length}</strong> users</div>
+                <div>Tổng: <strong>{totalAllUsers}</strong> users</div>
+                <div className="text-xs text-gray-400">Tải {PAGE_LIMIT}/role mỗi trang</div>
               </div>
             </div>
           </div>
@@ -375,10 +378,14 @@ const UserManager = () => {
         )}
 
         {/* Users by Role */}
-        {['admin', 'teacher', 'user'].map(role => {
-          const roleUsers = getUsersByRole(role);
-          if (roleUsers.length === 0 && filters.role && filters.role !== role) return null;
-          
+        {ROLES.map(role => {
+          if (filters.role && filters.role !== role) return null;
+
+          const rd = roleData[role];
+          const roleUsers = rd.items;
+          const totalPages = Math.max(1, Math.ceil(rd.total / PAGE_LIMIT));
+          const currentPage = Math.floor(rd.offset / PAGE_LIMIT) + 1;
+
           return (
             <div key={role} className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
               <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
@@ -387,7 +394,7 @@ const UserManager = () => {
                     {React.createElement(roleIcons[role], { className: "w-5 h-5 mr-2 inline-block align-middle" })}
                     {role === 'admin' ? 'Administrators' : role === 'teacher' ? 'Teachers' : 'Users'}
                     <span className="ml-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
-                      {roleUsers.length}
+                      {rd.total}
                     </span>
                   </h3>
                 </div>
@@ -464,6 +471,31 @@ const UserManager = () => {
                   </div>
                 )}
               </div>
+
+              {/* Phân trang cho role này */}
+              {rd.total > PAGE_LIMIT && (
+                <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-gray-50">
+                  <span className="text-sm text-gray-600">
+                    Trang {currentPage}/{totalPages} — {rd.total} user
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => changePage(role, rd.offset - PAGE_LIMIT)}
+                      disabled={rd.offset === 0}
+                      className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 flex items-center"
+                    >
+                      <FaChevronLeft className="w-3 h-3 mr-1" /> Trước
+                    </button>
+                    <button
+                      onClick={() => changePage(role, rd.offset + PAGE_LIMIT)}
+                      disabled={rd.offset + PAGE_LIMIT >= rd.total}
+                      className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 flex items-center"
+                    >
+                      Sau <FaChevronRight className="w-3 h-3 ml-1" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}

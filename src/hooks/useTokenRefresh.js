@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { resolveApiBaseUrl } from '../config/runtimeConfig';
+import { resolveApiBaseUrl, withBase } from '../config/runtimeConfig';
 
 /**
  * Hook to proactively refresh token based on user activity
@@ -41,7 +41,7 @@ export const useTokenRefresh = () => {
 
     // Redirect to login
     setTimeout(() => {
-      window.location.href = '/mini/login';
+      window.location.href = withBase('/login');
     }, 1000);
   };
 
