@@ -1,10 +1,11 @@
 import React from "react";
-import { resolveBaseUrl } from "../config/runtimeConfig";
+import { resolveBasePath, resolveBaseUrl } from "../config/runtimeConfig";
 
 const API_CONNECT_SSO = import.meta.env.VITE_API_CONNECT_SSO
 const BASE_URL = resolveBaseUrl();
+const BASE_PATH = resolveBasePath();
 const MicrosoftLoginButton = () => {
-  const redirect_uri = `${BASE_URL}/mini/access-auth`
+  const redirect_uri = `${BASE_URL}${BASE_PATH}/access-auth`
 
   const loginUrl = `${API_CONNECT_SSO}/?client_id=ptit-connect&response_type=code&redirect_uri=${redirect_uri}&scope=openid%20profile%20email&state=abc123xyz`
 

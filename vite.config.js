@@ -1,13 +1,19 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  // Read config from the repo-root .env so all services share one source of
+  // truth. In docker the same values also arrive via `env_file` (process.env),
+  // which loadEnv merges in because the prefix filter is '' (all keys).
+  const rootEnvDir = path.resolve(process.cwd(), '..');
+  const env = loadEnv(mode, rootEnvDir, '');
   const authProxyTarget = env.VITE_DEV_PROXY_AUTH_TARGET || 'http://localhost:4559';
   const mbaProxyTarget = env.VITE_DEV_PROXY_MBA_TARGET || 'http://localhost:4558';
 
   return {
     base: '/mini/',
+    envDir: rootEnvDir,
     plugins: [react()],
 
     server: {

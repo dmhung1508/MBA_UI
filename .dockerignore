@@ -1,0 +1,10 @@
+.env
+.git/
+node_modules/
+dist/
+build/
+coverage/
+*.log
+nohup.out
+.claude/
+self_documents/

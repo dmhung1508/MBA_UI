@@ -57,6 +57,13 @@ export function resolveBaseUrl() {
   return import.meta.env.VITE_BASE_URL || "";
 }
 
+export function resolveBasePath() {
+  const raw = import.meta.env.VITE_PREF_PATH || "/mini";
+  // Normalize: ensure a single leading slash and no trailing slash.
+  const trimmed = raw.replace(/\/+$/, "");
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
 export function resolveApiBaseUrl() {
   const configuredBase = import.meta.env.VITE_API_BASE_URL || "";
 

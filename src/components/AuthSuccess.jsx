@@ -1,9 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { resolveApiBaseUrl, resolveBaseUrl } from "../config/runtimeConfig";
+import { resolveApiBaseUrl, resolveBasePath, resolveBaseUrl } from "../config/runtimeConfig";
 
 const API_BASE_URL = resolveApiBaseUrl();
 const BASE_URL = resolveBaseUrl();
+const BASE_PATH = resolveBasePath();
 const API_GET_TOKEN = import.meta.env.VITE_API_GET_TOKEN
 const AuthSuccess = () => {
   const location = useLocation();
@@ -14,7 +15,7 @@ const AuthSuccess = () => {
 
   const params = new URLSearchParams(location.search);
   const code = params.get("code");
-  const redirect_uri = `${BASE_URL}/mini/access-auth`
+  const redirect_uri = `${BASE_URL}${BASE_PATH}/access-auth`
 
   useEffect(() => {
     const handleAuth = async () => {
