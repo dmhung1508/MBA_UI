@@ -17,19 +17,59 @@ import {
     FaBullseye,
     FaExclamationTriangle,
     FaSortAmountDown,
-    FaSyncAlt
+    FaSyncAlt,
+    FaStar,
+    FaMeh,
+    FaThumbsDown,
+    FaRobot,
+    FaFilter
 } from 'react-icons/fa';
+
+const QUALITY_META = {
+    hay: {
+        label: 'Câu hỏi hay',
+        short: 'Hay',
+        icon: FaStar,
+        bar: 'bg-emerald-500',
+        badge: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+        card: 'border-emerald-100 bg-emerald-50',
+        text: 'text-emerald-900',
+        soft: 'text-emerald-700'
+    },
+    trung_binh: {
+        label: 'Câu hỏi trung bình',
+        short: 'Trung bình',
+        icon: FaMeh,
+        bar: 'bg-amber-400',
+        badge: 'bg-amber-100 text-amber-800 border-amber-200',
+        card: 'border-amber-100 bg-amber-50',
+        text: 'text-amber-900',
+        soft: 'text-amber-700'
+    },
+    kem: {
+        label: 'Câu hỏi kém',
+        short: 'Kém',
+        icon: FaThumbsDown,
+        bar: 'bg-rose-500',
+        badge: 'bg-rose-100 text-rose-800 border-rose-200',
+        card: 'border-rose-100 bg-rose-50',
+        text: 'text-rose-900',
+        soft: 'text-rose-700'
+    }
+};
 
 const TeacherAnalytics = () => {
     const mapViewportRef = useRef(null);
     const [topics, setTopics] = useState([]);
     const [selectedTopic, setSelectedTopic] = useState('');
-    const [activeTab, setActiveTab] = useState('ranking'); // 'ranking' | 'clusters'
+    const [activeTab, setActiveTab] = useState('ranking'); // 'ranking' | 'clusters' | 'quality'
 
     const [rankingData, setRankingData] = useState([]);
     const [clustersData, setClustersData] = useState(null);
+    const [qualityData, setQualityData] = useState(null);
     const [rankingUpdatedAt, setRankingUpdatedAt] = useState(null);
     const [clustersUpdatedAt, setClustersUpdatedAt] = useState(null);
+    const [qualityUpdatedAt, setQualityUpdatedAt] = useState(null);
     
     const [selectedUser, setSelectedUser] = useState(null);
     const [userQuestions, setUserQuestions] = useState([]);
@@ -39,6 +79,8 @@ const TeacherAnalytics = () => {
     const [clusterSortBy, setClusterSortBy] = useState('size_desc');
     const [selectedClusterId, setSelectedClusterId] = useState(null);
     const [mapZoom, setMapZoom] = useState(1);
+    const [qualityFilter, setQualityFilter] = useState('all'); // all | hay | trung_binh | kem
+    const [qualitySearchTerm, setQualitySearchTerm] = useState('');
     
     const [loading, setLoading] = useState(false);
     const [loadingDetails, setLoadingDetails] = useState(false);
@@ -249,15 +291,54 @@ const TeacherAnalytics = () => {
         }
     };
 
+    const fetchQuality = async (topic, forceRefresh = false) => {
+        if (!topic) return;
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(API_ENDPOINTS.TEACHER_QUESTION_QUALITY(topic, forceRefresh), {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) {
+                const apiError = await getApiError(response, 'Không thể đánh giá chất lượng câu hỏi');
+                if (isNotFoundError(response.status, apiError)) {
+                    setQualityData({
+                        message: 'Chưa có dữ liệu câu hỏi để đánh giá',
+                        summary: { total: 0, hay: 0, trung_binh: 0, kem: 0 },
+                        questions: [],
+                        by_student: []
+                    });
+                    setError('');
+                    return;
+                }
+                throw new Error(apiError);
+            }
+            const data = await response.json();
+            setQualityData(data);
+            setQualityUpdatedAt(data.updated_at || null);
+            setError('');
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleTopicChange = (e) => {
         const topic = e.target.value;
         setSelectedTopic(topic);
         setStudentSearchTerm('');
         setShowStudentSuggestions(false);
+        setQualitySearchTerm('');
+        setQualityFilter('all');
+        setQualityData(null);
+        setClustersData(null);
         if (activeTab === 'ranking') {
             fetchRanking(topic);
-        } else {
+        } else if (activeTab === 'clusters') {
             fetchClusters(topic);
+        } else {
+            fetchQuality(topic);
         }
     };
 
@@ -267,6 +348,8 @@ const TeacherAnalytics = () => {
             fetchRanking(selectedTopic);
         } else if (tab === 'clusters' && !clustersData) {
             fetchClusters(selectedTopic);
+        } else if (tab === 'quality' && !qualityData) {
+            fetchQuality(selectedTopic);
         }
     };
 
@@ -276,11 +359,25 @@ const TeacherAnalytics = () => {
             fetchRanking(selectedTopic, true);
             return;
         }
+        if (activeTab === 'quality') {
+            fetchQuality(selectedTopic, true);
+            return;
+        }
         fetchClusters(selectedTopic, true);
     };
 
-    const activeUpdatedAt = activeTab === 'ranking' ? rankingUpdatedAt : clustersUpdatedAt;
+    const activeUpdatedAt = activeTab === 'ranking'
+        ? rankingUpdatedAt
+        : activeTab === 'quality'
+            ? qualityUpdatedAt
+            : clustersUpdatedAt;
     const activeUpdatedAtText = activeUpdatedAt ? new Date(activeUpdatedAt).toLocaleString('vi-VN') : '';
+
+    const getQualityKey = (q) => {
+        const raw = String(q?.quality || '').toLowerCase();
+        if (raw === 'hay' || raw === 'trung_binh' || raw === 'kem') return raw;
+        return 'trung_binh';
+    };
 
     const baseClusters = Array.isArray(clustersData?.clusters) ? clustersData.clusters : [];
     const visibleClusters = baseClusters.filter((cluster) => {
@@ -375,7 +472,7 @@ const TeacherAnalytics = () => {
                                 <FaChartPie className="mr-3 text-red-600" />
                                 Phân tích câu hỏi sinh viên
                             </h1>
-                            <p className="text-gray-600 mt-2">Theo dõi mức độ liên quan và xu hướng câu hỏi của sinh viên</p>
+                            <p className="text-gray-600 mt-2">Theo dõi mức độ liên quan, xu hướng và chất lượng câu hỏi (hay / trung bình / kém) bằng LLM</p>
                         </div>
                         
                         <div className="mt-4 md:mt-0 w-full md:w-1/3">
@@ -414,6 +511,12 @@ const TeacherAnalytics = () => {
                             onClick={() => handleTabChange('clusters')}
                         >
                             <FaProjectDiagram className="mr-2" /> Gom cụm câu hỏi
+                        </button>
+                        <button
+                            className={`py-2 px-4 font-medium text-sm flex items-center ${activeTab === 'quality' ? 'border-b-2 border-red-500 text-red-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            onClick={() => handleTabChange('quality')}
+                        >
+                            <FaStar className="mr-2" /> Chất lượng câu hỏi
                         </button>
                         </div>
                         <div className="mb-1 flex items-center gap-3">
@@ -545,14 +648,32 @@ const TeacherAnalytics = () => {
                                             <p className="text-sm text-gray-500 italic">Không tìm thấy câu hỏi.</p>
                                         ) : (
                                             <div className="space-y-4">
-                                                {userQuestions.map((q, i) => (
+                                                {userQuestions.map((q, i) => {
+                                                    const qKey = getQualityKey(q);
+                                                    const qMeta = QUALITY_META[qKey] || QUALITY_META.trung_binh;
+                                                    return (
                                                     <div
                                                         key={i}
                                                         className={`p-3 rounded-lg border ${q.is_top_related ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-100'}`}
                                                     >
+                                                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${qMeta.badge}`}>
+                                                                {q.quality_label || qMeta.label}
+                                                            </span>
+                                                            {q.quality_eval_source === 'llm' && (
+                                                                <span className="text-[10px] text-indigo-600 flex items-center gap-1">
+                                                                    <FaRobot /> LLM
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         <p className={`text-sm italic mb-2 ${q.is_top_related ? 'text-green-900 font-bold' : 'text-gray-800'}`}>
                                                             "{q.question}"
                                                         </p>
+                                                        {q.quality_reason && (
+                                                            <p className="text-xs text-gray-600 mb-2">
+                                                                <span className="font-semibold">Đánh giá:</span> {q.quality_reason}
+                                                            </p>
+                                                        )}
                                                         <div className="flex justify-between items-center text-xs">
                                                             <span className="text-gray-500">{new Date(q.timestamp).toLocaleString('vi-VN')}</span>
                                                             <span className={`font-semibold px-2 py-1 rounded-full ${q.relevance_score > 0.7 ? 'bg-green-100 text-green-800' : q.relevance_score > 0.4 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
@@ -560,7 +681,8 @@ const TeacherAnalytics = () => {
                                                             </span>
                                                         </div>
                                                     </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         )}
                                     </div>
@@ -568,6 +690,229 @@ const TeacherAnalytics = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* QUALITY TAB */}
+                    {!loading && activeTab === 'quality' && qualityData && (() => {
+                        const summary = qualityData.summary || { total: 0, hay: 0, trung_binh: 0, kem: 0, hay_pct: 0, trung_binh_pct: 0, kem_pct: 0 };
+                        const totalQ = summary.total || 0;
+                        const allQuestions = Array.isArray(qualityData.questions) ? qualityData.questions : [];
+                        const searchLower = qualitySearchTerm.trim().toLowerCase();
+                        const filteredQualityQuestions = allQuestions.filter((item) => {
+                            if (qualityFilter !== 'all' && getQualityKey(item) !== qualityFilter) return false;
+                            if (!searchLower) return true;
+                            const haystack = `${item.question || ''} ${item.username || ''} ${item.full_name || ''} ${item.reason || ''}`.toLowerCase();
+                            return haystack.includes(searchLower);
+                        });
+                        const byStudent = Array.isArray(qualityData.by_student) ? qualityData.by_student : [];
+                        const barMax = Math.max(summary.hay || 0, summary.trung_binh || 0, summary.kem || 0, 1);
+
+                        return (
+                        <div className="space-y-6">
+                            {qualityData.message && allQuestions.length === 0 ? (
+                                <div className="text-center p-8 bg-gray-50 rounded-lg">
+                                    <p className="text-gray-500 italic">{qualityData.message}</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
+                                        <div className="flex items-center gap-2">
+                                            <FaRobot className="text-indigo-500" />
+                                            <span>
+                                                LLM: {qualityData.llm_evaluated ?? 0} câu · Heuristic fallback: {qualityData.heuristic_evaluated ?? 0} câu
+                                                {qualityData.cached ? ' · (cache)' : ''}
+                                            </span>
+                                        </div>
+                                        <p className="text-gray-400">
+                                            Tiêu chí: rõ ràng, liên quan môn, chiều sâu tư duy · 3 mức hay / trung bình / kém
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                                        <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                                            <p className="text-xs text-indigo-700 font-semibold flex items-center"><FaQuestionCircle className="mr-1" /> Tổng câu hỏi đánh giá</p>
+                                            <p className="text-2xl font-bold text-indigo-900 mt-1">{totalQ}</p>
+                                        </div>
+                                        {['hay', 'trung_binh', 'kem'].map((key) => {
+                                            const meta = QUALITY_META[key];
+                                            const Icon = meta.icon;
+                                            const count = summary[key] || 0;
+                                            const pct = summary[`${key}_pct`] != null
+                                                ? summary[`${key}_pct`]
+                                                : (totalQ > 0 ? ((count / totalQ) * 100).toFixed(1) : 0);
+                                            return (
+                                                <button
+                                                    key={key}
+                                                    type="button"
+                                                    onClick={() => setQualityFilter(qualityFilter === key ? 'all' : key)}
+                                                    className={`rounded-xl border p-4 text-left transition hover:shadow-sm ${meta.card} ${qualityFilter === key ? 'ring-2 ring-offset-1 ring-red-300' : ''}`}
+                                                >
+                                                    <p className={`text-xs font-semibold flex items-center ${meta.soft}`}>
+                                                        <Icon className="mr-1" /> {meta.label}
+                                                    </p>
+                                                    <p className={`text-2xl font-bold mt-1 ${meta.text}`}>{count}</p>
+                                                    <p className={`text-xs mt-1 ${meta.soft}`}>{pct}%</p>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                                        <div className="xl:col-span-2 rounded-xl border border-gray-200 bg-white p-4">
+                                            <h3 className="font-semibold text-gray-800 mb-4">Phân bố chất lượng</h3>
+                                            <div className="space-y-4">
+                                                {['hay', 'trung_binh', 'kem'].map((key) => {
+                                                    const meta = QUALITY_META[key];
+                                                    const count = summary[key] || 0;
+                                                    const width = Math.max(4, (count / barMax) * 100);
+                                                    return (
+                                                        <div key={`bar-${key}`}>
+                                                            <div className="flex justify-between text-sm mb-1">
+                                                                <span className={`font-medium ${meta.text}`}>{meta.label}</span>
+                                                                <span className="text-gray-600">{count} câu</span>
+                                                            </div>
+                                                            <div className="h-3 rounded-full bg-gray-100 overflow-hidden">
+                                                                <div className={`h-full rounded-full ${meta.bar}`} style={{ width: `${width}%` }} />
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                            {/* stacked ratio bar */}
+                                            {totalQ > 0 && (
+                                                <div className="mt-6">
+                                                    <p className="text-xs font-semibold text-gray-500 mb-2">Tỷ lệ tổng thể</p>
+                                                    <div className="flex h-4 rounded-full overflow-hidden border border-gray-100">
+                                                        {['hay', 'trung_binh', 'kem'].map((key) => {
+                                                            const count = summary[key] || 0;
+                                                            if (!count) return null;
+                                                            return (
+                                                                <div
+                                                                    key={`stack-${key}`}
+                                                                    className={QUALITY_META[key].bar}
+                                                                    style={{ width: `${(count / totalQ) * 100}%` }}
+                                                                    title={`${QUALITY_META[key].label}: ${count}`}
+                                                                />
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="rounded-xl border border-gray-200 bg-white p-4">
+                                            <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                                <FaUsers className="mr-2 text-blue-600" /> Theo sinh viên
+                                            </h3>
+                                            <div className="max-h-64 overflow-y-auto space-y-2">
+                                                {byStudent.length === 0 ? (
+                                                    <p className="text-sm text-gray-500 italic">Chưa có dữ liệu sinh viên.</p>
+                                                ) : (
+                                                    byStudent.slice(0, 20).map((st) => (
+                                                        <div key={st.username} className="p-2 rounded-lg border border-gray-100 hover:bg-gray-50">
+                                                            <div className="flex justify-between gap-2">
+                                                                <div>
+                                                                    <p className="text-sm font-medium text-gray-800">{normalizeDisplayName(st.full_name) || st.username}</p>
+                                                                    <p className="text-[11px] text-gray-500">@{st.username}</p>
+                                                                </div>
+                                                                <p className="text-xs text-gray-500 whitespace-nowrap">{st.total} câu</p>
+                                                            </div>
+                                                            <div className="mt-1.5 flex flex-wrap gap-1">
+                                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">{st.hay || 0} hay</span>
+                                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">{st.trung_binh || 0} TB</span>
+                                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-100 text-rose-800">{st.kem || 0} kém</span>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="rounded-xl border border-gray-200 bg-white p-4">
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                                            <h3 className="font-semibold text-gray-800 flex items-center">
+                                                <FaComments className="mr-2 text-red-500" /> Chi tiết câu hỏi đã đánh giá
+                                            </h3>
+                                            <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                                <div className="relative flex-1 sm:w-56">
+                                                    <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Tìm câu hỏi / sinh viên"
+                                                        value={qualitySearchTerm}
+                                                        onChange={(e) => setQualitySearchTerm(e.target.value)}
+                                                        className="w-full rounded-lg border border-gray-200 pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                                                    />
+                                                </div>
+                                                <div className="relative sm:w-48">
+                                                    <FaFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
+                                                    <select
+                                                        value={qualityFilter}
+                                                        onChange={(e) => setQualityFilter(e.target.value)}
+                                                        className="w-full rounded-lg border border-gray-200 pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                                                    >
+                                                        <option value="all">Tất cả mức</option>
+                                                        <option value="hay">Câu hỏi hay</option>
+                                                        <option value="trung_binh">Câu hỏi trung bình</option>
+                                                        <option value="kem">Câu hỏi kém</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="max-h-[480px] overflow-y-auto space-y-3">
+                                            {filteredQualityQuestions.length === 0 ? (
+                                                <p className="text-sm text-gray-500 italic text-center py-8">Không có câu hỏi phù hợp bộ lọc.</p>
+                                            ) : (
+                                                filteredQualityQuestions.map((item, idx) => {
+                                                    const qKey = getQualityKey(item);
+                                                    const meta = QUALITY_META[qKey] || QUALITY_META.trung_binh;
+                                                    return (
+                                                        <div key={`${item.question_key || item.question}-${idx}`} className={`p-3 rounded-lg border ${meta.card}`}>
+                                                            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${meta.badge}`}>
+                                                                        {item.quality_label || meta.label}
+                                                                    </span>
+                                                                    {item.eval_source === 'llm' && (
+                                                                        <span className="text-[10px] text-indigo-600 flex items-center gap-1">
+                                                                            <FaRobot /> LLM
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <span className="text-[11px] text-gray-500">
+                                                                    {item.timestamp ? new Date(item.timestamp).toLocaleString('vi-VN') : ''}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-sm text-gray-800 italic mb-2">"{item.question}"</p>
+                                                            {item.reason && (
+                                                                <p className="text-xs text-gray-600 mb-2">
+                                                                    <span className="font-semibold">Lý do:</span> {item.reason}
+                                                                </p>
+                                                            )}
+                                                            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
+                                                                <span className="flex items-center gap-1">
+                                                                    <FaUserGraduate className="text-gray-400" />
+                                                                    {normalizeDisplayName(item.full_name) || item.username}
+                                                                    <span className="text-gray-400">@{item.username}</span>
+                                                                </span>
+                                                                {typeof item.relevance_score === 'number' && (
+                                                                    <span className="font-semibold text-gray-600">
+                                                                        Điểm liên quan: {item.relevance_score.toFixed(2)}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        );
+                    })()}
 
                     {/* CLUSTERS TAB */}
                     {!loading && activeTab === 'clusters' && clustersData && (
