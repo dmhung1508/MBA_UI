@@ -57,27 +57,37 @@ export function resolveBaseUrl() {
   return import.meta.env.VITE_BASE_URL || "";
 }
 
+/**
+ * Resolve API base URL.
+ * - Deployed hosts (mini.dinhmanhhung.net, ptitai.org, ...): always same-origin
+ *   so /auth_mini hits the reverse-proxy on the same domain.
+ * - Localhost / private IP: prefer local backend :4559 (or a local VITE_API_BASE_URL).
+ */
 export function resolveApiBaseUrl() {
-  const configuredBase = import.meta.env.VITE_API_BASE_URL || "";
+  const configuredBase = (import.meta.env.VITE_API_BASE_URL || "").trim();
 
+  // SSR / non-browser
   if (typeof window === "undefined" || !window.location?.hostname) {
-    return configuredBase;
+    return configuredBase || import.meta.env.VITE_BASE_URL || "";
   }
 
-  // If the configured URL points to an external (non-local) host, always use it
-  if (configuredBase) {
-    try {
-      const configuredHostname = new URL(configuredBase).hostname;
-      if (!isLocalLikeHost(configuredHostname)) {
-        return configuredBase;
+  const { protocol, hostname, origin } = window.location;
+
+  // Local dev: call backend on :4559 (or a configured local API URL)
+  if (isLocalLikeHost(hostname)) {
+    if (configuredBase) {
+      try {
+        const configuredHostname = new URL(configuredBase).hostname;
+        if (isLocalLikeHost(configuredHostname)) {
+          return configuredBase.replace(/\/$/, "");
+        }
+      } catch {
+        // ignore invalid URL, fall through
       }
-    } catch {}
+    }
+    return `${protocol}//${hostname}:4559`;
   }
 
-  const { protocol, hostname } = window.location;
-  if (!isLocalLikeHost(hostname)) {
-    return configuredBase;
-  }
-
-  return `${protocol}//${hostname}:4559`;
+  // Production / public host: always same origin (do NOT cross-call another domain)
+  return origin;
 }
