@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
 
   // Base path (asset + router) lấy từ VITE_PREF_PATH — đảm bảo có leading &
   // trailing slash theo yêu cầu của Vite.
-  let basePath = env.VITE_PREF_PATH || '/mini';
+  let basePath = env.VITE_PREF_PATH || '';
   if (!basePath.startsWith('/')) basePath = '/' + basePath;
   if (!basePath.endsWith('/')) basePath = basePath + '/';
 
