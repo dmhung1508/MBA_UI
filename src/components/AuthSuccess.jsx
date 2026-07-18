@@ -15,7 +15,7 @@ const AuthSuccess = () => {
 
   const params = new URLSearchParams(location.search);
   const code = params.get("code");
-  const redirect_uri = `${BASE_URL}${BASE_PATH}/access-auth`
+  const redirect_uri = `${BASE_URL}${BASE_PATH}access-auth`
 
   useEffect(() => {
     const handleAuth = async () => {
