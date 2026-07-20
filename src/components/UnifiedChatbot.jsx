@@ -360,76 +360,218 @@ const UnifiedChatbot = ({
     }
   }, [chatbotConfig.source, isSpeakerActive, speakText, setIsLoading]);
 
+  const formatSourceLabels = useCallback((rawSources) => {
+    if (!Array.isArray(rawSources)) return [];
+    return rawSources.map((source) => {
+      if (typeof source === 'string') return source;
+      const name = source.file_name || source.file_path || 'Tài liệu';
+      const snippet = source.text || source.section_summary || '';
+      const short = String(snippet).length > 200 ? `${String(snippet).slice(0, 200)}...` : snippet;
+      return short ? `${name}: ${short}` : name;
+    });
+  }, []);
+
   const handleSendMessage = useCallback(async () => {
     if (inputMessage.trim() !== "" && !isLoading) {
       setIsLoading(true);
-      setLoadingMessageIndex(0); // Reset loading message index
+      setLoadingMessageIndex(0);
 
+      const questionText = inputMessage.trim();
       const newMessage = {
         id: uuidv4(),
-        text: inputMessage,
+        text: questionText,
         sender: "user",
         timestamp: new Date().toLocaleTimeString(),
       };
       setMessages(prev => [...prev, newMessage]);
       setInputMessage("");
-      try {
-        let apiEndpoint;
-        if (chatbotConfig.id === 0) {
-          apiEndpoint = API_ENDPOINTS.MBA_RAG_TONGHOP(timestamp, inputMessage);
-        } else {
-          apiEndpoint = API_ENDPOINTS.RAG(username, inputMessage, chatbotConfig.source, true);
-        }
 
+      try {
         const token = localStorage.getItem('access_token');
         const headers = new Headers({
           "ngrok-skip-browser-warning": "69420",
         });
 
-        if (token && chatbotConfig.id !== 0) {
-          headers.append('Authorization', `Bearer ${token}`);
-        }
-
-        const response = await fetch(apiEndpoint, {
-          method: "GET",
-          headers: headers,
-        });
-        const result = await response.json();
-        let botResponse;
+        // Chatbot tổng hợp (id === 0): giữ GET non-stream cũ
         if (chatbotConfig.id === 0) {
-          botResponse = {
+          const apiEndpoint = API_ENDPOINTS.MBA_RAG_TONGHOP(timestamp, questionText);
+          const response = await fetch(apiEndpoint, { method: "GET", headers });
+          const result = await response.json();
+          const botResponse = {
             id: uuidv4(),
             text: result.text,
             sender: "bot",
             timestamp: new Date().toLocaleTimeString(),
             sources: Object.entries(result.source || {}).map(([key, value]) => `${key}: ${value}`),
           };
-        } else {
-          botResponse = {
-            id: uuidv4(),
-            text: result.answer.response,
-            sender: "bot",
-            timestamp: new Date().toLocaleTimeString(),
-            sources: result.answer.sources.map(source => `${source.file_name}: ${source.text}`),
-          };
+          setMessages(prev => [...prev, botResponse]);
+          if (isSpeakerActive) speakText(botResponse.text);
+          return;
         }
-        setMessages(prev => [...prev, botResponse]);
-        if (isSpeakerActive) {
-          speakText(botResponse.text);
+
+        // Chat thường: SSE streaming (1 bubble). Lỗi → fallback GET /rag/ cùng bubble.
+        if (token) {
+          headers.append('Authorization', `Bearer ${token}`);
+        }
+
+        const botId = uuidv4();
+        let fullText = '';
+        let gotFirstToken = false;
+        let botBubbleCreated = false;
+
+        // Chỉ tạo 1 bubble bot khi có token đầu (tránh 2 ô: ▋ + loading)
+        const ensureBotBubble = () => {
+          if (botBubbleCreated) return;
+          botBubbleCreated = true;
+          setIsLoading(false); // tắt spinner loading — chỉ còn bubble stream
+          setMessages(prev => [...prev, {
+            id: botId,
+            text: '',
+            sender: 'bot',
+            timestamp: new Date().toLocaleTimeString(),
+            sources: [],
+            streaming: true,
+          }]);
+        };
+
+        const applyBotUpdate = (patch) => {
+          ensureBotBubble();
+          setMessages(prev => prev.map((m) => (m.id === botId ? { ...m, ...patch } : m)));
+        };
+
+        const finishWithNonStream = async () => {
+          const apiEndpoint = API_ENDPOINTS.RAG(
+            username || 'anonymous',
+            questionText,
+            chatbotConfig.source,
+            true
+          );
+          const h = new Headers({ "ngrok-skip-browser-warning": "69420" });
+          if (token) h.append('Authorization', `Bearer ${token}`);
+          const response = await fetch(apiEndpoint, { method: 'GET', headers: h });
+          if (!response.ok) {
+            throw new Error(`RAG HTTP ${response.status}`);
+          }
+          const result = await response.json();
+          const answerPayload = result.answer || {};
+          const text = answerPayload.response || (typeof answerPayload === 'string' ? answerPayload : '') || '';
+          fullText = text;
+          applyBotUpdate({
+            text: text || 'Không nhận được phản hồi.',
+            sources: formatSourceLabels(answerPayload.sources || []),
+            streaming: false,
+          });
+          if (text && isSpeakerActive) speakText(text);
+        };
+
+        try {
+          const streamHeaders = new Headers(headers);
+          streamHeaders.append('Content-Type', 'application/json');
+          streamHeaders.append('Accept', 'text/event-stream');
+
+          // Chỉ hiện loading spinner (1 ô) cho đến token đầu
+          const response = await fetch(API_ENDPOINTS.RAG_STREAMING, {
+            method: 'POST',
+            headers: streamHeaders,
+            body: JSON.stringify({
+              userId: username || 'anonymous',
+              text: questionText,
+              source: chatbotConfig.source,
+              save: true,
+              mode: 'default',
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Stream HTTP ${response.status}`);
+          }
+          if (!response.body) {
+            throw new Error('Stream body unavailable');
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+
+            // Chuẩn hóa xuống dòng (proxy đôi khi dùng \r\n)
+            buffer = buffer.replace(/\r\n/g, '\n');
+            const parts = buffer.split('\n\n');
+            buffer = parts.pop() || '';
+
+            for (const part of parts) {
+              const lines = part.split('\n');
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith(':')) continue;
+                if (!trimmed.startsWith('data:')) continue;
+                const payload = trimmed.slice(5).trim();
+                if (!payload || payload === '[DONE]') continue;
+
+                let event;
+                try {
+                  event = JSON.parse(payload);
+                } catch {
+                  continue;
+                }
+
+                const stage = event.stage;
+                if (stage === 'token' && event.content != null && event.content !== '') {
+                  fullText += event.content;
+                  gotFirstToken = true;
+                  applyBotUpdate({ text: fullText, streaming: true });
+                } else if (stage === 'sources' && Array.isArray(event.sources)) {
+                  if (gotFirstToken) {
+                    applyBotUpdate({ sources: formatSourceLabels(event.sources) });
+                  }
+                } else if (stage === 'complete') {
+                  const finalText = event.response || fullText;
+                  fullText = finalText || fullText;
+                  if (fullText) {
+                    applyBotUpdate({
+                      text: fullText,
+                      sources: formatSourceLabels(event.sources || []),
+                      streaming: false,
+                    });
+                  }
+                } else if (stage === 'error') {
+                  throw new Error(event.message || 'Lỗi stream từ server');
+                }
+              }
+            }
+          }
+
+          if (!fullText) {
+            throw new Error('Stream rỗng');
+          }
+          applyBotUpdate({ streaming: false });
+          if (fullText && isSpeakerActive) speakText(fullText);
+        } catch (streamErr) {
+          console.warn('Stream failed, fallback non-stream:', streamErr);
+          if (gotFirstToken && fullText) {
+            applyBotUpdate({ streaming: false });
+          } else {
+            // Vẫn đang loading spinner → fallback non-stream vào 1 bubble
+            await finishWithNonStream();
+          }
         }
       } catch (error) {
-        const errorMessage = {
+        console.error('Chat send error:', error);
+        setMessages(prev => [...prev, {
           id: uuidv4(),
-          text: "Error, cannot connect to server",
-          sender: "bot",
+          text: `Không kết nối được máy chủ${error?.message ? ` (${error.message})` : ''}. Thử lại sau.`,
+          sender: 'bot',
           timestamp: new Date().toLocaleTimeString(),
-        };
-        setMessages(prev => [...prev, errorMessage]);
+        }]);
       } finally {
         setIsLoading(false);
       }
     }
-  }, [inputMessage, isLoading, chatbotConfig.id, chatbotConfig.source, username, isSpeakerActive, speakText, setIsLoading]);
+  }, [inputMessage, isLoading, chatbotConfig.id, chatbotConfig.source, username, isSpeakerActive, speakText, setIsLoading, formatSourceLabels]);
 
   const handleKeyPress = useCallback((e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -606,11 +748,18 @@ const UnifiedChatbot = ({
                   td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
                   tr: ({node, ...props}) => <tr className="even:bg-gray-50" {...props} />,
                 }}
-              >{preprocessMath(message.text)}</ReactMarkdown>
+              >{preprocessMath(message.text || '')}</ReactMarkdown>
+              {message.streaming && (
+                <span
+                  className="inline-block w-1.5 h-4 ml-0.5 bg-blue-500 align-middle"
+                  style={{ animation: 'pulse 1s ease-in-out infinite' }}
+                  aria-hidden
+                />
+              )}
               <div className="flex justify-between items-center mt-2 text-xs">
                 <p className={`${message.sender === "user" ? "text-blue-200" : "text-gray-500"}`}>
                   {message.historyId && <span className="text-xs opacity-70">📜 </span>}
-                  {message.timestamp}
+                  {message.streaming ? 'Đang trả lời...' : message.timestamp}
                 </p>
                 {/* {message.sender === "bot" && (
                   <div className="flex items-center space-x-2">

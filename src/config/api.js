@@ -160,6 +160,7 @@ export const API_ENDPOINTS = {
 
   // RAG & Chat
   RAG: (time, query, source, save) => `${AUTH_MINI_BASE}/mba/rag/?time=${time}&q=${encodeURIComponent(query)}&source=${source}&save=${save}`,
+  RAG_STREAMING: `${AUTH_MINI_BASE}/mba/rag_streaming/`,
   MBA_RAG_TONGHOP: (time, query) => `${MBA_MINI_BASE}/tonghop/?time=${time}&q=${encodeURIComponent(query)}`,
   MBA_EXPLANATION: `${MBA_MINI_BASE}/explanation/`,
 
