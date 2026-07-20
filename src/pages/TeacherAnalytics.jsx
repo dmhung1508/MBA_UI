@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { API_ENDPOINTS } from '../config/api';
@@ -81,12 +81,14 @@ const TeacherAnalytics = () => {
     const [mapZoom, setMapZoom] = useState(1);
     const [qualityFilter, setQualityFilter] = useState('all'); // all | hay | trung_binh | kem
     const [qualitySearchTerm, setQualitySearchTerm] = useState('');
+    const [qualityLoadingLlm, setQualityLoadingLlm] = useState(false);
     
     const [loading, setLoading] = useState(false);
     const [loadingDetails, setLoadingDetails] = useState(false);
     const [error, setError] = useState('');
 
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const getApiError = async (response, fallbackMessage) => {
         try {
@@ -139,12 +141,18 @@ const TeacherAnalytics = () => {
             navigate('/mini/');
             return;
         }
+        // Admin/teacher có thể vào thẳng tab quality qua ?tab=quality
+        const tab = (searchParams.get('tab') || '').toLowerCase();
+        if (tab === 'quality' || tab === 'clusters' || tab === 'ranking') {
+            setActiveTab(tab);
+        }
         fetchTopics();
-    }, [navigate]);
+    }, [navigate, searchParams]);
 
     const fetchTopics = async () => {
         try {
             const token = localStorage.getItem('access_token');
+            const userRole = localStorage.getItem('user_role');
             const response = await fetch(API_ENDPOINTS.TEACHER_MY_TOPICS, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -152,42 +160,57 @@ const TeacherAnalytics = () => {
                 throw new Error(await getApiError(response, 'Không thể tải danh sách môn học'));
             }
             const data = await response.json();
-            const fetchedTopics = data.assigned_topics || data.topics || [];
-            let topicOptions = fetchedTopics.map((item) => {
-                const raw = String(item || '').trim();
-                const code = parseTopicCode(raw);
-                return { code: code || raw, name: raw };
-            });
+            let fetchedTopics = data.assigned_topics || data.topics || [];
 
-            // Enrich topic label with subject name: "CODE - Subject Name"
+            // Enrich + admin fallback: lấy full list từ chatbots
             const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-
+            let allChatbots = [];
             if (chatbotsResponse.ok) {
                 const chatbotsData = await chatbotsResponse.json();
-                const allChatbots = chatbotsData.chatbots || [];
-                topicOptions = fetchedTopics.map((item) => {
-                    const raw = String(item || '').trim();
-                    const parsedCode = parseTopicCode(raw) || raw;
-                    const chatbot = allChatbots.find((cb) => cb.source === parsedCode || cb.quizTopic === parsedCode);
-                    return {
-                        code: parsedCode,
-                        name: chatbot?.name || raw
-                    };
-                });
+                allChatbots = chatbotsData.chatbots || [];
             }
+
+            // Admin không có assigned_topics → dùng mọi chatbot
+            if ((!fetchedTopics || fetchedTopics.length === 0) && (userRole === 'admin' || allChatbots.length > 0)) {
+                if (userRole === 'admin') {
+                    fetchedTopics = allChatbots
+                        .map((cb) => cb.source || cb.quizTopic)
+                        .filter(Boolean);
+                }
+            }
+
+            let topicOptions = fetchedTopics.map((item) => {
+                const raw = String(item || '').trim();
+                const parsedCode = parseTopicCode(raw) || raw;
+                const chatbot = allChatbots.find((cb) => cb.source === parsedCode || cb.quizTopic === parsedCode);
+                return {
+                    code: parsedCode,
+                    name: chatbot?.name || raw
+                };
+            });
+            // unique by code
+            topicOptions = Array.from(new Map(topicOptions.map((t) => [t.code, t])).values());
 
             setTopics(topicOptions);
             setError('');
 
             if (topicOptions.length > 0) {
                 setSelectedTopic(topicOptions[0].code);
-                fetchRanking(topicOptions[0].code);
+                const tab = (searchParams.get('tab') || 'ranking').toLowerCase();
+                if (tab === 'quality') {
+                    fetchQuality(topicOptions[0].code);
+                } else if (tab === 'clusters') {
+                    fetchClusters(topicOptions[0].code);
+                } else {
+                    fetchRanking(topicOptions[0].code);
+                }
             } else {
                 setSelectedTopic('');
                 setRankingData([]);
                 setClustersData(null);
+                setQualityData(null);
                 setError('Bạn chưa được gán môn học nào để xem phân tích.');
             }
         } catch (err) {
@@ -291,20 +314,26 @@ const TeacherAnalytics = () => {
         }
     };
 
-    const fetchQuality = async (topic, forceRefresh = false) => {
+    const fetchQuality = async (topic, { forceRefresh = false } = {}) => {
         if (!topic) return;
         try {
-            setLoading(true);
+            // LLM có thể chậm: nếu đã có data thì giữ màn hình + spinner riêng
+            if (qualityData) {
+                setQualityLoadingLlm(true);
+            } else {
+                setLoading(true);
+            }
             const token = localStorage.getItem('access_token');
-            const response = await fetch(API_ENDPOINTS.TEACHER_QUESTION_QUALITY(topic, forceRefresh), {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const response = await fetch(
+                API_ENDPOINTS.TEACHER_QUESTION_QUALITY(topic, { forceRefresh, useLlm: true }),
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
             if (!response.ok) {
                 const apiError = await getApiError(response, 'Không thể đánh giá chất lượng câu hỏi');
                 if (isNotFoundError(response.status, apiError)) {
                     setQualityData({
                         message: 'Chưa có dữ liệu câu hỏi để đánh giá',
-                        summary: { total: 0, hay: 0, trung_binh: 0, kem: 0 },
+                        summary: { total: 0, unique_questions: 0, hay: 0, trung_binh: 0, kem: 0 },
                         questions: [],
                         by_student: []
                     });
@@ -321,6 +350,7 @@ const TeacherAnalytics = () => {
             setError(err.message);
         } finally {
             setLoading(false);
+            setQualityLoadingLlm(false);
         }
     };
 
@@ -360,7 +390,7 @@ const TeacherAnalytics = () => {
             return;
         }
         if (activeTab === 'quality') {
-            fetchQuality(selectedTopic, true);
+            fetchQuality(selectedTopic, { forceRefresh: true });
             return;
         }
         fetchClusters(selectedTopic, true);
@@ -376,7 +406,8 @@ const TeacherAnalytics = () => {
     const getQualityKey = (q) => {
         const raw = String(q?.quality || '').toLowerCase();
         if (raw === 'hay' || raw === 'trung_binh' || raw === 'kem') return raw;
-        return 'trung_binh';
+        // null / chưa đánh giá LLM
+        return null;
     };
 
     const baseClusters = Array.isArray(clustersData?.clusters) ? clustersData.clusters : [];
@@ -538,7 +569,7 @@ const TeacherAnalytics = () => {
                         </div>
                     </div>
 
-                    {loading && (
+                    {loading && !(activeTab === 'quality' && qualityData) && (
                         <div className="flex justify-center my-12">
                             <FaSpinner className="animate-spin text-4xl text-red-600" />
                         </div>
@@ -650,15 +681,15 @@ const TeacherAnalytics = () => {
                                             <div className="space-y-4">
                                                 {userQuestions.map((q, i) => {
                                                     const qKey = getQualityKey(q);
-                                                    const qMeta = QUALITY_META[qKey] || QUALITY_META.trung_binh;
+                                                    const qMeta = qKey ? QUALITY_META[qKey] : null;
                                                     return (
                                                     <div
                                                         key={i}
                                                         className={`p-3 rounded-lg border ${q.is_top_related ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-100'}`}
                                                     >
                                                         <div className="flex flex-wrap items-center gap-2 mb-2">
-                                                            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${qMeta.badge}`}>
-                                                                {q.quality_label || qMeta.label}
+                                                            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${qMeta ? qMeta.badge : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                                                                {q.quality_label || (qMeta ? qMeta.label : 'Chưa đánh giá LLM')}
                                                             </span>
                                                             {q.quality_eval_source === 'llm' && (
                                                                 <span className="text-[10px] text-indigo-600 flex items-center gap-1">
@@ -692,9 +723,10 @@ const TeacherAnalytics = () => {
                     )}
 
                     {/* QUALITY TAB */}
-                    {!loading && activeTab === 'quality' && qualityData && (() => {
-                        const summary = qualityData.summary || { total: 0, hay: 0, trung_binh: 0, kem: 0, hay_pct: 0, trung_binh_pct: 0, kem_pct: 0 };
+                    {activeTab === 'quality' && qualityData && (() => {
+                        const summary = qualityData.summary || { total: 0, unique_questions: 0, hay: 0, trung_binh: 0, kem: 0, hay_pct: 0, trung_binh_pct: 0, kem_pct: 0 };
                         const totalQ = summary.total || 0;
+                        const uniqueQ = summary.unique_questions || 0;
                         const allQuestions = Array.isArray(qualityData.questions) ? qualityData.questions : [];
                         const searchLower = qualitySearchTerm.trim().toLowerCase();
                         const filteredQualityQuestions = allQuestions.filter((item) => {
@@ -705,7 +737,6 @@ const TeacherAnalytics = () => {
                         });
                         const byStudent = Array.isArray(qualityData.by_student) ? qualityData.by_student : [];
                         const barMax = Math.max(summary.hay || 0, summary.trung_binh || 0, summary.kem || 0, 1);
-
                         return (
                         <div className="space-y-6">
                             {qualityData.message && allQuestions.length === 0 ? (
@@ -714,23 +745,56 @@ const TeacherAnalytics = () => {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
-                                        <div className="flex items-center gap-2">
-                                            <FaRobot className="text-indigo-500" />
-                                            <span>
-                                                LLM: {qualityData.llm_evaluated ?? 0} câu · Heuristic fallback: {qualityData.heuristic_evaluated ?? 0} câu
-                                                {qualityData.cached ? ' · (cache)' : ''}
-                                            </span>
+                                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                                            <div className="text-sm text-slate-700 space-y-1">
+                                                <p className="font-semibold text-slate-900">
+                                                    {totalQ} câu hỏi
+                                                    {uniqueQ > 0 && uniqueQ !== totalQ ? ` (${uniqueQ} nội dung khác nhau)` : ''}
+                                                </p>
+                                                <p className="text-xs text-slate-600">
+                                                    AI phân loại từng câu: hay · trung bình · kém
+                                                    {qualityData.cached ? ' · Đang dùng kết quả đã lưu' : ''}
+                                                </p>
+                                                {(qualityData.error_count ?? 0) > 0 && (
+                                                    <p className="text-xs text-rose-600">
+                                                        {qualityData.error_count} câu chưa chấm được (lỗi AI)
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => fetchQuality(selectedTopic, { forceRefresh: true })}
+                                                disabled={qualityLoadingLlm || loading || !selectedTopic}
+                                                className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold border ${
+                                                    qualityLoadingLlm || loading || !selectedTopic
+                                                        ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                                        : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
+                                                }`}
+                                                title="Chấm lại toàn bộ bằng AI"
+                                            >
+                                                {qualityLoadingLlm ? (
+                                                    <FaSpinner className="mr-2 animate-spin" />
+                                                ) : (
+                                                    <FaRobot className="mr-2" />
+                                                )}
+                                                {qualityLoadingLlm ? 'Đang đánh giá...' : 'Đánh giá lại'}
+                                            </button>
                                         </div>
-                                        <p className="text-gray-400">
-                                            Tiêu chí: rõ ràng, liên quan môn, chiều sâu tư duy · 3 mức hay / trung bình / kém
-                                        </p>
+                                        {qualityLoadingLlm && (
+                                            <p className="mt-2 text-xs text-indigo-700">
+                                                Đang đánh giá — có thể mất chút thời gian tùy số câu hỏi.
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                                         <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
-                                            <p className="text-xs text-indigo-700 font-semibold flex items-center"><FaQuestionCircle className="mr-1" /> Tổng câu hỏi đánh giá</p>
+                                            <p className="text-xs text-indigo-700 font-semibold flex items-center"><FaQuestionCircle className="mr-1" /> Tổng câu hỏi</p>
                                             <p className="text-2xl font-bold text-indigo-900 mt-1">{totalQ}</p>
+                                            {uniqueQ > 0 && uniqueQ !== totalQ && (
+                                                <p className="text-xs text-indigo-700 mt-1">{uniqueQ} nội dung khác nhau</p>
+                                            )}
                                         </div>
                                         {['hay', 'trung_binh', 'kem'].map((key) => {
                                             const meta = QUALITY_META[key];
