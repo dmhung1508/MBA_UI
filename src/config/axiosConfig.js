@@ -89,7 +89,7 @@ axiosInstance.interceptors.response.use(
           `${apiBaseUrl}/auth_mini/refresh`,
           {},
           {
-            withCredentials: true, // Send refresh token cookie
+            withCredentials: true, // Send refrestạoh token cookie
             headers: {
               Authorization: `Bearer ${currentToken}`,
             },

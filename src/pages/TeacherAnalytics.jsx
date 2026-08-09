@@ -960,11 +960,6 @@ const TeacherAnalytics = () => {
                                                                     {normalizeDisplayName(item.full_name) || item.username}
                                                                     <span className="text-gray-400">@{item.username}</span>
                                                                 </span>
-                                                                {typeof item.relevance_score === 'number' && (
-                                                                    <span className="font-semibold text-gray-600">
-                                                                        Điểm liên quan: {item.relevance_score.toFixed(2)}
-                                                                    </span>
-                                                                )}
                                                             </div>
                                                         </div>
                                                     );

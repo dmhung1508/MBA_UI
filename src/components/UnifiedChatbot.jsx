@@ -55,6 +55,7 @@ const UnifiedChatbot = ({
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [sessionId, setSessionId] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -86,6 +87,24 @@ const UnifiedChatbot = ({
       console.error('Failed to decode access token:', error);
     }
   }
+
+  const sessionStorageKey = useMemo(
+    () => `mba-course-session:${username || 'anonymous'}:${chatbotConfig.source || 'unknown'}`,
+    [username, chatbotConfig.source]
+  );
+
+  const rememberSessionId = useCallback((value) => {
+    const normalized = String(value || '').trim();
+    if (!normalized) return null;
+    sessionStorage.setItem(sessionStorageKey, normalized);
+    setSessionId(normalized);
+    return normalized;
+  }, [sessionStorageKey]);
+
+  const ensureSessionId = useCallback(() => {
+    const existing = sessionStorage.getItem(sessionStorageKey);
+    return rememberSessionId(existing || uuidv4());
+  }, [rememberSessionId, sessionStorageKey]);
 
   // Function để format lịch sử chat từ API thành format message
   const formatChatHistoryToMessages = useCallback((chatHistoryData) => {
@@ -222,6 +241,7 @@ const UnifiedChatbot = ({
         if (data.status === "ok") {
           setChatHistory([]);
           setMessages([]);
+          rememberSessionId(uuidv4());
           showToastNotification(`🎉 Đã xóa thành công ${data.deleted_count} tin nhắn chat!`, "success");
         }
       } else {
@@ -233,7 +253,7 @@ const UnifiedChatbot = ({
     } finally {
       setIsLoadingHistory(false);
     }
-  }, [username, chatbotConfig.source, showToastNotification]);
+  }, [username, chatbotConfig.source, rememberSessionId, showToastNotification]);
 
   const openQuizPractice = useCallback((chapters = []) => {
     if (inactivityTimerRef.current) {
@@ -387,6 +407,7 @@ const UnifiedChatbot = ({
       setInputMessage("");
 
       try {
+        const activeSessionId = sessionId || ensureSessionId();
         const token = localStorage.getItem('access_token');
         const headers = new Headers({
           "ngrok-skip-browser-warning": "69420",
@@ -444,7 +465,8 @@ const UnifiedChatbot = ({
             username || 'anonymous',
             questionText,
             chatbotConfig.source,
-            true
+            true,
+            activeSessionId
           );
           const h = new Headers({ "ngrok-skip-browser-warning": "69420" });
           if (token) h.append('Authorization', `Bearer ${token}`);
@@ -453,6 +475,7 @@ const UnifiedChatbot = ({
             throw new Error(`RAG HTTP ${response.status}`);
           }
           const result = await response.json();
+          if (result.session_id) rememberSessionId(result.session_id);
           const answerPayload = result.answer || {};
           const text = answerPayload.response || (typeof answerPayload === 'string' ? answerPayload : '') || '';
           fullText = text;
@@ -479,6 +502,10 @@ const UnifiedChatbot = ({
               source: chatbotConfig.source,
               save: true,
               mode: 'default',
+              sessionId: activeSessionId,
+              metadata: {
+                subjectName: chatbotConfig.name || '',
+              },
             }),
           });
 
@@ -519,6 +546,7 @@ const UnifiedChatbot = ({
                   continue;
                 }
 
+                if (event.session_id) rememberSessionId(event.session_id);
                 const stage = event.stage;
                 if (stage === 'token' && event.content != null && event.content !== '') {
                   fullText += event.content;
@@ -571,7 +599,7 @@ const UnifiedChatbot = ({
         setIsLoading(false);
       }
     }
-  }, [inputMessage, isLoading, chatbotConfig.id, chatbotConfig.source, username, isSpeakerActive, speakText, setIsLoading, formatSourceLabels]);
+  }, [inputMessage, isLoading, chatbotConfig.id, chatbotConfig.name, chatbotConfig.source, username, sessionId, ensureSessionId, rememberSessionId, isSpeakerActive, speakText, setIsLoading, formatSourceLabels]);
 
   const handleKeyPress = useCallback((e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -641,6 +669,12 @@ const UnifiedChatbot = ({
     setChatHistory([]);
     setMessages([]);
   }, [chatbotConfig.source]);
+
+  useEffect(() => {
+    if (chatbotConfig.source) {
+      ensureSessionId();
+    }
+  }, [chatbotConfig.source, ensureSessionId]);
 
   useEffect(() => {
     const el = textareaRef.current;
