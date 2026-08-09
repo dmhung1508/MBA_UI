@@ -275,6 +275,36 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setAvatarFile(null);
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Định dạng ảnh không hợp lệ. Hỗ trợ: JPG, PNG, GIF, WebP.');
+      e.target.value = '';
+      setAvatarFile(null);
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Ảnh avatar tối đa 5MB.');
+      e.target.value = '';
+      setAvatarFile(null);
+      return;
+    }
+
+    setError('');
+    setAvatarFile(file);
+
+    const reader = new FileReader();
+    reader.onload = () => setAvatarPreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+
   const clearMessages = () => {
     setError('');
     setSuccess('');
