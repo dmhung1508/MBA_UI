@@ -118,15 +118,14 @@ const AdminDashboard = () => {
     return baseString + randomNumbers;
   };
 
-  // Chuẩn hóa mã môn: bỏ dấu, bỏ ký tự đặc biệt, viết thường
+  // Chuẩn hóa mã môn: bỏ dấu và ký tự đặc biệt, giữ nguyên chữ hoa/thường
   const normalizeTopicCode = (value) =>
     (value || '')
       .normalize('NFD')
       .replace(/\p{Diacritic}/gu, '')
       .replace(/đ/g, 'd')
       .replace(/Đ/g, 'D')
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]/g, '');
+      .replace(/[^A-Za-z0-9_-]/g, '');
 
   const handleCreateChatbot = async () => {
     try {
@@ -138,10 +137,10 @@ const AdminDashboard = () => {
       // Mã môn do admin nhập; nếu bỏ trống thì tự sinh từ tên chatbot
       const topicCode = normalizeTopicCode(formData.source) || generateSourceAndQuizTopic(formData.name);
       if (topicCode.length < 3) {
-        setError('Mã môn phải có ít nhất 3 ký tự (chữ thường, số, "-" hoặc "_").');
+        setError('Mã môn phải có ít nhất 3 ký tự (chữ cái không dấu, số, "-" hoặc "_").');
         return;
       }
-      if (chatbots.some((c) => (c.source || '').toLowerCase() === topicCode)) {
+      if (chatbots.some((c) => (c.source || '').toLowerCase() === topicCode.toLowerCase())) {
         setError(`Mã môn "${topicCode}" đã tồn tại. Vui lòng chọn mã khác.`);
         return;
       }
@@ -190,10 +189,10 @@ const AdminDashboard = () => {
       const topicCode = normalizeTopicCode(formData.source);
       if (topicCode && topicCode !== selectedChatbot.source) {
         if (topicCode.length < 3) {
-          setError('Mã môn phải có ít nhất 3 ký tự (chữ thường, số, "-" hoặc "_").');
+          setError('Mã môn phải có ít nhất 3 ký tự (chữ cái không dấu, số, "-" hoặc "_").');
           return;
         }
-        if (chatbots.some((c) => c.id !== selectedChatbot.id && (c.source || '').toLowerCase() === topicCode)) {
+        if (chatbots.some((c) => c.id !== selectedChatbot.id && (c.source || '').toLowerCase() === topicCode.toLowerCase())) {
           setError(`Mã môn "${topicCode}" đã tồn tại. Vui lòng chọn mã khác.`);
           return;
         }
@@ -670,7 +669,7 @@ const AdminDashboard = () => {
                         )}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
-                        Chỉ dùng chữ thường, số, "-" hoặc "_" (tối thiểu 3 ký tự).
+                        Chỉ dùng chữ cái không dấu, số, "-" hoặc "_" (tối thiểu 3 ký tự).
                         {modalMode === 'create'
                           ? ' Để trống sẽ tự sinh từ tên chatbot.'
                           : ' Đổi mã môn sẽ ảnh hưởng tới dữ liệu/tài liệu đã gắn với mã cũ.'}
