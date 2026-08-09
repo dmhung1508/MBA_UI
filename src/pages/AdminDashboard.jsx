@@ -11,7 +11,8 @@ import {
   FaSave,
   FaTimes,
   FaExclamationTriangle,
-  FaSpinner
+  FaSpinner,
+  FaSearch
 } from 'react-icons/fa';
 
 const AdminDashboard = () => {
@@ -27,6 +28,8 @@ const AdminDashboard = () => {
     prompt: ''
   });
   
+  const [searchTerm, setSearchTerm] = useState('');
+
   // States for avatar upload
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState('');
@@ -350,6 +353,16 @@ const AdminDashboard = () => {
     return 'https://cdn-icons-png.flaticon.com/512/1698/1698535.png';
   };
 
+  // Lọc chatbot theo từ khóa (tên, mã môn, id, prompt)
+  const keyword = searchTerm.trim().toLowerCase();
+  const filteredChatbots = keyword
+    ? chatbots.filter((chatbot) => {
+        const topicCode = chatbot.source || chatbot.quizTopic || '';
+        return [String(chatbot.id), chatbot.name, topicCode, chatbot.prompt]
+          .some((field) => (field || '').toLowerCase().includes(keyword));
+      })
+    : chatbots;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
@@ -393,6 +406,33 @@ const AdminDashboard = () => {
               Thêm Chatbot
             </button>
           </div>
+
+          {/* Ô tìm kiếm */}
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="relative flex-1">
+              <FaSearch className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Tìm theo tên, mã môn, ID hoặc prompt..."
+                className="w-full border border-gray-300 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  title="Xóa tìm kiếm"
+                >
+                  <FaTimes className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <p className="text-sm text-gray-600 whitespace-nowrap">
+              {filteredChatbots.length}/{chatbots.length} chatbot
+            </p>
+          </div>
         </div>
 
         {/* Chatbot List */}
@@ -410,7 +450,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {chatbots.map((chatbot) => {
+                {filteredChatbots.map((chatbot) => {
                   const topicCode = chatbot.source || chatbot.quizTopic || '';
                   return (
                   <tr key={chatbot.id} className="hover:bg-gray-50">
@@ -463,10 +503,14 @@ const AdminDashboard = () => {
               </tbody>
             </table>
           </div>
-          {chatbots.length === 0 && (
+          {filteredChatbots.length === 0 && (
             <div className="text-center py-12 text-gray-500">
               <FaRobot className="w-24 h-24 mb-4 text-gray-300 mx-auto" />
-              <p className="text-xl">Chưa có chatbot nào</p>
+              <p className="text-xl">
+                {chatbots.length === 0
+                  ? 'Chưa có chatbot nào'
+                  : `Không tìm thấy chatbot nào khớp với "${searchTerm}"`}
+              </p>
             </div>
           )}
         </div>
