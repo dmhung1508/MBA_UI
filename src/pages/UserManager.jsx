@@ -46,6 +46,10 @@ const UserManager = () => {
   });
   const [topicSearch, setTopicSearch] = useState('');
 
+  // Phân trang riêng cho từng role
+  const PAGE_SIZE = 10;
+  const [rolePages, setRolePages] = useState({ admin: 1, teacher: 1, user: 1 });
+
   const navigate = useNavigate();
 
   const colors = {
@@ -83,6 +87,11 @@ const UserManager = () => {
   useEffect(() => {
     filterUsers();
   }, [users, filters]);
+
+  // Đổi bộ lọc thì mọi role quay về trang 1
+  useEffect(() => {
+    setRolePages({ admin: 1, teacher: 1, user: 1 });
+  }, [filters]);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('access_token');
@@ -378,7 +387,12 @@ const UserManager = () => {
         {['admin', 'teacher', 'user'].map(role => {
           const roleUsers = getUsersByRole(role);
           if (roleUsers.length === 0 && filters.role && filters.role !== role) return null;
-          
+
+          const totalPages = Math.max(1, Math.ceil(roleUsers.length / PAGE_SIZE));
+          const currentPage = Math.min(rolePages[role] || 1, totalPages);
+          const pagedUsers = roleUsers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+          const goToPage = (page) => setRolePages(prev => ({ ...prev, [role]: page }));
+
           return (
             <div key={role} className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
               <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
@@ -406,7 +420,7 @@ const UserManager = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {roleUsers.map((user, index) => (
+                    {pagedUsers.map((user, index) => (
                       <tr key={user.username} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {user.username} - {user.full_name}
@@ -457,6 +471,46 @@ const UserManager = () => {
                   </tbody>
                 </table>
                 
+                {roleUsers.length > 0 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-600">
+                      Hiển thị {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, roleUsers.length)} / {roleUsers.length}
+                    </p>
+                    <div className="flex items-center gap-1 flex-wrap justify-center">
+                      <button
+                        type="button"
+                        onClick={() => goToPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-40 hover:bg-gray-100"
+                      >
+                        Trước
+                      </button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => goToPage(page)}
+                          className={`px-3 py-1 rounded border text-sm ${
+                            page === currentPage
+                              ? 'bg-red-600 border-red-600 text-white'
+                              : 'border-gray-300 hover:bg-gray-100'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => goToPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-40 hover:bg-gray-100"
+                      >
+                        Sau
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {roleUsers.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     {React.createElement(roleIcons[role], { className: "w-16 h-16 mb-2 text-gray-300 mx-auto" })}

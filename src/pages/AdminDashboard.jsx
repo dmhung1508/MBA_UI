@@ -25,10 +25,13 @@ const AdminDashboard = () => {
   const [selectedChatbot, setSelectedChatbot] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
+    source: '',
     prompt: ''
   });
   
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   // States for avatar upload
   const [avatarFile, setAvatarFile] = useState(null);
@@ -115,6 +118,16 @@ const AdminDashboard = () => {
     return baseString + randomNumbers;
   };
 
+  // Chuẩn hóa mã môn: bỏ dấu, bỏ ký tự đặc biệt, viết thường
+  const normalizeTopicCode = (value) =>
+    (value || '')
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '');
+
   const handleCreateChatbot = async () => {
     try {
       if (!avatarFile) {
@@ -122,13 +135,21 @@ const AdminDashboard = () => {
         return;
       }
 
-      // Tự động tạo source và quiztopic từ tên
-      const generatedSourceAndQuizTopic = generateSourceAndQuizTopic(formData.name);
+      // Mã môn do admin nhập; nếu bỏ trống thì tự sinh từ tên chatbot
+      const topicCode = normalizeTopicCode(formData.source) || generateSourceAndQuizTopic(formData.name);
+      if (topicCode.length < 3) {
+        setError('Mã môn phải có ít nhất 3 ký tự (chữ thường, số, "-" hoặc "_").');
+        return;
+      }
+      if (chatbots.some((c) => (c.source || '').toLowerCase() === topicCode)) {
+        setError(`Mã môn "${topicCode}" đã tồn tại. Vui lòng chọn mã khác.`);
+        return;
+      }
 
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
-      formDataToSend.append('source', generatedSourceAndQuizTopic);
-      formDataToSend.append('quizTopic', generatedSourceAndQuizTopic);
+      formDataToSend.append('source', topicCode);
+      formDataToSend.append('quizTopic', topicCode);
       formDataToSend.append('prompt', formData.prompt);
       formDataToSend.append('avatar_file', avatarFile);
 
@@ -156,53 +177,48 @@ const AdminDashboard = () => {
 
   const handleUpdateChatbot = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      
-      if (avatarFile) {
-        // Nếu có file avatar mới, sử dụng FormData
-        const formDataToSend = new FormData();
-        
-        if (formData.name !== selectedChatbot.name) {
-          formDataToSend.append('name', formData.name);
-        }
-        if (formData.prompt !== selectedChatbot.prompt) {
-          formDataToSend.append('prompt', formData.prompt);
-        }
-        formDataToSend.append('avatar_file', avatarFile);
+      // Endpoint PUT chỉ nhận JSON (ChatbotUpdate), avatar gửi dưới dạng base64
+      const updateData = {};
 
-        const response = await fetch(API_ENDPOINTS.ADMIN_CHATBOT_BY_ID(selectedChatbot.id), {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: formDataToSend
-        });
+      if (formData.name && formData.name !== selectedChatbot.name) {
+        updateData.name = formData.name;
+      }
+      if (formData.prompt && formData.prompt !== selectedChatbot.prompt) {
+        updateData.prompt = formData.prompt;
+      }
 
-        if (!response.ok) {
-          const errorData = (await parseJsonSafe(response)) || {};
-          throw new Error(errorData.detail || 'Không thể cập nhật chatbot');
-        }
-      } else {
-        // Nếu không có file avatar mới, sử dụng JSON
-        const updateData = Object.fromEntries(
-          Object.entries(formData).filter(([key, value]) => value !== '' && value !== selectedChatbot[key])
-        );
-
-        if (Object.keys(updateData).length === 0) {
-          setError('Không có thay đổi nào để cập nhật');
+      const topicCode = normalizeTopicCode(formData.source);
+      if (topicCode && topicCode !== selectedChatbot.source) {
+        if (topicCode.length < 3) {
+          setError('Mã môn phải có ít nhất 3 ký tự (chữ thường, số, "-" hoặc "_").');
           return;
         }
-
-        const response = await fetch(API_ENDPOINTS.ADMIN_CHATBOT_BY_ID(selectedChatbot.id), {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(updateData)
-        });
-
-        if (!response.ok) {
-          const errorData = (await parseJsonSafe(response)) || {};
-          throw new Error(errorData.detail || 'Không thể cập nhật chatbot');
+        if (chatbots.some((c) => c.id !== selectedChatbot.id && (c.source || '').toLowerCase() === topicCode)) {
+          setError(`Mã môn "${topicCode}" đã tồn tại. Vui lòng chọn mã khác.`);
+          return;
         }
+        updateData.source = topicCode;
+        updateData.quizTopic = topicCode;
+      }
+
+      if (avatarFile && avatarPreview) {
+        updateData.avatar = avatarPreview;
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        setError('Không có thay đổi nào để cập nhật');
+        return;
+      }
+
+      const response = await fetch(API_ENDPOINTS.ADMIN_CHATBOT_BY_ID(selectedChatbot.id), {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(updateData)
+      });
+
+      if (!response.ok) {
+        const errorData = (await parseJsonSafe(response)) || {};
+        throw new Error(errorData.detail || 'Không thể cập nhật chatbot');
       }
 
       setSuccess('Chatbot đã được cập nhật thành công!');
@@ -235,7 +251,7 @@ const AdminDashboard = () => {
 
   const openCreateModal = () => {
     setModalMode('create');
-    setFormData({ name: '', prompt: '' });
+    setFormData({ name: '', source: '', prompt: '' });
     setAvatarFile(null);
     setAvatarPreview('');
     setShowModal(true);
@@ -246,6 +262,7 @@ const AdminDashboard = () => {
     setSelectedChatbot(chatbot);
     setFormData({
       name: chatbot.name,
+      source: chatbot.source || chatbot.quizTopic || '',
       prompt: chatbot.prompt
     });
     setAvatarFile(null);
@@ -262,7 +279,7 @@ const AdminDashboard = () => {
   const closeModal = () => {
     setShowModal(false);
     setSelectedChatbot(null);
-    setFormData({ name: '', prompt: '' });
+    setFormData({ name: '', source: '', prompt: '' });
     setAvatarFile(null);
     setAvatarPreview('');
   };
@@ -363,6 +380,15 @@ const AdminDashboard = () => {
       })
     : chatbots;
 
+  // Phân trang danh sách chatbot
+  const totalPages = Math.max(1, Math.ceil(filteredChatbots.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const pagedChatbots = filteredChatbots.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
@@ -450,7 +476,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredChatbots.map((chatbot) => {
+                {pagedChatbots.map((chatbot) => {
                   const topicCode = chatbot.source || chatbot.quizTopic || '';
                   return (
                   <tr key={chatbot.id} className="hover:bg-gray-50">
@@ -503,6 +529,45 @@ const AdminDashboard = () => {
               </tbody>
             </table>
           </div>
+          {filteredChatbots.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600">
+                Hiển thị {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredChatbots.length)} / {filteredChatbots.length} chatbot
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(safePage - 1)}
+                  disabled={safePage === 1}
+                  className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-40 hover:bg-gray-100"
+                >
+                  Trước
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 rounded border text-sm ${
+                      page === safePage
+                        ? 'bg-red-600 border-red-600 text-white'
+                        : 'border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(safePage + 1)}
+                  disabled={safePage === totalPages}
+                  className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-40 hover:bg-gray-100"
+                >
+                  Sau
+                </button>
+              </div>
+            </div>
+          )}
           {filteredChatbots.length === 0 && (
             <div className="text-center py-12 text-gray-500">
               <FaRobot className="w-24 h-24 mb-4 text-gray-300 mx-auto" />
@@ -578,11 +643,38 @@ const AdminDashboard = () => {
                         placeholder="Nhập tên chatbot"
                         required={modalMode === 'create'}
                       />
-                      {modalMode === 'create' && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          Source và Quiz Topic sẽ được tự động tạo từ tên chatbot
-                        </p>
-                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Mã môn
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={formData.source}
+                          onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                          onBlur={(e) => setFormData({ ...formData, source: normalizeTopicCode(e.target.value) })}
+                          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                          placeholder="VD: marketing101"
+                        />
+                        {modalMode === 'create' && (
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, source: generateSourceAndQuizTopic(formData.name) })}
+                            disabled={!formData.name}
+                            className="whitespace-nowrap bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-700 text-sm font-medium px-3 rounded-lg"
+                            title="Tự sinh mã môn từ tên chatbot"
+                          >
+                            Tự sinh
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Chỉ dùng chữ thường, số, "-" hoặc "_" (tối thiểu 3 ký tự).
+                        {modalMode === 'create'
+                          ? ' Để trống sẽ tự sinh từ tên chatbot.'
+                          : ' Đổi mã môn sẽ ảnh hưởng tới dữ liệu/tài liệu đã gắn với mã cũ.'}
+                      </p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
