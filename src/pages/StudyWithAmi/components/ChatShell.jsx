@@ -11,7 +11,7 @@ import VoiceRecorder from "./VoiceRecorder";
 export default function ChatShell() {
   const {
     chatHidden, setChatHidden,
-    selectedSource, selectedName,
+    selectedSource, selectedLabel,
     thinkEnabled, setThinkEnabled,
     searchEnabled, setSearchEnabled,
     debateActive, timeLeft, debateFinished, debateReadOnly,
@@ -105,7 +105,7 @@ export default function ChatShell() {
             <div className="chat-shell-meta-text">
               <strong id="chat-shell-title">Học cùng Ami</strong>
               <span id="chat-shell-subtitle">
-                {selectedSource ? selectedName : "Chọn môn học để bắt đầu"}
+                {selectedSource ? selectedLabel : "Chọn môn học để bắt đầu"}
               </span>
             </div>
           </div>

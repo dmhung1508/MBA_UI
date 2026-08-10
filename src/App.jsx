@@ -17,6 +17,7 @@ const Test = lazy(() => import("./pages/Test"));
 const EditPage = lazy(() => import("./pages/EditPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminStudentAnalytics = lazy(() => import("./pages/AdminStudentAnalytics"));
+const AdminTermManager = lazy(() => import("./pages/AdminTermManager"));
 const SourceManager = lazy(() => import("./pages/SourceManager"));
 const QuestionManager = lazy(() => import("./pages/QuestionManager"));
 const UserManager = lazy(() => import("./pages/UserManager"));
@@ -77,6 +78,7 @@ function App() {
             <Route path="/edit" element={<PrivateRoute><EditPage /></PrivateRoute>} />
             <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
             <Route path="/admin/student-analytics" element={<PrivateRoute><AdminStudentAnalytics /></PrivateRoute>} />
+            <Route path="/admin/terms" element={<PrivateRoute><AdminTermManager /></PrivateRoute>} />
             <Route path="/teacher-stats" element={<PrivateRoute><TeacherStats /></PrivateRoute>} />
             <Route path="/sources" element={<PrivateRoute><SourceManager /></PrivateRoute>} />
             <Route path="/questions" element={<PrivateRoute><QuestionManager /></PrivateRoute>} />

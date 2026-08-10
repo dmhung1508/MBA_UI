@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import 'katex/dist/katex.min.css'
+import { installAcademicTermRequestMiddleware } from './config/academicTerm'
+
+installAcademicTermRequestMiddleware()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

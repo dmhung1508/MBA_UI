@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { API_ENDPOINTS } from './api';
 import { resolveApiBaseUrl } from './runtimeConfig';
+import { ACADEMIC_TERM_HEADER, getEffectiveAcademicTerm } from './academicTerm';
 
 // Create axios instance
 const axiosInstance = axios.create({
@@ -42,6 +43,10 @@ axiosInstance.interceptors.request.use(
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    const academicTerm = getEffectiveAcademicTerm();
+    if (academicTerm && !config.headers[ACADEMIC_TERM_HEADER]) {
+      config.headers[ACADEMIC_TERM_HEADER] = academicTerm;
     }
     return config;
   },

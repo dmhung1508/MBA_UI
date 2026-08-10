@@ -97,7 +97,7 @@ function AmiApp() {
   const { submitMessage } = useAmiChat();
   const { startDebate, cancelDebate, submitDebateAnswer, finishDebate, debateActive, setTimeOption } = useAmiDebate();
   const { toggleRecording, cancelRecording, finishRecording, replayLastSpeech, speakText } = useAmiVoice();
-  const { modelRef: contextModelRef, mouthHoldRef: contextMouthHoldRef, costumeControllerRef: contextCostumeRef, selectedSource, selectedName, profile } = useAmi();
+  const { modelRef: contextModelRef, mouthHoldRef: contextMouthHoldRef, costumeControllerRef: contextCostumeRef, selectedSource, selectedLabel, profile } = useAmi();
   const [modelReady, setModelReady] = useState(false);
   const initials = getInitials(profile?.full_name, profile?.username);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -232,7 +232,7 @@ function AmiApp() {
               {selectedSource ? (
                 <>
                   <span className="ami-subject-pill-dot" />
-                  {selectedName}
+                  {selectedLabel}
                 </>
               ) : (
                 "Chọn môn học để bắt đầu cùng Ami"
@@ -289,7 +289,7 @@ const StudyWithAmi = () => {
 
   useEffect(() => {
     if (!token) return;
-    fetch(`${amiApiBase}/auth_mini/chatbots`, {
+    fetch(`${amiApiBase}/auth_mini/chatbots?include_avatar=false&include_prompt=false`, {
       headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "69420" },
     })
       .then((r) => r.ok ? r.json() : null)

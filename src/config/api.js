@@ -23,7 +23,12 @@ export const API_ENDPOINTS = {
 
   // Chatbots
   CHATBOTS: `${AUTH_MINI_BASE}/chatbots`,
+  CHATBOTS_COMPACT: `${AUTH_MINI_BASE}/chatbots?include_avatar=false&include_prompt=false`,
   CHATBOT_BY_ID: (id) => `${AUTH_MINI_BASE}/chatbots/${id}`,
+  TERMS: `${AUTH_MINI_BASE}/terms`,
+  ADMIN_TERMS: `${AUTH_MINI_BASE}/admin/terms`,
+  ADMIN_DEFAULT_TERM: `${AUTH_MINI_BASE}/admin/terms/default`,
+  ADMIN_TERM_BY_KEY: (termKey) => `${AUTH_MINI_BASE}/admin/terms/${encodeURIComponent(termKey)}`,
 
   // Files (auth_mini endpoints)
   FILE_UPLOAD: `${AUTH_MINI_BASE}/mba/upload`,

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useAmi } from "../context/AmiContext";
+import { formatSubjectLabel, useAmi } from "../context/AmiContext";
 
 export default function useAmiSubjects() {
   const { chatbots, selectedSource, selectedName, selectSubject, setMessages, newConversation } = useAmi();
@@ -15,7 +15,7 @@ export default function useAmiSubjects() {
         {
           id: `sys-${Date.now()}`,
           role: "assistant",
-          content: `📚 Ami đã sẵn sàng học môn **${bot.name}** cùng bạn! Hãy hỏi Ami bất cứ điều gì nhé.`,
+          content: `📚 Ami đã sẵn sàng học môn **${formatSubjectLabel(bot)}** cùng bạn! Hãy hỏi Ami bất cứ điều gì nhé.`,
           timestamp: new Date().toISOString(),
         },
       ]);

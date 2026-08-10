@@ -48,7 +48,7 @@ const SourceManager = () => {
   const fetchChatbots = async () => {
     try {
       const accessToken = localStorage.getItem('access_token');
-      const response = await fetch(API_ENDPOINTS.CHATBOTS, 
+      const response = await fetch(API_ENDPOINTS.CHATBOTS_COMPACT,
         {
           method: 'GET',
           headers: {
@@ -105,7 +105,7 @@ const SourceManager = () => {
         
         // Then get all chatbots and filter by assigned topics
         const accessToken = localStorage.getItem('access_token');
-        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS, 
+        const chatbotsResponse = await fetch(API_ENDPOINTS.CHATBOTS_COMPACT,
           {
             method: 'GET',
             headers: {
@@ -217,4 +217,4 @@ const SourceManager = () => {
   );
 };
 
-export default SourceManager; 
+export default SourceManager;

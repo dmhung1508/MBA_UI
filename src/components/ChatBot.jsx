@@ -8,6 +8,17 @@ import { API_ENDPOINTS } from '../config/api';
 import Navbar from '../pages/Navbar';
 import Footer from '../pages/Footer';
 
+const DEFAULT_CHATBOT_AVATAR = "https://cdn-icons-png.flaticon.com/512/1698/1698535.png";
+
+const getChatbotLabel = (chatbot) => {
+  const code = chatbot?.source || chatbot?.quizTopic || "";
+  const name = chatbot?.name || "";
+  if (code && name && code !== name) return `${code} - ${name}`;
+  return name || code || "Chatbot";
+};
+
+const getAvatarSrc = (chatbot) => chatbot?.avatar || DEFAULT_CHATBOT_AVATAR;
+
 const ChatUI = () => {
   const [chatbots, setChatbots] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
@@ -29,7 +40,7 @@ const ChatUI = () => {
       try {
         const accessToken = localStorage.getItem('access_token');
         const response = await fetch(
-          API_ENDPOINTS.CHATBOTS,
+          `${API_ENDPOINTS.CHATBOTS}?include_avatar=false&include_prompt=false`,
           {
             method: 'GET',
             headers: {
@@ -54,7 +65,7 @@ const ChatUI = () => {
           initialHistories[chatbot.id] = [
             {
               id: 1,
-              text: `Rất vui được gặp bạn, mình là LISA, trợ lí cho môn học ${chatbot.name}. Mình có thể giúp gì cho bạn không?`,
+              text: `Rất vui được gặp bạn, mình là LISA, trợ lí cho môn học ${getChatbotLabel(chatbot)}. Mình có thể giúp gì cho bạn không?`,
               sender: "bot",
               timestamp: new Date().toLocaleTimeString(),
               sources: []
@@ -67,7 +78,7 @@ const ChatUI = () => {
         console.error('Error fetching chatbots:', error);
         // Fallback to default chatbots if API fails
         const defaultChatbots = [
-          { id: 0, name: "Tổng hợp", source: "tonghop", quizTopic: "tonghop", avatar: "https://cdn-icons-png.flaticon.com/512/1698/1698535.png" }
+          { id: 0, name: "Tổng hợp", source: "tonghop", quizTopic: "tonghop", avatar: DEFAULT_CHATBOT_AVATAR }
         ];
         setChatbots(defaultChatbots);
         setCurrentChat(defaultChatbots[0]);
@@ -189,7 +200,7 @@ const ChatUI = () => {
 
   // Filter chatbots based on search query
   const filteredChatbots = chatbots.filter(chatbot =>
-    removeVietnameseDiacritics(chatbot.name).includes(removeVietnameseDiacritics(searchQuery))
+    removeVietnameseDiacritics(getChatbotLabel(chatbot)).includes(removeVietnameseDiacritics(searchQuery))
   );
 
   return (
@@ -229,12 +240,15 @@ const ChatUI = () => {
             }}
           >
             <img
-              src={chatbot.avatar}
-              alt={chatbot.name}
+              src={getAvatarSrc(chatbot)}
+              alt={getChatbotLabel(chatbot)}
               className="w-10 h-10 rounded-full mr-3"
+              onError={(e) => {
+                e.currentTarget.src = DEFAULT_CHATBOT_AVATAR;
+              }}
             />
-            <div>
-              <h3 className="font-semibold">{chatbot.name}</h3>
+            <div className="min-w-0">
+              <h3 className="font-semibold truncate">{getChatbotLabel(chatbot)}</h3>
               <p className="text-sm text-gray-500 truncate">{chatbot.lastMessage || "Sẵn sàng trò chuyện"}</p>
             </div>
           </div>
@@ -252,12 +266,15 @@ const ChatUI = () => {
               </button>
             )}
             <img
-              src={currentChat.avatar}
-              alt={currentChat.name}
+              src={getAvatarSrc(currentChat)}
+              alt={getChatbotLabel(currentChat)}
               className="w-10 h-10 rounded-full mr-3"
+              onError={(e) => {
+                e.currentTarget.src = DEFAULT_CHATBOT_AVATAR;
+              }}
             />
-            <div>
-              <h2 className="font-semibold">{currentChat.name}</h2>
+            <div className="min-w-0">
+              <h2 className="font-semibold truncate">{getChatbotLabel(currentChat)}</h2>
               <div className="flex items-center text-sm text-green-500">
                 <BsCircleFill className="w-2 h-2 mr-1" />
                 <span>Online</span>

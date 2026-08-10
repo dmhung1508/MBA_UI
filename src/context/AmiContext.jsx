@@ -10,6 +10,18 @@ export function useAmi() {
   return ctx;
 }
 
+export function formatSubjectLabel(subjectOrSource, maybeName = "") {
+  const source = typeof subjectOrSource === "object"
+    ? subjectOrSource?.source || subjectOrSource?.quizTopic || ""
+    : subjectOrSource || "";
+  const name = typeof subjectOrSource === "object"
+    ? subjectOrSource?.name || ""
+    : maybeName || "";
+
+  if (source && name) return `${source} - ${name}`;
+  return name || source || "";
+}
+
 export default function AmiProvider({ children, userProfile, chatbots: initialChatbots, token }) {
   const modelRef = useRef(null);
   const mouthHoldRef = useRef(null);
@@ -257,7 +269,7 @@ export default function AmiProvider({ children, userProfile, chatbots: initialCh
   const value = {
     modelRef, mouthHoldRef, costumeControllerRef, model,
     sidebarState, activeFeature, returnFeature, setReturnFeature, toggleSidebar, openFeature, backToExtended, collapseSidebar,
-    chatbots, selectedSource, selectedName, selectSubject,
+    chatbots, selectedSource, selectedName, selectedLabel: formatSubjectLabel(selectedSource, selectedName), selectSubject,
     messages, setMessages, isSending, setIsSending,
     sessions, setSessions, currentSessionId, setCurrentSessionId, newConversation,
     isRecording, setIsRecording,

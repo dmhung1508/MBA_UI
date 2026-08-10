@@ -14,6 +14,7 @@ import {
   FaEdit,
   FaUserShield,
   FaFileAlt,
+  FaCalendarAlt,
   FaQuestionCircle,
   FaChevronDown,
   FaCog,
@@ -26,6 +27,7 @@ import {
 } from "react-icons/fa";
 import { isTokenValid, clearAuthData } from "../utils/auth";
 import { API_ENDPOINTS } from "../config/api";
+import AcademicTermSelector from "../components/AcademicTermSelector";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -260,6 +262,13 @@ const Navbar = () => {
                             <FaChartBar className="mr-2 text-sm inline" /> Quản lý phân tích sinh viên
                           </a>
                           <a
+                            href="/mini/admin/terms"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                            onClick={() => setIsAdminDropdownOpen(false)}
+                          >
+                            <FaCalendarAlt className="mr-2 text-sm inline" /> Quản lý Kỳ học
+                          </a>
+                          <a
                             href="/mini/teacher-analytics?tab=quality"
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
@@ -350,6 +359,7 @@ const Navbar = () => {
               </>
             ) : (
               <>
+                <AcademicTermSelector />
                 <a
                   href="/mini/account"
                   className="text-gray-700 hover:text-red-600 transition-all duration-200 flex items-center px-2 py-2 rounded-lg hover:bg-gray-50 font-medium"
@@ -417,6 +427,7 @@ const Navbar = () => {
 
                   {isLoggedIn ? (
                     <>
+                      <AcademicTermSelector compact />
                       <a
                         href="/mini/mini"
                         onClick={(e) => {
@@ -536,6 +547,14 @@ const Navbar = () => {
                           >
                             <FaChartBar className="mr-3 text-sm" />
                             Quản lý phân tích sinh viên
+                          </a>
+                          <a
+                            href="/mini/admin/terms"
+                            className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            <FaCalendarAlt className="mr-3 text-sm" />
+                            Quản lý Kỳ học
                           </a>
                           <a
                             href="/mini/teacher-analytics?tab=quality"

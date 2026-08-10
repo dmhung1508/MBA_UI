@@ -1,5 +1,5 @@
 import React from "react";
-import { useAmi } from "../../../context/AmiContext";
+import { formatSubjectLabel, useAmi } from "../../../context/AmiContext";
 import { fetchSessions } from "../../../services/amiApi";
 import { DEBATE_ROUND_OPTIONS, DEBATE_TIME_OPTIONS } from "../../../hooks/useAmiDebate";
 
@@ -46,7 +46,9 @@ function FeatureSubjects() {
             className={`subject-card ${bot.source === selectedSource ? "is-active" : ""}`}
             onClick={() => handleSelect(bot)}>
             <span className="subject-icon"><SubjectAvatar avatar={bot.avatar} /></span>
-            <span className="subject-info" style={bot.source === selectedSource ? { paddingRight: 72 } : undefined}><span className="subject-name">{bot.name}</span><span className="subject-code">{bot.source}</span></span>
+            <span className="subject-info" style={bot.source === selectedSource ? { paddingRight: 72 } : undefined}>
+              <span className="subject-name">{formatSubjectLabel(bot)}</span>
+            </span>
             {bot.source === selectedSource && (
               <span className="subject-active-badge">
                 <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" width="11" height="11"><path d="M5 12l5 5L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
