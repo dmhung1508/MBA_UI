@@ -4,7 +4,6 @@ import { resolveApiBaseUrl, resolveBaseUrl } from "../config/runtimeConfig";
 
 const API_BASE_URL = resolveApiBaseUrl();
 const BASE_URL = resolveBaseUrl();
-const API_GET_TOKEN = import.meta.env.VITE_API_GET_TOKEN
 const AuthSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -45,58 +44,26 @@ const AuthSuccess = () => {
       }
 
       try {
-        const tokenResponse = await fetch(
-          `${API_GET_TOKEN}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams({
-              grant_type: "authorization_code",
-              code: code,
-              redirect_uri: redirect_uri, 
-              client_id: "ptit-connect",
-            }),
-          }
-        );
-
-        if (!tokenResponse.ok) {
-          const errText = await tokenResponse.text();
-          console.error("Error fetching SSO token:", errText);
-          setErrorMessage(
-            "Không thể xác thực mã đăng nhập SSO. Vui lòng đăng nhập lại."
-          );
-          setLoading(false);
-          return;
-        }
-
-        const ssoData = await tokenResponse.json();
-        const ssoAccessToken = ssoData.access_token;
-
-        if (!ssoAccessToken) {
-          console.error("No access_token returned from SSO", ssoData);
-          setErrorMessage("Hệ thống SSO không trả về access token.");
-          setLoading(false);
-          return;
-        }
-
         const appTokenResponse = await fetch(
-          `${API_BASE_URL}/auth_mini/generate/access-token`,
+          `${API_BASE_URL}/auth_mini/generate/access-token/sso`,
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${ssoAccessToken}`,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({}), 
+            body: JSON.stringify({
+              code: code,
+              redirect_uri: redirect_uri,
+            }),
           }
         );
 
         if (!appTokenResponse.ok) {
           const errText = await appTokenResponse.text();
-          console.error("Error fetching app access token:", errText);
-          setErrorMessage("Không thể tạo phiên đăng nhập. Vui lòng thử lại.");
+          console.error("Error exchanging SSO code:", errText);
+          setErrorMessage(
+            "Không thể xác thực mã đăng nhập SSO. Vui lòng đăng nhập lại."
+          );
           setLoading(false);
           return;
         }
