@@ -174,6 +174,62 @@ const AdminTickets = () => {
     }
   };
 
+  // A labelled proportion bar. "3 / 2 / 2" as three numbers makes you compare
+  // them yourself; as bars the shape of the queue is visible before you read a
+  // digit.
+  const distRow = (label, value, max, barClass) => (
+    <div key={label} className="flex items-center gap-3">
+      <span className="w-28 flex-none text-sm text-gray-600">{label}</span>
+      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full ${barClass}`}
+          style={{ width: max > 0 ? `${(value / max) * 100}%` : '0%' }}
+        />
+      </div>
+      <span className={`w-8 flex-none text-sm text-right tabular-nums ${value === 0 ? 'text-gray-400' : 'font-semibold text-gray-900'}`}>
+        {value}
+      </span>
+    </div>
+  );
+
+  // How long a ticket may sit before the queue says something about it.
+  // Tiered so a ticket turns amber while it is still a nudge, rather than
+  // jumping from "fine" to "alarming" after a month of silence.
+  const WAIT_WARN_DAYS = 3;   // amber
+  const WAIT_LATE_DAYS = 14;  // red
+
+  // Colour for a wait duration. Only tickets still awaiting a reply escalate —
+  // a resolved ticket that once took 200 days is history, not a task.
+  const waitTone = (days, status) => {
+    const awaiting = ['open', 'in_progress'].includes(status);
+    if (days == null || !awaiting) return 'text-gray-500';
+    if (days >= WAIT_LATE_DAYS) return 'text-red-600 font-semibold';
+    // yellow-700 rather than the yellow-600 used for large stat numbers:
+    // small text needs 4.5:1 contrast on white, and yellow-600 misses it.
+    if (days >= WAIT_WARN_DAYS) return 'text-yellow-700 font-medium';
+    return 'text-gray-500';
+  };
+
+  // Whole days a ticket has been waiting. Age is the primary triage signal and
+  // the table previously showed only a dd/mm/yyyy created date, so a ticket
+  // waiting five months looked identical to one filed an hour ago.
+  const daysWaiting = (createdAt) => {
+    if (!createdAt) return null;
+    const ms = Date.now() - new Date(createdAt).getTime();
+    return Math.max(0, Math.floor(ms / 86400000));
+  };
+
+  const getPriorityBadge = (priority) => {
+    const dot = { low: 'bg-gray-300', medium: 'bg-yellow-400', high: 'bg-red-500' };
+    const labels = { low: 'Thấp', medium: 'Trung bình', high: 'Cao' };
+    return (
+      <span className={`inline-flex items-center gap-2 text-sm whitespace-nowrap ${priority === 'high' ? 'text-red-700 font-semibold' : 'text-gray-600'}`}>
+        <span className={`w-2 h-2 rounded-full flex-none ${dot[priority] || 'bg-gray-300'}`} />
+        {labels[priority] || priority}
+      </span>
+    );
+  };
+
   const getStatusBadge = (status) => {
     const badges = {
       open: 'bg-blue-100 text-blue-800',
@@ -257,25 +313,40 @@ const AdminTickets = () => {
 
         {/* Additional Stats */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Theo loại</h3>
                 <FaChartBar className="text-gray-400" />
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Báo lỗi</span>
-                  <span className="font-semibold text-red-600">{stats.by_type.bug}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Câu hỏi</span>
-                  <span className="font-semibold text-purple-600">{stats.by_type.question}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Yêu cầu tính năng</span>
-                  <span className="font-semibold text-indigo-600">{stats.by_type.feature_request}</span>
-                </div>
+              <div className="space-y-3">
+                {(() => {
+                  const t = stats.by_type;
+                  const max = Math.max(t.bug, t.question, t.feature_request, 1);
+                  return [
+                    distRow('Báo lỗi', t.bug, max, 'bg-red-500'),
+                    distRow('Câu hỏi', t.question, max, 'bg-purple-500'),
+                    distRow('Tính năng', t.feature_request, max, 'bg-indigo-500'),
+                  ];
+                })()}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Theo mức ưu tiên</h3>
+                <FaChartBar className="text-gray-400" />
+              </div>
+              <div className="space-y-3">
+                {(() => {
+                  const p = stats.by_priority;
+                  const max = Math.max(p.low, p.medium, p.high, 1);
+                  return [
+                    distRow('Cao', p.high, max, 'bg-red-500'),
+                    distRow('Trung bình', p.medium, max, 'bg-yellow-400'),
+                    distRow('Thấp', p.low, max, 'bg-gray-300'),
+                  ];
+                })()}
               </div>
             </div>
 
@@ -284,18 +355,38 @@ const AdminTickets = () => {
                 <h3 className="text-lg font-semibold text-gray-900">Hiệu suất</h3>
                 <FaChartBar className="text-gray-400" />
               </div>
-              <div className="space-y-3">
-                <div>
-                  <div className="text-sm text-gray-600 mb-1">Thời gian giải quyết TB</div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {stats.avg_resolution_time_hours ? stats.avg_resolution_time_hours.toFixed(1) : '0'}h
-                  </div>
+              <div className="space-y-4">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-sm text-gray-600">Thời gian giải quyết TB</span>
+                  <span className="text-lg font-bold text-gray-900 tabular-nums">
+                    {stats.avg_resolution_time_hours != null
+                      ? `${stats.avg_resolution_time_hours.toFixed(1)}h`
+                      : <span className="text-base font-medium text-gray-400">Chưa có</span>}
+                  </span>
                 </div>
-                <div>
-                  <div className="text-sm text-gray-600 mb-1">Tỷ lệ hoàn thành</div>
-                  <div className="text-2xl font-bold text-green-600">
-                    {stats.total_tickets === 0 ? '100' : ((stats.resolved_tickets / stats.total_tickets) * 100).toFixed(0)}%
-                  </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-sm text-gray-600">Tỷ lệ hoàn thành</span>
+                  {/* Red at 0%. This read 0% for five months as a quiet green
+                      number and nobody flinched. */}
+                  <span className={`text-lg font-bold tabular-nums ${
+                    stats.total_tickets > 0 && stats.resolved_tickets === 0 ? 'text-red-600' : 'text-green-600'
+                  }`}>
+                    {stats.total_tickets === 0
+                      ? '—'
+                      : `${((stats.resolved_tickets / stats.total_tickets) * 100).toFixed(0)}%`}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-sm text-gray-600">Ticket cũ nhất còn mở</span>
+                  <span className={`text-lg font-bold tabular-nums ${
+                    stats.oldest_open_age_days >= WAIT_LATE_DAYS ? 'text-red-600'
+                      : stats.oldest_open_age_days >= WAIT_WARN_DAYS ? 'text-yellow-700'
+                      : 'text-gray-900'
+                  }`}>
+                    {stats.oldest_open_age_days != null
+                      ? `${stats.oldest_open_age_days} ngày`
+                      : <span className="text-base font-medium text-gray-400">—</span>}
+                  </span>
                 </div>
               </div>
             </div>
@@ -305,7 +396,8 @@ const AdminTickets = () => {
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
+            {/* search spans two columns; status moved to chips below */}
+            <div className="relative md:col-span-2">
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
@@ -317,18 +409,6 @@ const AdminTickets = () => {
             </div>
 
             <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-            >
-              <option value="">Tất cả trạng thái</option>
-              <option value="open">Mở</option>
-              <option value="in_progress">Đang xử lý</option>
-              <option value="resolved">Đã giải quyết</option>
-              <option value="closed">Đã đóng</option>
-            </select>
-
-            <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -338,6 +418,36 @@ const AdminTickets = () => {
               <option value="question">Câu hỏi</option>
               <option value="feature_request">Yêu cầu tính năng</option>
             </select>
+          </div>
+
+          {/* Status as chips rather than a dropdown: the current filter is
+              visible without opening anything, and switching is one click.
+              aria-pressed carries the state for screen readers. */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            {[
+              { value: '', label: 'Tất cả' },
+              { value: 'open', label: 'Đang mở' },
+              { value: 'in_progress', label: 'Đang xử lý' },
+              { value: 'resolved', label: 'Đã giải quyết' },
+              { value: 'closed', label: 'Đã đóng' },
+            ].map(({ value, label }) => {
+              const active = statusFilter === value;
+              return (
+                <button
+                  key={value || 'all'}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => { setStatusFilter(value); setPage(1); }}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 ${
+                    active
+                      ? 'bg-red-600 border-red-600 text-white'
+                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -384,6 +494,9 @@ const AdminTickets = () => {
                       Loại
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ưu tiên
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Trạng thái
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -391,6 +504,9 @@ const AdminTickets = () => {
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Ngày tạo
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Đã chờ
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Thao tác
@@ -414,6 +530,9 @@ const AdminTickets = () => {
                         {getTypeBadge(ticket.type)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {getPriorityBadge(ticket.priority)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {getStatusBadge(ticket.status)}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
@@ -424,6 +543,17 @@ const AdminTickets = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(ticket.created_at).toLocaleDateString('vi-VN')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right tabular-nums">
+                        {(() => {
+                          const d = daysWaiting(ticket.created_at);
+                          if (d == null) return <span className="text-gray-400">—</span>;
+                          return (
+                            <span className={waitTone(d, ticket.status)}>
+                              {d} ngày
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <button
