@@ -24,7 +24,9 @@ const AdminTickets = () => {
   const [loadError, setLoadError] = useState(null);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const PAGE_SIZE = 20;
+  // 10 rows per page, matching MyTickets. Anything beyond paginates rather
+  // than growing the table.
+  const PAGE_SIZE = 10;
   const totalPages = Math.max(1, Math.ceil(totalTickets / PAGE_SIZE));
 
   // Debounce the search box. It used to refetch the list AND the stats on every
