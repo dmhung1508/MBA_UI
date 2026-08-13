@@ -269,7 +269,7 @@ const AdminTickets = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-red-100 to-pink-100 bg-fixed flex flex-col" style={{ paddingTop: '100px' }}>
+    <div className="bg-gradient-to-br from-red-100 to-pink-100 bg-fixed flex flex-col" style={{ paddingTop: '120px' }}>
       <Navbar />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl flex-1 pb-12">
         {/* Header */}
