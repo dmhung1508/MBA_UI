@@ -19,67 +19,117 @@ const AdminTickets = () => {
   const [ticketToDelete, setTicketToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Remove Vietnamese diacritics for search
-  const removeVietnameseDiacritics = (str) => {
-    if (!str) return '';
-    return str
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'D')
-      .toLowerCase();
+  const [page, setPage] = useState(1);
+  const [totalTickets, setTotalTickets] = useState(0);
+  const [loadError, setLoadError] = useState(null);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const PAGE_SIZE = 20;
+  const totalPages = Math.max(1, Math.ceil(totalTickets / PAGE_SIZE));
+
+  // Debounce the search box. It used to refetch the list AND the stats on every
+  // keystroke, and the stats handler runs 11 collection scans on the single
+  // event loop.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
+  /**
+   * Turn a non-OK response into something an operator can act on.
+   * Every failure used to fall through to the same empty "Khong tim thay ticket
+   * nao" panel, making an expired session, a permissions problem and a genuinely
+   * empty queue indistinguishable.
+   */
+  const handleFailure = async (response, what) => {
+    if (response.status === 401) {
+      setLoadError('Phi\u00ean \u0111\u0103ng nh\u1eadp \u0111\u00e3 h\u1ebft h\u1ea1n. \u0110ang chuy\u1ec3n t\u1edbi trang \u0111\u0103ng nh\u1eadp...');
+      toast.error('Phi\u00ean \u0111\u0103ng nh\u1eadp \u0111\u00e3 h\u1ebft h\u1ea1n');
+      localStorage.removeItem('access_token');
+      setTimeout(() => { window.location.href = '/mini/login'; }, 1200);
+      return;
+    }
+    if (response.status === 403) {
+      setLoadError('B\u1ea1n kh\u00f4ng c\u00f3 quy\u1ec1n truy c\u1eadp trang qu\u1ea3n l\u00fd h\u1ed7 tr\u1ee3.');
+      return;
+    }
+    let detail = '';
+    try { detail = (await response.json())?.detail || ''; } catch { /* non-JSON body */ }
+    setLoadError(`Kh\u00f4ng t\u1ea3i \u0111\u01b0\u1ee3c ${what} (l\u1ed7i ${response.status}). ${detail}`);
+    toast.error(`Kh\u00f4ng t\u1ea3i \u0111\u01b0\u1ee3c ${what}`);
   };
 
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('access_token');
       const response = await fetch(API_ENDPOINTS.ADMIN_TICKET_STATS, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'accept': 'application/json'
-        }
+        headers: { 'Authorization': `Bearer ${token}`, 'accept': 'application/json' }
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setStats(data);
+        setStats(await response.json());
+      } else {
+        await handleFailure(response, 'th\u1ed1ng k\u00ea');
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setLoadError('L\u1ed7i k\u1ebft n\u1ed1i t\u1edbi m\u00e1y ch\u1ee7.');
     }
   };
 
-  const fetchTickets = async () => {
-    setIsLoading(true);
+  const fetchTickets = async ({ quiet = false } = {}) => {
+    if (!quiet) setIsLoading(true);
 
     try {
       const token = localStorage.getItem('access_token');
       const response = await fetch(
-        API_ENDPOINTS.ADMIN_TICKETS_LIST(100, 0, statusFilter, typeFilter, '', searchTerm),
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'accept': 'application/json'
-          }
-        }
+        API_ENDPOINTS.ADMIN_TICKETS_LIST(
+          PAGE_SIZE, (page - 1) * PAGE_SIZE, statusFilter, typeFilter, '', debouncedSearch
+        ),
+        { headers: { 'Authorization': `Bearer ${token}`, 'accept': 'application/json' } }
       );
 
       if (response.ok) {
         const data = await response.json();
-        setTickets(data.tickets);
+        setTickets(data.tickets || []);
+        setTotalTickets(data.total_tickets || 0);
+        setLoadError(null);
+      } else {
+        await handleFailure(response, 'danh s\u00e1ch tickets');
       }
     } catch (error) {
       console.error('Error fetching tickets:', error);
-      toast.error('Lỗi tải danh sách tickets');
+      setLoadError('L\u1ed7i k\u1ebft n\u1ed1i t\u1edbi m\u00e1y ch\u1ee7.');
     } finally {
-      setIsLoading(false);
+      if (!quiet) setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchStats();
     fetchTickets();
-  }, [statusFilter, typeFilter, searchTerm]);
+  }, [statusFilter, typeFilter, debouncedSearch, page]);
+
+  // Keep the queue fresh without a reload. Admins had no in-app signal at all,
+  // so a ticket sat unseen until somebody happened to open this page - a median
+  // of 22 hours after it was filed.
+  useEffect(() => {
+    const id = setInterval(() => fetchTickets({ quiet: true }), 60000);
+    return () => clearInterval(id);
+  }, [statusFilter, typeFilter, debouncedSearch, page]);
+
+  // Open the ticket named in a notification email deep link
+  // (.../admin/tickets?ticket=TICKET-000026&term=...).
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get('ticket');
+    if (wanted) {
+      setSelectedTicket({ ticket_number: wanted });
+      setShowDetailModal(true);
+    }
+  }, []);
 
   const handleTicketClick = (ticket) => {
     setSelectedTicket(ticket);
@@ -291,6 +341,22 @@ const AdminTickets = () => {
           </div>
         </div>
 
+        {/* Surface load failures instead of rendering an empty queue */}
+        {loadError && (
+          <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-6 flex items-start">
+            <FaExclamationTriangle className="mr-3 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium">{loadError}</p>
+              <button
+                onClick={() => { setLoadError(null); fetchStats(); fetchTickets(); }}
+                className="mt-2 text-sm underline hover:no-underline"
+              >
+                Thử lại
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Tickets Table */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           {isLoading ? (
@@ -376,6 +442,35 @@ const AdminTickets = () => {
             </div>
           )}
         </div>
+
+        {/* Pagination - the list was hardcoded to limit=100/offset=0, so ticket
+            101 onward was simply unreachable and total_tickets was discarded. */}
+        {totalTickets > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6">
+            <p className="text-sm text-gray-600">
+              Hiển thị {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalTickets)} trên tổng {totalTickets} ticket
+            </p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((n) => Math.max(1, n - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Trước
+                </button>
+                <span className="px-3 text-sm text-gray-600">Trang {page} / {totalPages}</span>
+                <button
+                  onClick={() => setPage((n) => Math.min(totalPages, n + 1))}
+                  disabled={page >= totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Sau
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <Footer />

@@ -312,10 +312,19 @@ const Navbar = () => {
                           </a>
                           <a
                             href="/mini/admin/tickets"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                             onClick={() => setIsAdminDropdownOpen(false)}
                           >
-                            <FaTicketAlt className="mr-2 text-sm inline" /> Quản lý Hỗ trợ
+                            <FaTicketAlt className="mr-2 text-sm" /> Quản lý Hỗ trợ
+                            {/* For admins this counts the whole open queue, so it is
+                                the "work is waiting" signal. Without it admins had no
+                                in-app notice at all and found tickets only by opening
+                                this page - a median of 22 hours after they arrived. */}
+                            {openTicketCount > 0 && (
+                              <span className="ml-auto bg-red-600 text-white text-xs rounded-full h-5 min-w-[1.25rem] px-1 flex items-center justify-center font-bold">
+                                {openTicketCount}
+                              </span>
+                            )}
                           </a>
                           <a
                             href="/mini/teacher-stats"
@@ -611,6 +620,11 @@ const Navbar = () => {
                           >
                             <FaTicketAlt className="mr-3 text-sm" />
                             Quản lý Hỗ trợ
+                            {openTicketCount > 0 && (
+                              <span className="ml-auto bg-red-600 text-white text-xs rounded-full h-5 min-w-[1.25rem] px-1 flex items-center justify-center font-bold">
+                                {openTicketCount}
+                              </span>
+                            )}
                           </a>
                           <a
                             href="/mini/teacher-stats"
