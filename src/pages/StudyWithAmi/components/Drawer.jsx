@@ -532,13 +532,79 @@ function ProfileField({ label, value }) {
   );
 }
 
+function getProfileRoleConfig(role) {
+  if (role === "teacher") {
+    return {
+      title: "Tài khoản giảng viên",
+      roleLabel: "Giảng viên",
+      statusLabel: "Quyền giảng viên đang hoạt động",
+      accent: "#ef4444",
+      badgeBg: "rgba(239,68,68,0.14)",
+      badgeBorder: "rgba(248,113,113,0.34)",
+      items: [
+        ["Phạm vi", "Môn học được phân công"],
+        ["Khu vực", "Quản lý học liệu và câu hỏi"],
+        ["Loại tài khoản", "Giảng viên PTIT"],
+      ],
+    };
+  }
+  if (role === "admin") {
+    return {
+      title: "Tài khoản quản trị viên",
+      roleLabel: "Quản trị viên",
+      statusLabel: "Quyền quản trị đang hoạt động",
+      accent: "#ef4444",
+      badgeBg: "rgba(239,68,68,0.14)",
+      badgeBorder: "rgba(248,113,113,0.34)",
+      items: [
+        ["Phạm vi", "Toàn hệ thống"],
+        ["Khu vực", "Quản trị và phân quyền"],
+        ["Loại tài khoản", "Admin"],
+      ],
+    };
+  }
+  return {
+    title: "Tài khoản sinh viên",
+    roleLabel: "Sinh viên",
+    statusLabel: "Quyền sinh viên đang hoạt động",
+    accent: "#ef4444",
+    badgeBg: "rgba(239,68,68,0.14)",
+    badgeBorder: "rgba(248,113,113,0.34)",
+    items: [
+      ["Phạm vi", "Học tập cá nhân"],
+      ["Khu vực", "Chatbot và ôn luyện"],
+      ["Loại tài khoản", "Sinh viên"],
+    ],
+  };
+}
+
+function ProfileRoleItem({ label, value }) {
+  return (
+    <div style={{ padding:"10px 12px", borderRadius:12, background:"rgba(255,255,255,0.055)", border:"1px solid rgba(255,255,255,0.08)" }}>
+      <span style={{ display:"block", fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:"rgba(255,255,255,0.34)", marginBottom:4 }}>{label}</span>
+      <span style={{ display:"block", fontSize:12, color:"rgba(255,255,255,0.86)", lineHeight:1.45 }}>{value}</span>
+    </div>
+  );
+}
+
 function FeatureProfile() {
   const { profile } = useAmi();
-  const roleMap = { admin: "Quản trị viên", teacher: "Giảng viên", user: "Học viên" };
+  const roleConfig = getProfileRoleConfig(profile?.role);
   return (
     <div className="feature-page">
-      <div className="feature-hero">
-        <p className="panel-copy">{profile ? "Thông tin tài khoản của bạn." : "Đang tải..."}</p>
+      <div className="feature-hero" style={{ borderColor: roleConfig.badgeBorder }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, marginBottom:10 }}>
+          <div>
+            <p style={{ margin:"0 0 5px", color:"#fff", fontSize:17, fontWeight:800 }}>{profile ? roleConfig.title : "Đang tải tài khoản"}</p>
+            {!profile && <p className="panel-copy">Đang tải thông tin tài khoản...</p>}
+          </div>
+        </div>
+        {profile?.role && (
+          <span style={{ display:"inline-flex", alignItems:"center", gap:7, padding:"6px 12px", borderRadius:999, background:roleConfig.badgeBg, border:`1px solid ${roleConfig.badgeBorder}`, fontSize:11, fontWeight:800, color:"#fff" }}>
+            <span style={{ width:7, height:7, borderRadius:"50%", background:roleConfig.accent, display:"inline-block" }} />
+            {roleConfig.statusLabel}
+          </span>
+        )}
       </div>
       <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
         <ProfileField label="Họ và tên"     value={profile?.full_name} />
@@ -547,10 +613,15 @@ function FeatureProfile() {
         {profile?.role && (
           <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
             <span style={{ fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:"rgba(255,255,255,0.35)" }}>Vai trò</span>
-            <span style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"4px 10px", borderRadius:999, background:"rgba(255,255,255,0.08)", fontSize:12, width:"fit-content", color:"#fff" }}>
-              <span style={{ width:6, height:6, borderRadius:"50%", background:"#22c55e", display:"inline-block" }} />
-              {roleMap[profile.role] || profile.role}
+            <span style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"4px 10px", borderRadius:999, background:roleConfig.badgeBg, border:`1px solid ${roleConfig.badgeBorder}`, fontSize:12, width:"fit-content", color:"#fff" }}>
+              <span style={{ width:6, height:6, borderRadius:"50%", background:roleConfig.accent, display:"inline-block" }} />
+              {roleConfig.roleLabel}
             </span>
+          </div>
+        )}
+        {profile?.role && (
+          <div style={{ display:"grid", gap:8 }}>
+            {roleConfig.items.map(([label, value]) => <ProfileRoleItem key={label} label={label} value={value} />)}
           </div>
         )}
       </div>
