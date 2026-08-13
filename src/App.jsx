@@ -93,7 +93,7 @@ function App() {
             <Route path="/study-with-ami" element={<PrivateRoute><StudyWithAmi /></PrivateRoute>} />
             <Route path="/ratings" element={<PrivateRoute><AdminRatings /></PrivateRoute>} />
             <Route path="/tickets" element={<PrivateRoute><MyTickets /></PrivateRoute>} />
-            <Route path="/admin/tickets" element={<PrivateRoute><AdminTickets /></PrivateRoute>} />
+            <Route path="/admin/tickets" element={<AdminRoute><AdminTickets /></AdminRoute>} />
             <Route path="/access-auth" element={<AuthSuccess />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -119,6 +119,19 @@ function App() {
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('access_token');
   return token ? children : <Navigate to="/login" replace />;
+}
+
+/**
+ * Admin-only route. The backend already enforces this, but without a client-side
+ * gate a student navigating to /admin/tickets got a fully rendered admin console
+ * - stat cards, table, delete buttons - that simply failed every request. Now
+ * they are sent to their own ticket list instead.
+ */
+function AdminRoute({ children }) {
+  const token = localStorage.getItem('access_token');
+  if (!token) return <Navigate to="/login" replace />;
+  if (localStorage.getItem('user_role') !== 'admin') return <Navigate to="/tickets" replace />;
+  return children;
 }
 
 export default App;

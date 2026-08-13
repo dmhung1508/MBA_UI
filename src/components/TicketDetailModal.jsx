@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaTimes, FaComment, FaCheckCircle, FaRedo, FaSpinner, FaPaperclip, FaImage, FaTrash, FaFile, FaDownload } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { API_ENDPOINTS } from '../config/api';
@@ -14,6 +14,17 @@ const TicketDetailModal = ({ isOpen, onClose, ticketNumber, onUpdate }) => {
   const [lightboxImage, setLightboxImage] = useState(null);
   const [commentAttachments, setCommentAttachments] = useState([]);
   const [commentImageUrls, setCommentImageUrls] = useState({});
+
+  // Admins drive the triage workflow; anyone else who can load this ticket is
+  // its owner (the backend 403s everyone else), so they get the owner-permitted
+  // close action rather than an admin-only endpoint that would reject them.
+  const isAdmin = localStorage.getItem('user_role') === 'admin';
+
+  // The cleanup effect closes over whatever these were when the effect ran -
+  // which is {}, because they are populated later by an async fetch. A ref
+  // always reflects the current value, so the blobs are actually revoked.
+  const blobUrlsRef = useRef([]);
+  const trackBlob = (url) => { blobUrlsRef.current.push(url); return url; };
 
   const fetchTicketDetail = async () => {
     setIsLoading(true);
@@ -45,7 +56,7 @@ const TicketDetailModal = ({ isOpen, onClose, ticketNumber, onUpdate }) => {
                 });
                 if (imgResponse.ok) {
                   const blob = await imgResponse.blob();
-                  urls[attachment.filename] = URL.createObjectURL(blob);
+                  urls[attachment.filename] = trackBlob(URL.createObjectURL(blob));
                 } else {
                   const errorText = await imgResponse.text();
                   console.error('Failed to load image:', attachment.filename, errorText);
@@ -74,7 +85,7 @@ const TicketDetailModal = ({ isOpen, onClose, ticketNumber, onUpdate }) => {
                     });
                     if (imgResponse.ok) {
                       const blob = await imgResponse.blob();
-                      commentUrls[`${comment.id}_${attachment.filename}`] = URL.createObjectURL(blob);
+                      commentUrls[`${comment.id}_${attachment.filename}`] = trackBlob(URL.createObjectURL(blob));
                     }
                   } catch (err) {
                     console.error('Error loading comment image:', attachment.filename, err);
@@ -102,10 +113,12 @@ const TicketDetailModal = ({ isOpen, onClose, ticketNumber, onUpdate }) => {
       fetchTicketDetail();
     }
 
-    // Cleanup blob URLs when modal closes
+    // Cleanup blob URLs when the modal closes. Reading from the ref rather than
+    // from state is the whole point: state here is stale by construction, so the
+    // previous version always revoked an empty object and leaked every image.
     return () => {
-      Object.values(imageUrls).forEach(url => URL.revokeObjectURL(url));
-      Object.values(commentImageUrls).forEach(url => URL.revokeObjectURL(url));
+      blobUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      blobUrlsRef.current = [];
     };
   }, [isOpen, ticketNumber]);
 
@@ -140,6 +153,7 @@ const TicketDetailModal = ({ isOpen, onClose, ticketNumber, onUpdate }) => {
       const commentId = result.comment_id;
 
       // Step 2: Upload attachments if any
+      const failed = [];
       if (commentAttachments.length > 0) {
         for (const attachment of commentAttachments) {
           const uploadFormData = new FormData();
@@ -156,14 +170,23 @@ const TicketDetailModal = ({ isOpen, onClose, ticketNumber, onUpdate }) => {
             });
 
             if (!uploadResponse.ok) {
-              console.error('Failed to upload attachment:', attachment.file.name);
+              let detail = '';
+              try { detail = (await uploadResponse.json())?.detail || ''; } catch { /* non-JSON */ }
+              failed.push(`${attachment.file.name}${detail ? `: ${detail}` : ''}`);
             }
           } catch (uploadError) {
             console.error('Error uploading attachment:', uploadError);
+            failed.push(attachment.file.name);
           }
         }
       }
 
+      // Every upload failure used to be console.error'd while a success toast
+      // still fired, so users believed files were attached when the server had
+      // rejected them (.webp was rejected outright until now).
+      if (failed.length) {
+        toast.error(`Không tải lên được ${failed.length} file: ${failed.join('; ')}`);
+      }
       toast.success('Đã thêm bình luận');
       setNewComment('');
       setCommentAttachments([]);
@@ -677,36 +700,39 @@ const TicketDetailModal = ({ isOpen, onClose, ticketNumber, onUpdate }) => {
                   </button>
                 ) : (
                   <>
-                    {/* For bugs: show different buttons based on status */}
-                    {ticket.type === 'bug' ? (
-                      <>
-                        {ticket.status === 'open' && (
-                          <button
-                            onClick={handleMarkInProgress}
-                            disabled={isUpdatingStatus}
-                            className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
-                          >
-                            <FaSpinner className="mr-2" />
-                            {isUpdatingStatus ? 'Đang cập nhật...' : 'Đang xử lý'}
-                          </button>
-                        )}
-                        {ticket.status === 'in_progress' && (
-                          <button
-                            onClick={handleMarkResolved}
-                            disabled={isUpdatingStatus}
-                            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
-                          >
-                            <FaCheckCircle className="mr-2" />
-                            {isUpdatingStatus ? 'Đang cập nhật...' : 'Đã xử lý'}
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      /* For questions and feature requests: show close button */
+                    {/* Admins drive the bug workflow: open -> in_progress -> resolved.
+                        Anyone else who can load this ticket owns it (the backend
+                        403s everyone else), so they get the owner-permitted close
+                        action. Previously the bug branch rendered ONLY the
+                        admin-only endpoints, so a student who filed a bug saw a
+                        button that always returned 403 and could never close their
+                        own report - and those are exactly the tickets that matter
+                        most. */}
+                    {isAdmin && ticket.type === 'bug' && ticket.status === 'open' && (
+                      <button
+                        onClick={handleMarkInProgress}
+                        disabled={isUpdatingStatus}
+                        className="px-6 py-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors bg-yellow-600 hover:bg-yellow-700"
+                      >
+                        <FaSpinner className="mr-2" />
+                        {isUpdatingStatus ? 'Đang cập nhật...' : 'Đang xử lý'}
+                      </button>
+                    )}
+                    {isAdmin && ticket.type === 'bug' && ticket.status === 'in_progress' && (
+                      <button
+                        onClick={handleMarkResolved}
+                        disabled={isUpdatingStatus}
+                        className="px-6 py-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors bg-green-600 hover:bg-green-700"
+                      >
+                        <FaCheckCircle className="mr-2" />
+                        {isUpdatingStatus ? 'Đang cập nhật...' : 'Đã xử lý'}
+                      </button>
+                    )}
+                    {(!isAdmin || ticket.type !== 'bug') && (
                       <button
                         onClick={handleCloseTicket}
                         disabled={isClosing}
-                        className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                        className="px-6 py-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors bg-green-600 hover:bg-green-700"
                       >
                         <FaCheckCircle className="mr-2" />
                         {isClosing ? 'Đang đóng...' : 'Đóng ticket'}

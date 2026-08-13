@@ -20,19 +20,20 @@ const MyTickets = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const limit = 10;
 
-  // Remove Vietnamese diacritics for search
-  const removeVietnameseDiacritics = (str) => {
-    if (!str) return '';
-    return str
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'D')
-      .toLowerCase();
-  };
+  // Search server-side. The client-side filter below only ever saw the 10 rows
+  // already fetched, so searching from page 1 reported "no tickets found" for a
+  // ticket sitting on page 2.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+      setCurrentPage(1);
+    }, 350);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
 
   const fetchTickets = async () => {
     setIsLoading(true);
@@ -42,7 +43,7 @@ const MyTickets = () => {
       const offset = (currentPage - 1) * limit;
 
       const response = await fetch(
-        API_ENDPOINTS.TICKET_MY_LIST(limit, offset, statusFilter, typeFilter),
+        API_ENDPOINTS.TICKET_MY_LIST(limit, offset, statusFilter, typeFilter, debouncedSearch),
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -68,7 +69,7 @@ const MyTickets = () => {
 
   useEffect(() => {
     fetchTickets();
-  }, [currentPage, statusFilter, typeFilter]);
+  }, [currentPage, statusFilter, typeFilter, debouncedSearch]);
 
   const handleTicketClick = (ticket) => {
     setSelectedTicket(ticket);
@@ -115,14 +116,8 @@ const MyTickets = () => {
 
   const totalPages = Math.ceil(totalTickets / limit);
 
-  // Filter tickets by search term (client-side)
-  const displayedTickets = tickets.filter(ticket =>
-    searchTerm === '' ||
-    removeVietnameseDiacritics(ticket.title).includes(removeVietnameseDiacritics(searchTerm)) ||
-    removeVietnameseDiacritics(ticket.ticket_number).includes(removeVietnameseDiacritics(searchTerm)) ||
-    removeVietnameseDiacritics(ticket.created_by?.name || '').includes(removeVietnameseDiacritics(searchTerm)) ||
-    removeVietnameseDiacritics(ticket.created_by?.username || '').includes(removeVietnameseDiacritics(searchTerm))
-  );
+  // Filtering happens server-side now, across the user's whole history.
+  const displayedTickets = tickets;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-100 flex flex-col" style={{ paddingTop: '100px' }}>

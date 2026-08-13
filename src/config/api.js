@@ -193,8 +193,8 @@ export const API_ENDPOINTS = {
 
   // User Ticket Endpoints
   TICKET_CREATE: `${AUTH_MINI_BASE}/tickets`,
-  TICKET_MY_LIST: (limit, offset, status, type) =>
-    `${AUTH_MINI_BASE}/tickets/my?limit=${limit}&offset=${offset}${status ? `&status=${status}` : ''}${type ? `&type=${type}` : ''}`,
+  TICKET_MY_LIST: (limit, offset, status, type, search) =>
+    `${AUTH_MINI_BASE}/tickets/my?limit=${limit}&offset=${offset}${status ? `&status=${status}` : ''}${type ? `&type=${type}` : ''}${search ? `&search=${encodeURIComponent(search)}` : ''}`,
   TICKET_DETAIL: (ticketId) => `${AUTH_MINI_BASE}/tickets/${ticketId}`,
   TICKET_CLOSE: (ticketId) => `${AUTH_MINI_BASE}/tickets/${ticketId}/close`,
   TICKET_REOPEN: (ticketId) => `${AUTH_MINI_BASE}/tickets/${ticketId}/reopen`,
@@ -209,7 +209,7 @@ export const API_ENDPOINTS = {
 
   // Admin Ticket Endpoints
   ADMIN_TICKETS_LIST: (limit, offset, status, type, assigned_to, search) =>
-    `${AUTH_MINI_BASE}/admin/tickets?limit=${limit}&offset=${offset}${status ? `&status=${status}` : ''}${type ? `&type=${type}` : ''}${assigned_to ? `&assigned_to=${assigned_to}` : ''}${search ? `&search=${search}` : ''}`,
+    `${AUTH_MINI_BASE}/admin/tickets?limit=${limit}&offset=${offset}${status ? `&status=${status}` : ''}${type ? `&type=${type}` : ''}${assigned_to ? `&assigned_to=${encodeURIComponent(assigned_to)}` : ''}${search ? `&search=${encodeURIComponent(search)}` : ''}`,
   ADMIN_TICKET_UPDATE: (ticketId) => `${AUTH_MINI_BASE}/admin/tickets/${ticketId}`,
   ADMIN_TICKET_DELETE: (ticketId) => `${AUTH_MINI_BASE}/admin/tickets/${ticketId}`,
   ADMIN_TICKET_STATS: `${AUTH_MINI_BASE}/admin/tickets/stats`,

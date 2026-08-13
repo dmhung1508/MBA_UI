@@ -7,7 +7,12 @@ const TicketModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    type: 'question'
+    type: 'question',
+    // The backend has always accepted priority, constrained it with a Literal,
+    // indexed it and reported on it - but no UI ever sent it, so every one of
+    // the 7 existing tickets is "medium" and the admin by_priority panel is
+    // meaningless. Now the reporter chooses.
+    priority: 'medium'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachments, setAttachments] = useState([]);
@@ -88,6 +93,7 @@ const TicketModal = ({ isOpen, onClose, onSuccess }) => {
       const ticketNumber = result.ticket_number;
 
       // Step 2: Upload attachments if any
+      const failed = [];
       if (attachments.length > 0) {
         for (const attachment of attachments) {
           const uploadFormData = new FormData();
@@ -105,18 +111,27 @@ const TicketModal = ({ isOpen, onClose, onSuccess }) => {
             });
 
             if (!uploadResponse.ok) {
-              const errorText = await uploadResponse.text();
-              console.error('Upload failed:', errorText);
+              let detail = '';
+              try { detail = (await uploadResponse.clone().json())?.detail || ''; } catch { /* non-JSON */ }
+              console.error('Upload failed:', detail || await uploadResponse.text());
+              failed.push(`${attachment.name}${detail ? `: ${detail}` : ''}`);
             }
           } catch (uploadError) {
             console.error('Error uploading attachment:', uploadError);
+            failed.push(attachment.name);
             // Continue with other attachments even if one fails
           }
         }
       }
 
+      // The ticket exists either way, but the user must be told which files did
+      // not make it. Previously a success toast fired regardless and the images
+      // were simply gone - .webp was rejected server-side every single time.
+      if (failed.length) {
+        toast.error(`Ticket đã tạo nhưng ${failed.length} file không tải lên được: ${failed.join('; ')}`);
+      }
       toast.success(`Đã tạo ticket ${ticketNumber} thành công!`);
-      setFormData({ title: '', description: '', type: 'question' });
+      setFormData({ title: '', description: '', type: 'question', priority: 'medium' });
       setAttachments([]);
 
       // Clean up preview URLs
@@ -194,6 +209,22 @@ const TicketModal = ({ isOpen, onClose, onSuccess }) => {
                 <option value="question">Câu hỏi</option>
                 <option value="bug">Báo lỗi</option>
                 <option value="feature_request">Yêu cầu tính năng</option>
+              </select>
+            </div>
+
+            {/* Priority */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Mức độ ưu tiên
+              </label>
+              <select
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                <option value="low">Thấp - không gấp</option>
+                <option value="medium">Trung bình</option>
+                <option value="high">Cao - đang chặn việc học</option>
               </select>
             </div>
 
