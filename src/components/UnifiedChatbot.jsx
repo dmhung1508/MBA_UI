@@ -35,6 +35,93 @@ const preprocessMath = (text) => {
   return text;
 };
 
+const REMARK_PLUGINS = [remarkGfm, remarkMath];
+const REHYPE_PLUGINS = [rehypeKatex];
+
+// Hoisted ra module scope: nếu khai báo inline trong JSX thì mỗi render tạo
+// object mới, ReactMarkdown không bail-out được và parse lại toàn bộ markdown.
+const MD_COMPONENTS = {
+  h1: ({node, ...props}) => <h1 className="text-base font-bold mt-2 mb-1" {...props} />,
+  h2: ({node, ...props}) => <h2 className="text-sm font-bold mt-2 mb-1" {...props} />,
+  h3: ({node, ...props}) => <h3 className="text-sm font-semibold mt-1 mb-1" {...props} />,
+  p: ({node, ...props}) => <p className="mb-1 last:mb-0 leading-relaxed" {...props} />,
+  ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-1 space-y-0.5" {...props} />,
+  ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-1 space-y-0.5" {...props} />,
+  li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
+  strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
+  em: ({node, ...props}) => <em className="italic" {...props} />,
+  pre: ({node, ...props}) => <pre className="bg-gray-900 text-gray-100 rounded p-3 my-2 overflow-x-auto text-xs font-mono" {...props} />,
+  code: ({node, className, children, ...props}) => {
+    const isBlock = /language-(\w+)/.test(className || '');
+    return isBlock
+      ? <code className={`${className} text-xs font-mono`} {...props}>{children}</code>
+      : <code className="bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-xs font-mono" {...props}>{children}</code>;
+  },
+  blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-3 italic text-gray-500 my-1" {...props} />,
+  a: ({node, ...props}) => <a className="text-blue-500 underline hover:text-blue-700" target="_blank" rel="noopener noreferrer" {...props} />,
+  hr: ({node, ...props}) => <hr className="my-2 border-gray-300" {...props} />,
+  table: ({node, ...props}) => <div className="overflow-x-auto my-2"><table className="border-collapse text-xs w-full" {...props} /></div>,
+  thead: ({node, ...props}) => <thead className="bg-gray-50" {...props} />,
+  th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 font-semibold text-left" {...props} />,
+  td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
+  tr: ({node, ...props}) => <tr className="even:bg-gray-50" {...props} />,
+};
+
+// Một row là hàm thuần của `message`. memo() so sánh shallow prop `message`:
+// khi stream token, applyBotUpdate chỉ thay object của bubble đang chạy nên
+// các tin nhắn còn lại giữ nguyên identity và bỏ qua được re-render.
+const ChatMessageRow = memo(function ChatMessageRow({ message }) {
+  const mdText = useMemo(() => preprocessMath(message.text || ''), [message.text]);
+
+  return (
+    <div className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
+      <div className={`${message.sender === "user" ? "max-w-xs lg:max-w-md xl:max-w-lg" : "max-w-[90%]"} ${message.sender === "user" ? "bg-blue-600 text-white" : "bg-white text-gray-800"} rounded-lg p-3 ${message.sender === "user" ? "rounded-br-none" : "rounded-bl-none"} shadow-md break-words ${message.historyId ? "opacity-90 border-l-4 border-gray-300" : ""}`}>
+        <ReactMarkdown
+          className="text-sm whitespace-normal mb-1"
+          remarkPlugins={REMARK_PLUGINS}
+          rehypePlugins={REHYPE_PLUGINS}
+          components={MD_COMPONENTS}
+        >{mdText}</ReactMarkdown>
+        {message.streaming && (
+          <span
+            className="inline-block w-1.5 h-4 ml-0.5 bg-blue-500 align-middle"
+            style={{ animation: 'pulse 1s ease-in-out infinite' }}
+            aria-hidden
+          />
+        )}
+        <div className="flex justify-between items-center mt-2 text-xs">
+          <p className={`${message.sender === "user" ? "text-blue-200" : "text-gray-500"}`}>
+            {message.historyId && <span className="text-xs opacity-70">📜 </span>}
+            {message.streaming ? 'Đang trả lời...' : message.timestamp}
+          </p>
+          {/* {message.sender === "bot" && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handleToggleSpeaker(message.text)}
+                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {isSpeakerActive ? (
+                  <FaVolumeUp className="w-4 h-4" />
+                ) : (
+                  <FaVolumeMute className="w-4 h-4" />
+                )}
+              </button>
+              {message.sources && (
+                <button
+                  onClick={() => toggleSourcePopup(message.sources)}
+                  className="text-blue-500 hover:underline focus:outline-none"
+                >
+                  View Sources
+                </button>
+              )}
+            </div>
+          )} */}
+        </div>
+      </div>
+    </div>
+  );
+});
+
 const UnifiedChatbot = ({
   chatbotConfig, // { id, name, source, quizTopic, avatar }
   isSpeakerActive,
@@ -750,76 +837,7 @@ const UnifiedChatbot = ({
           </div>
         )}
         {messages.map((message) => (
-          <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`${message.sender === "user" ? "max-w-xs lg:max-w-md xl:max-w-lg" : "max-w-[90%]"} ${message.sender === "user" ? "bg-blue-600 text-white" : "bg-white text-gray-800"} rounded-lg p-3 ${message.sender === "user" ? "rounded-br-none" : "rounded-bl-none"} shadow-md break-words ${message.historyId ? "opacity-90 border-l-4 border-gray-300" : ""}`}>
-              <ReactMarkdown
-                className="text-sm whitespace-normal mb-1"
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeKatex]}
-                components={{
-                  h1: ({node, ...props}) => <h1 className="text-base font-bold mt-2 mb-1" {...props} />,
-                  h2: ({node, ...props}) => <h2 className="text-sm font-bold mt-2 mb-1" {...props} />,
-                  h3: ({node, ...props}) => <h3 className="text-sm font-semibold mt-1 mb-1" {...props} />,
-                  p: ({node, ...props}) => <p className="mb-1 last:mb-0 leading-relaxed" {...props} />,
-                  ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-1 space-y-0.5" {...props} />,
-                  ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-1 space-y-0.5" {...props} />,
-                  li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
-                  strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
-                  em: ({node, ...props}) => <em className="italic" {...props} />,
-                  pre: ({node, ...props}) => <pre className="bg-gray-900 text-gray-100 rounded p-3 my-2 overflow-x-auto text-xs font-mono" {...props} />,
-                  code: ({node, className, children, ...props}) => {
-                    const isBlock = /language-(\w+)/.test(className || '');
-                    return isBlock
-                      ? <code className={`${className} text-xs font-mono`} {...props}>{children}</code>
-                      : <code className="bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-xs font-mono" {...props}>{children}</code>;
-                  },
-                  blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-3 italic text-gray-500 my-1" {...props} />,
-                  a: ({node, ...props}) => <a className="text-blue-500 underline hover:text-blue-700" target="_blank" rel="noopener noreferrer" {...props} />,
-                  hr: ({node, ...props}) => <hr className="my-2 border-gray-300" {...props} />,
-                  table: ({node, ...props}) => <div className="overflow-x-auto my-2"><table className="border-collapse text-xs w-full" {...props} /></div>,
-                  thead: ({node, ...props}) => <thead className="bg-gray-50" {...props} />,
-                  th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 font-semibold text-left" {...props} />,
-                  td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
-                  tr: ({node, ...props}) => <tr className="even:bg-gray-50" {...props} />,
-                }}
-              >{preprocessMath(message.text || '')}</ReactMarkdown>
-              {message.streaming && (
-                <span
-                  className="inline-block w-1.5 h-4 ml-0.5 bg-blue-500 align-middle"
-                  style={{ animation: 'pulse 1s ease-in-out infinite' }}
-                  aria-hidden
-                />
-              )}
-              <div className="flex justify-between items-center mt-2 text-xs">
-                <p className={`${message.sender === "user" ? "text-blue-200" : "text-gray-500"}`}>
-                  {message.historyId && <span className="text-xs opacity-70">📜 </span>}
-                  {message.streaming ? 'Đang trả lời...' : message.timestamp}
-                </p>
-                {/* {message.sender === "bot" && (
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleToggleSpeaker(message.text)}
-                      className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                    >
-                      {isSpeakerActive ? (
-                        <FaVolumeUp className="w-4 h-4" />
-                      ) : (
-                        <FaVolumeMute className="w-4 h-4" />
-                      )}
-                    </button>
-                    {message.sources && (
-                      <button
-                        onClick={() => toggleSourcePopup(message.sources)}
-                        className="text-blue-500 hover:underline focus:outline-none"
-                      >
-                        View Sources
-                      </button>
-                    )}
-                  </div>
-                )} */}
-              </div>
-            </div>
-          </div>
+          <ChatMessageRow key={message.id} message={message} />
         ))}
         {isLoading && (
           <div className="flex justify-start">
